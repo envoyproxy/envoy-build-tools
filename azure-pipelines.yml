@@ -1,0 +1,20 @@
+trigger:
+- master
+
+jobs:
+- job: build_container
+  strategy:
+    matrix:
+      ubuntu:
+        LINUX_DISTRO: ubuntu
+      centos:
+        LINUX_DISTRO: centos
+  dependsOn: []
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - bash: |
+      ./docker-build.sh
+    workingDirectory: build_container
+    env:
+      CIRCLE_SHA1: $(Build.SourceVersion)
