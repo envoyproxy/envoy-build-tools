@@ -4,68 +4,27 @@
 # CircleCI logs.
 set -e
 
-# push the envoy image on merge to master
-branch_want_push='false'
-for branch in "master"
-do
-   if [[ "$CIRCLE_BRANCH" == "$branch" ]]; then
-       branch_want_push='true'
-   fi
-done
+CONTAINER_SHA=$(git log -1 --pretty=format:"%H" .)
+CURRENT_SHA=$(git rev-parse HEAD)
 
-if [[ -z "${CIRCLE_PR_NUMBER}" && "${branch_want_push}" == "true" ]]; then
-    diff_base="HEAD^"
-else
-    git fetch https://github.com/envoyproxy/envoy.git master
-    diff_base="$(git merge-base HEAD FETCH_HEAD)"
-fi
-
-diff_want_build='false'
-if [[ ! -z $(git diff --name-only "${diff_base}..HEAD" ci/build_container/) ]]; then
-    echo "There are changes in the ci/build_container directory"
-    diff_want_build='true'
-fi
-
-cd ci/build_container
-if [ "$diff_want_build" == "true" ]; then
-    for distro in ubuntu centos
-    do
-        echo "Updating envoyproxy/envoy-build-${distro} image"
-        LINUX_DISTRO=$distro ./docker_build.sh
-    done
-else
-    echo "The ci/build_container directory has not changed"
+if [[ "${CONTAINER_SHA}" != "${CURRENT_SHA}" ]]; then
+    echo "The build_container directory has not changed."
     exit 0
 fi
 
-if [[ -z "${CIRCLE_PR_NUMBER}" && "${branch_want_push}" == "true" ]]; then
-    docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
+CONTAINER_TAG=${CONTAINER_SHA} ./docker_build.sh
 
-    if [[ ! -z "${GCP_SERVICE_ACCOUNT_KEY}" ]]; then
-        echo ${GCP_SERVICE_ACCOUNT_KEY} | base64 --decode | gcloud auth activate-service-account --key-file=-
-        gcloud auth configure-docker
+if [[ "${SOURCE_BRANCH}" == "refs/heads/master" ]]; then
+    #docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
+
+    echo ${GCP_SERVICE_ACCOUNT_KEY} | base64 --decode | gcloud auth activate-service-account --key-file=-
+    gcloud auth configure-docker
+
+    if [[ "${LINUX_DISTRO}" == "ubuntu" ]]; then
+        echo "Updating gcr.io/envoy-ci/envoy-build image"
+        docker tag envoyproxy/envoy-build-"${distro}":"$CONTAINER_SHA" gcr.io/envoy-ci/envoy-build:"$CONTAINER_SHA"
+        docker push gcr.io/envoy-ci/envoy-build:"$CIRCLE_SHA1"
     fi
-
-    for distro in ubuntu centos
-    do
-        echo "Updating envoyproxy/envoy-build-${distro} image"
-        docker push envoyproxy/envoy-build-"${distro}":"$CIRCLE_SHA1"
-        docker tag envoyproxy/envoy-build-"${distro}":"$CIRCLE_SHA1" envoyproxy/envoy-build-"${distro}":latest
-        docker push envoyproxy/envoy-build-"${distro}":latest
-
-        if [[ "$distro" == "ubuntu" ]]
-        then
-            echo "Updating envoyproxy/envoy-build image"
-            docker tag envoyproxy/envoy-build-"${distro}":"$CIRCLE_SHA1" envoyproxy/envoy-build:"$CIRCLE_SHA1"
-            docker push envoyproxy/envoy-build:"$CIRCLE_SHA1"
-            docker tag envoyproxy/envoy-build:"$CIRCLE_SHA1" envoyproxy/envoy-build:latest
-            docker push envoyproxy/envoy-build:latest
-
-            echo "Updating gcr.io/envoy-ci/envoy-build image"
-            docker tag envoyproxy/envoy-build-"${distro}":"$CIRCLE_SHA1" gcr.io/envoy-ci/envoy-build:"$CIRCLE_SHA1"
-            docker push gcr.io/envoy-ci/envoy-build:"$CIRCLE_SHA1"
-        fi
-    done
 else
     echo 'Ignoring PR branch for docker push.'
 fi

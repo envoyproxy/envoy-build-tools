@@ -12,9 +12,10 @@ jobs:
   dependsOn: []
   pool:
     vmImage: 'ubuntu-16.04'
+  container: google/cloud-sdk:latest
   steps:
   - bash: |
-      ./docker_build.sh
+      ./docker_push.sh
     workingDirectory: build_container
     env:
-      CIRCLE_SHA1: $(Build.SourceVersion)
+      SOURCE_BRANCH: $(Build.SourceBranch)
