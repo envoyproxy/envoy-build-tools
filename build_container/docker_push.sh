@@ -5,7 +5,6 @@
 set -e
 
 CONTAINER_SHA=$(git log -1 --pretty=format:"%H" .)
-CURRENT_SHA=$(git rev-parse HEAD)
 
 if [[ "${CONTAINER_SHA}" != "${CURRENT_SHA}" ]]; then
     echo "The build_container directory has not changed."

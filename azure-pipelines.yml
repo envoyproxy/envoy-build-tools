@@ -18,4 +18,5 @@ jobs:
       ./docker_push.sh
     workingDirectory: build_container
     env:
+      CURRENT_SHA: $(Build.SourceVersion)
       SOURCE_BRANCH: $(Build.SourceBranch)
