@@ -1,20 +1,21 @@
 #!/bin/bash
 
 # Do not ever set -x here, it is a security hazard as it will place the credentials below in the
-# CircleCI logs.
+# CI logs.
 set -e
 
 CONTAINER_SHA=$(git log -1 --pretty=format:"%H" .)
 
-if [[ "${CONTAINER_SHA}" != "${CURRENT_SHA}" ]]; then
-    echo "The build_container directory has not changed."
-    exit 0
+echo "Building envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA}"
+if DOCKER_CLI_EXPERIMENTAL=enabled docker manifest inspect envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA} > /dev/null; then
+  echo "envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA} exists."
+  exit 0
 fi
 
 CONTAINER_TAG=${CONTAINER_SHA} ./docker_build.sh
 
 if [[ "${SOURCE_BRANCH}" == "refs/heads/master" ]]; then
-    #docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
+    # TODO: push to DockerHub
 
     echo ${GCP_SERVICE_ACCOUNT_KEY} | base64 --decode | gcloud auth activate-service-account --key-file=-
     gcloud auth configure-docker
