@@ -15,15 +15,17 @@ fi
 CONTAINER_TAG=${CONTAINER_SHA} ./docker_build.sh
 
 if [[ "${SOURCE_BRANCH}" == "refs/heads/master" ]]; then
-    # TODO: push to DockerHub
+    docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
 
-    echo ${GCP_SERVICE_ACCOUNT_KEY} | base64 --decode | gcloud auth activate-service-account --key-file=-
-    gcloud auth configure-docker
+    docker push envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA}
 
     if [[ "${LINUX_DISTRO}" == "ubuntu" ]]; then
+        echo ${GCP_SERVICE_ACCOUNT_KEY} | base64 --decode | gcloud auth activate-service-account --key-file=-
+        gcloud auth configure-docker
+
         echo "Updating gcr.io/envoy-ci/envoy-build image"
-        docker tag envoyproxy/envoy-build-"${distro}":"$CONTAINER_SHA" gcr.io/envoy-ci/envoy-build:"$CONTAINER_SHA"
-        docker push gcr.io/envoy-ci/envoy-build:"$CIRCLE_SHA1"
+        docker tag envoyproxy/envoy-build-"${LINUX_DISTRO}":"${CONTAINER_SHA}" gcr.io/envoy-ci/envoy-build:"${CONTAINER_SHA}"
+        docker push gcr.io/envoy-ci/envoy-build:"${CONTAINER_SHA}"
     fi
 else
     echo 'Ignoring PR branch for docker push.'

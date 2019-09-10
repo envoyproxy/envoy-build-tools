@@ -19,4 +19,6 @@ jobs:
     workingDirectory: build_container
     env:
       SOURCE_BRANCH: $(Build.SourceBranch)
-      GCP_SERVICE_ACCOUNT_KEY: $(GcpServiceKey)
+      DOCKERHUB_USERNAME: $(DockerUsername)
+      DOCKERHUD_PASSWORD: $(DockerPassword)
+      GCP_SERVICE_ACCOUNT_KEY: $(GcpServiceAccountKey)
