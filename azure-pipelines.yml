@@ -22,3 +22,29 @@ jobs:
       DOCKERHUB_USERNAME: $(DockerUsername)
       DOCKERHUB_PASSWORD: $(DockerPassword)
       GCP_SERVICE_ACCOUNT_KEY: $(GcpServiceAccountKey)
+
+- job: generate_toolchains
+  dependsOn: "build_container"
+  pool:
+    vmImage: 'ubuntu-16.04'
+  container: google/cloud-sdk:latest
+  steps:
+  - bash: |
+      wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.0/bazelisk-linux-amd64
+      chmod +x /usr/local/bin/bazel
+    displayName: Install Bazelisk
+
+  - bash: |
+      toolchains/regenerate.sh
+    env:
+      USE_BAZEL_VERSION: 0.29.1
+    displayName: Generate toolchains
+
+  - bash: |
+      git archive HEAD | gzip > $(Build.ArtifactStagingDirectory)/envoy-build-tools.tar.gz
+    displayName: Create artifacts
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      artifactName: 'envoy-build-tools'
+

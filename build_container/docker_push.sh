@@ -21,7 +21,7 @@ if [[ "${SOURCE_BRANCH}" == "refs/heads/master" ]]; then
 
     if [[ "${LINUX_DISTRO}" == "ubuntu" ]]; then
         echo ${GCP_SERVICE_ACCOUNT_KEY} | base64 --decode | gcloud auth activate-service-account --key-file=-
-        gcloud auth configure-docker
+        gcloud auth configure-docker --quiet
 
         echo "Updating gcr.io/envoy-ci/envoy-build image"
         docker tag envoyproxy/envoy-build-"${LINUX_DISTRO}":"${CONTAINER_SHA}" gcr.io/envoy-ci/envoy-build:"${CONTAINER_SHA}"
