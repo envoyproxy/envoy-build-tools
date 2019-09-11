@@ -20,5 +20,5 @@ jobs:
     env:
       SOURCE_BRANCH: $(Build.SourceBranch)
       DOCKERHUB_USERNAME: $(DockerUsername)
-      DOCKERHUD_PASSWORD: $(DockerPassword)
+      DOCKERHUB_PASSWORD: $(DockerPassword)
       GCP_SERVICE_ACCOUNT_KEY: $(GcpServiceAccountKey)
