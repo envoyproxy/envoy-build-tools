@@ -27,11 +27,10 @@ jobs:
   dependsOn: "build_container"
   pool:
     vmImage: 'ubuntu-16.04'
-  container: google/cloud-sdk:latest
   steps:
   - bash: |
-      wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.0/bazelisk-linux-amd64
-      chmod +x /usr/local/bin/bazel
+      sudo curl -sSL -o /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.0/bazelisk-linux-amd64
+      sudo chmod +x /usr/local/bin/bazel
     displayName: Install Bazelisk
 
   - bash: |
