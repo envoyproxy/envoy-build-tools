@@ -36,7 +36,8 @@ jobs:
   - bash: |
       toolchains/regenerate.sh
     env:
-      USE_BAZEL_VERSION: 0.29.1
+      USE_BAZEL_VERSION: "0.29.1"
+      COMMIT_TOOLCHAINS: "true"
     displayName: Generate toolchains
 
   - bash: |

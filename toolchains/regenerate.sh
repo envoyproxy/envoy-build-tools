@@ -30,7 +30,13 @@ if [[ -z "$(git diff HEAD --name-only)" ]]; then
   exit 0
 fi
 
-COMMIT_MSG="Regenerate toolchains from $(git rev-parse HEAD)
+if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
+  COMMIT_MSG="Regenerate toolchains from $(git rev-parse HEAD)
 
-$(git log --format=%B -n 1)"
-git commit -m "${COMMIT_MSG}"
+  $(git log --format=%B -n 1)"
+
+  git config user.name "envoy-build-tools(Azure Pipelines)"
+  git config user.email envoy-build-tools@users.noreply.github.com
+
+  git commit -m "${COMMIT_MSG}"
+fi
