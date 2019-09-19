@@ -12,13 +12,10 @@ yum install -y devtoolset-7-gcc devtoolset-7-gcc-c++ devtoolset-7-binutils java-
 ln -s /usr/bin/cmake3 /usr/bin/cmake
 ln -s /usr/bin/ninja-build /usr/bin/ninja
 
-# SLES 11 has older glibc than CentOS 7, so pre-built binary for it works on CentOS 7
-LLVM_VERSION=8.0.0
-LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-x86_64-linux-sles11.3"
-curl -OL "https://releases.llvm.org/${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz"
-tar Jxf "${LLVM_RELEASE}.tar.xz"
-mv "./${LLVM_RELEASE}" /opt/llvm
-rm "./${LLVM_RELEASE}.tar.xz"
+# Use prebuilt Clang+LLVM from GetEnvoy, build logs:
+# http://storage.googleapis.com/getenvoy-package/clang-toolchain/0e9d364b7199f3aaecbaf914cea3d9df4e97b850/artifacts-6cecd977-3051-4713-aba3-0d503691befc.json
+LLVM_PREBUILT=http://storage.googleapis.com/getenvoy-package/clang-toolchain/0e9d364b7199f3aaecbaf914cea3d9df4e97b850/clang+llvm-9.0.0-x86_64-linux-centos7.tar.xz
+curl -sSL "${LLVM_PREBUILT}" | tar Jx --strip-components=1 -C /opt/llvm
 
 # httpd24 is equired by rh-git218
 echo "/opt/rh/httpd24/root/usr/lib64" > /etc/ld.so.conf.d/httpd24.conf
