@@ -33,6 +33,7 @@ fi
 if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
   COMMIT_MSG="Regenerate toolchains from $(git rev-parse HEAD)
 
+  [skip ci]
   $(git log --format=%B -n 1)"
 
   git config user.name "envoy-build-tools(Azure Pipelines)"
