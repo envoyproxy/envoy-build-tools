@@ -14,7 +14,8 @@ ln -s /usr/bin/ninja-build /usr/bin/ninja
 
 # Use prebuilt Clang+LLVM from GetEnvoy, build logs:
 # http://storage.googleapis.com/getenvoy-package/clang-toolchain/0e9d364b7199f3aaecbaf914cea3d9df4e97b850/artifacts-6cecd977-3051-4713-aba3-0d503691befc.json
-LLVM_PREBUILT=http://storage.googleapis.com/getenvoy-package/clang-toolchain/0e9d364b7199f3aaecbaf914cea3d9df4e97b850/clang+llvm-9.0.0-x86_64-linux-centos7.tar.xz
+LLVM_PREBUILT=https://storage.googleapis.com/getenvoy-package/clang-toolchain/0e9d364b7199f3aaecbaf914cea3d9df4e97b850/clang+llvm-9.0.0-x86_64-linux-centos7.tar.xz
+mkdir -p /opt/llvm
 curl -sSL "${LLVM_PREBUILT}" | tar Jx --strip-components=1 -C /opt/llvm
 
 # httpd24 is equired by rh-git218
