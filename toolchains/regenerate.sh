@@ -39,4 +39,8 @@ if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
   git config user.email envoy-build-tools@users.noreply.github.com
 
   git commit -m "${COMMIT_MSG}"
+
+  if [[ "${SOURCE_BRANCH}" =~ ^refs/heads/.* ]]; then
+    git push git@github.com/envoyproxy/envoy-build-tools.git "${SOURCE_BRANCH}"
+  fi
 fi

@@ -33,11 +33,21 @@ jobs:
       sudo chmod +x /usr/local/bin/bazel
     displayName: Install Bazelisk
 
+  - task: InstallSSHKey@0
+    inputs:
+      hostName: "github.com"
+      knownHostEntry: "github.com,192.30.255.113 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=="
+      sshPublicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCns5kFJ6w7c/zH/FYBNvSpqhpSL147fizsru+PYwaw36RMCkJ4wqHVqusq6zF6K8SPloA4AlzPWx50i2NhRj8NEKgg3IkO35uFciEBcTwqr5+o+e96CvryNwGDZfavgUfrMwTQBYWdM7aaBoWUk31zmUixtlalgBEC1JGdEFxYpN3AmqN50mbu9ZvV8IEv8/AInqvqkS+dIzE9EcZQZQ98uDRU99S1YDCcvZO6xidGZz42AbS8CJ6idrreBoqy/eXmgio4YjGGFRnqr1tdXG5GKWSxfcrSC/gE8OzpFTJ1WOWH+SdZCptev8er6MBoFgRNkDhRckzpsAjhIYxSIAaL"
+      sshPassphrase: "$(SshKeyPassphrase)"
+      sshKeySecureFile: id_rsa_envoy_ci
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+
   - bash: |
       toolchains/regenerate.sh
     env:
       USE_BAZEL_VERSION: "0.29.1"
       COMMIT_TOOLCHAINS: "true"
+      SOURCE_BRANCH: $(Build.SourceBranch)
     displayName: Generate toolchains
 
   - bash: |
