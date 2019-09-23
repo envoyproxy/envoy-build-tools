@@ -33,10 +33,15 @@ fi
 if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
   COMMIT_MSG="Regenerate toolchains from $(git rev-parse HEAD)
 
+  [skip ci]
   $(git log --format=%B -n 1)"
 
   git config user.name "envoy-build-tools(Azure Pipelines)"
   git config user.email envoy-build-tools@users.noreply.github.com
 
   git commit -m "${COMMIT_MSG}"
+
+  if [[ "${SOURCE_BRANCH}" =~ ^refs/heads/.* ]]; then
+    git push git@github.com:envoyproxy/envoy-build-tools.git "HEAD:${SOURCE_BRANCH}"
+  fi
 fi

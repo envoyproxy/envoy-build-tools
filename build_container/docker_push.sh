@@ -7,7 +7,7 @@ set -e
 CONTAINER_SHA=$(git log -1 --pretty=format:"%H" .)
 
 echo "Building envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA}"
-if DOCKER_CLI_EXPERIMENTAL=enabled docker manifest inspect envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA} > /dev/null; then
+if curl -sSLf https://index.docker.io/v1/repositories/envoyproxy/envoy-build-${LINUX_DISTRO}/tags/${CONTAINER_SHA} > /dev/null; then
   echo "envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA} exists."
   exit 0
 fi
