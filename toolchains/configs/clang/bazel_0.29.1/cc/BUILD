@@ -117,7 +117,6 @@ cc_toolchain_config(
     "-Wl,-z,relro,-z,now",
     "-B/usr/lib/llvm-8/bin",
     "-lm",
-    "-static-libgcc",
     "-fuse-ld=lld"],
     link_libs = ["-l:libstdc++.a"],
     opt_link_flags = ["-Wl,--gc-sections"],
