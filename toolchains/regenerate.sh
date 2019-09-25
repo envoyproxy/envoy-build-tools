@@ -25,6 +25,8 @@ bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_clang_libcxx_gen//..."
 bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_gcc_gen//..."
 
 git add "${RBE_AUTOCONF_ROOT}"/toolchains/configs
+git add "${RBE_AUTOCONF_ROOT}"/toolchains/rbe_toolchains_config.bzl
+
 if [[ -z "$(git diff HEAD --name-only)" ]]; then
   echo "No toolchain changes."
   exit 0

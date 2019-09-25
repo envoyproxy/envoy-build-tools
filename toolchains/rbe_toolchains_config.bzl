@@ -48,7 +48,6 @@ def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, generator):
             name = name + "_gen",
             export_configs = True,
             create_java_configs = False,
-            # base_container_digest = _ENVOY_BUILD_BASE_IMAGE_DIGEST,
             digest = _ENVOY_BUILD_IMAGE_DIGEST,
             registry = _ENVOY_BUILD_IMAGE_REGISTRY,
             repository = _ENVOY_BUILD_IMAGE_REPOSITORY,
@@ -61,7 +60,6 @@ def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, generator):
     rbe_autoconfig(
         name = name,
         create_java_configs = False,
-        # base_container_digest = _ENVOY_BUILD_BASE_IMAGE_DIGEST,
         digest = _ENVOY_BUILD_IMAGE_DIGEST,
         registry = _ENVOY_BUILD_IMAGE_REGISTRY,
         repository = _ENVOY_BUILD_IMAGE_REPOSITORY,
