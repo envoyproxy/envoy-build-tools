@@ -4,13 +4,13 @@ load("@envoy_build_tools//toolchains:configs/versions.bzl", _generated_toolchain
 
 _ENVOY_BUILD_IMAGE_REGISTRY = "gcr.io"
 _ENVOY_BUILD_IMAGE_REPOSITORY = "envoy-ci/envoy-build"
-_ENVOY_BUILD_IMAGE_DIGEST = "sha256:9236915d10004a35f2439ce4a1c33c1dbb06f95f84c4a4497d4e4f95cdc9e07f"
+_ENVOY_BUILD_IMAGE_DIGEST = "sha256:1500b75cb9bc2184a26f72f63631e926cd05d6ee628e6fd005f069d2f9756ac7"
 _CONFIGS_OUTPUT_BASE = "toolchains/configs"
 
 _CLANG_ENV = {
     "BAZEL_COMPILER": "clang",
     "BAZEL_LINKLIBS": "-l%:libstdc++.a",
-    "BAZEL_LINKOPTS": "-lm:-static-libgcc:-fuse-ld=lld",
+    "BAZEL_LINKOPTS": "-lm:-fuse-ld=lld",
     "BAZEL_USE_LLVM_NATIVE_COVERAGE": "1",
     "GCOV": "llvm-profdata",
     "CC": "clang",
@@ -20,7 +20,7 @@ _CLANG_ENV = {
 
 _CLANG_LIBCXX_ENV = dicts.add(_CLANG_ENV, {
     "BAZEL_LINKLIBS": "-l%:libc++.a:-l%:libc++abi.a",
-    "BAZEL_LINKOPTS": "-lm:-static-libgcc:-pthread:-fuse-ld=lld",
+    "BAZEL_LINKOPTS": "-lm:-pthread:-fuse-ld=lld",
     "BAZEL_CXXOPTS": "-stdlib=libc++",
     "CXXFLAGS": "-stdlib=libc++",
 })
@@ -28,7 +28,7 @@ _CLANG_LIBCXX_ENV = dicts.add(_CLANG_ENV, {
 _GCC_ENV = {
     "BAZEL_COMPILER": "gcc",
     "BAZEL_LINKLIBS": "-l%:libstdc++.a",
-    "BAZEL_LINKOPTS": "-lm:-static-libgcc",
+    "BAZEL_LINKOPTS": "-lm",
     "CC": "gcc",
     "CXX": "g++",
     "PATH": "/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/llvm-9/bin",
@@ -48,7 +48,6 @@ def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, generator):
             name = name + "_gen",
             export_configs = True,
             create_java_configs = False,
-            # base_container_digest = _ENVOY_BUILD_BASE_IMAGE_DIGEST,
             digest = _ENVOY_BUILD_IMAGE_DIGEST,
             registry = _ENVOY_BUILD_IMAGE_REGISTRY,
             repository = _ENVOY_BUILD_IMAGE_REPOSITORY,
@@ -61,7 +60,6 @@ def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, generator):
     rbe_autoconfig(
         name = name,
         create_java_configs = False,
-        # base_container_digest = _ENVOY_BUILD_BASE_IMAGE_DIGEST,
         digest = _ENVOY_BUILD_IMAGE_DIGEST,
         registry = _ENVOY_BUILD_IMAGE_REGISTRY,
         repository = _ENVOY_BUILD_IMAGE_REPOSITORY,

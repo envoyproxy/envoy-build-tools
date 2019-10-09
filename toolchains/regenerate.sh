@@ -25,6 +25,8 @@ bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_clang_libcxx_gen//..."
 bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_gcc_gen//..."
 
 git add "${RBE_AUTOCONF_ROOT}"/toolchains/configs
+git add "${RBE_AUTOCONF_ROOT}"/toolchains/rbe_toolchains_config.bzl
+
 if [[ -z "$(git diff HEAD --name-only)" ]]; then
   echo "No toolchain changes."
   exit 0
@@ -33,10 +35,15 @@ fi
 if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
   COMMIT_MSG="Regenerate toolchains from $(git rev-parse HEAD)
 
+  [skip ci]
   $(git log --format=%B -n 1)"
 
   git config user.name "envoy-build-tools(Azure Pipelines)"
   git config user.email envoy-build-tools@users.noreply.github.com
 
   git commit -m "${COMMIT_MSG}"
+
+  if [[ "${SOURCE_BRANCH}" =~ ^refs/heads/.* ]]; then
+    git push git@github.com:envoyproxy/envoy-build-tools.git "HEAD:${SOURCE_BRANCH}"
+  fi
 fi
