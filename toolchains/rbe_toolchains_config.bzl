@@ -15,7 +15,7 @@ _CLANG_ENV = {
     "GCOV": "llvm-profdata",
     "CC": "clang",
     "CXX": "clang++",
-    "PATH": "/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/llvm-8/bin",
+    "PATH": "/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/llvm-9/bin",
 }
 
 _CLANG_LIBCXX_ENV = dicts.add(_CLANG_ENV, {
@@ -31,7 +31,7 @@ _GCC_ENV = {
     "BAZEL_LINKOPTS": "-lm",
     "CC": "gcc",
     "CXX": "g++",
-    "PATH": "/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/llvm-8/bin",
+    "PATH": "/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/llvm-9/bin",
 }
 
 _TOOLCHAIN_CONFIG_SUITE_SPEC = {

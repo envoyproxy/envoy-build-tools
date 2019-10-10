@@ -13,7 +13,7 @@ ln -s /usr/bin/cmake3 /usr/bin/cmake
 ln -s /usr/bin/ninja-build /usr/bin/ninja
 
 # SLES 11 has older glibc than CentOS 7, so pre-built binary for it works on CentOS 7
-LLVM_VERSION=8.0.0
+LLVM_VERSION=9.0.0
 LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-x86_64-linux-sles11.3"
 curl -OL "https://releases.llvm.org/${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz"
 tar Jxf "${LLVM_RELEASE}.tar.xz"
