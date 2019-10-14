@@ -1,5 +1,5 @@
-Envoy's CI has a build run called `build_image`. On a commit to master, `ci/build_container/docker_push.sh`
-checks if the commit has changed the `ci/build_container` directory. If there are changes, CI builds a new `envoyproxy/envoy-build`
+Envoy's CI has a build run called `build_image`. On a commit to master, `build_container/docker_push.sh`
+checks if the commit has changed the `build_container` directory. If there are changes, CI builds a new `envoyproxy/envoy-build`
 image. The image is pushed to [dockerhub](https://hub.docker.com/r/envoyproxy/envoy-build/tags/) under `latest` and under the commit sha.
 
 After the PR that changes `ci/build_container` has been merged, and the new image gets pushed,
