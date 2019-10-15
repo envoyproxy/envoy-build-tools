@@ -37,7 +37,8 @@ case $ARCH in
         wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
         apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main"
         apt-get update
-        apt-get install -y --no-install-recommends clang-9 clang-format-9 clang-tidy-9 lld-9 libc++-9-dev libc++abi-9-dev llvm-9
+        apt-get install -y --no-install-recommends clang-9 clang-format-9 clang-tidy-9 lld-9 libc++-9-dev libc++abi-9-dev \
+          libclang-9-dev llvm-9-dev llvm-9
         ;;
 esac
 
