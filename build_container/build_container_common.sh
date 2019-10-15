@@ -33,6 +33,7 @@ LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-${LLVM_DISTRO}"
 download_and_check "${LLVM_RELEASE}.tar.xz" "https://releases.llvm.org/${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz" "${LLVM_SHA256SUM}"
 tar Jxf "${LLVM_RELEASE}.tar.xz"
 mv "./${LLVM_RELEASE}" /opt/llvm
+chown -R root:root /opt/llvm
 rm "./${LLVM_RELEASE}.tar.xz"
 echo "/opt/llvm/lib" > /etc/ld.so.conf.d/llvm.conf
 ldconfig
