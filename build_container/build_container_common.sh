@@ -30,7 +30,7 @@ if [[ "$(uname -m)" == "x86_64" ]]; then
 fi
 
 LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-${LLVM_DISTRO}"
-download_and_check "${LLVM_RELEASE}.tar.xz" "https://releases.llvm.org/${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz""${LLVM_SHA256SUM}"
+download_and_check "${LLVM_RELEASE}.tar.xz" "https://releases.llvm.org/${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz" "${LLVM_SHA256SUM}"
 tar Jxf "${LLVM_RELEASE}.tar.xz"
 mv "./${LLVM_RELEASE}" /opt/llvm
 rm "./${LLVM_RELEASE}.tar.xz"
