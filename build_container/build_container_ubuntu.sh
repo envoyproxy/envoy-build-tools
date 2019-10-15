@@ -21,23 +21,15 @@ update-alternatives --config g++
 apt-get install -y --no-install-recommends curl wget make cmake git python python-pip python-setuptools python3 python3-pip \
   unzip bc libtool ninja-build automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client
 
-# clang 8.
+LLVM_VERSION=9.0.0
 case $ARCH in
     'ppc64le' )
-        LLVM_VERSION=8.0.0
-        LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-powerpc64le-unknown-unknown"
-        wget "https://releases.llvm.org/${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz"
-        tar Jxf "${LLVM_RELEASE}.tar.xz"
-        mv "./${LLVM_RELEASE}" /opt/llvm
-        rm "./${LLVM_RELEASE}.tar.xz"
-        echo "/opt/llvm/lib" > /etc/ld.so.conf.d/llvm.conf
-        ldconfig
+        LLVM_DISTRO=powerpc64le-linux-ubuntu-16.04
+        LLVM_SHA256SUM=a8e7dc00e9eac47ea769eb1f5145e1e28f0610289f07f3275021f0556c169ddf
         ;;
     'x86_64' )
-        wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
-        apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main"
-        apt-get update
-        apt-get install -y --no-install-recommends clang-9 clang-format-9 clang-tidy-9 lld-9 libc++-9-dev libc++abi-9-dev llvm-9
+        LLVM_DISTRO=x86_64-linux-gnu-ubuntu-16.04
+        LLVM_SHA256SUM=5c1473c2611e1eac4ed1aeea5544eac5e9d266f40c5623bbaeb1c6555815a27d
         ;;
 esac
 
@@ -64,6 +56,6 @@ setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 # virtualenv
 pip3 install virtualenv
 
-./build_container_common.sh
+source ./build_container_common.sh
 
 apt-get clean
