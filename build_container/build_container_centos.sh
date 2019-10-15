@@ -14,15 +14,11 @@ ln -s /usr/bin/ninja-build /usr/bin/ninja
 
 # SLES 11 has older glibc than CentOS 7, so pre-built binary for it works on CentOS 7
 LLVM_VERSION=9.0.0
-LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-x86_64-linux-sles11.3"
-curl -OL "https://releases.llvm.org/${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz"
-tar Jxf "${LLVM_RELEASE}.tar.xz"
-mv "./${LLVM_RELEASE}" /opt/llvm
-rm "./${LLVM_RELEASE}.tar.xz"
+LLVM_DISTRO="x86_64-linux-sles11.3"
+LLVM_SHA256SUM="7e2846ff60c181d1f27d97c23c25a2295f5730b6d88612ddd53b4cbb8177c4b9"
 
 # httpd24 is equired by rh-git218
 echo "/opt/rh/httpd24/root/usr/lib64" > /etc/ld.so.conf.d/httpd24.conf
-echo "/opt/llvm/lib" > /etc/ld.so.conf.d/llvm.conf
 ldconfig
 
 # Setup tcpdump for non-root.
@@ -31,4 +27,4 @@ chgrp pcap /usr/sbin/tcpdump
 chmod 750 /usr/sbin/tcpdump
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 
-./build_container_common.sh
+source ./build_container_common.sh
