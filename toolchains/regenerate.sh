@@ -21,9 +21,11 @@ rm -rf "${RBE_AUTOCONF_ROOT}"/toolchains/configs/*
 cp -vf "${RBE_AUTOCONF_ROOT}/toolchains/empty.bzl" "${RBE_AUTOCONF_ROOT}/toolchains/configs/versions.bzl"
 
 # Bazel query is the right command so bazel won't fail itself.
-bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_clang_gen//..."
-bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_clang_libcxx_gen//..."
-bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_gcc_gen//..."
+for BAZEL_VERSION in "0.29.1" "1.0.0"; do
+  USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_clang_gen//..."
+  USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_clang_libcxx_gen//..."
+  USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_gcc_gen//..."
+done
 
 git add "${RBE_AUTOCONF_ROOT}"/toolchains/configs
 git add "${RBE_AUTOCONF_ROOT}"/toolchains/rbe_toolchains_config.bzl
