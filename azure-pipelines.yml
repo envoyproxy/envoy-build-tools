@@ -44,7 +44,6 @@ jobs:
   - bash: |
       toolchains/regenerate.sh
     env:
-      USE_BAZEL_VERSION: "0.29.1"
       COMMIT_TOOLCHAINS: "true"
       SOURCE_BRANCH: $(Build.SourceBranch)
     displayName: Generate toolchains
