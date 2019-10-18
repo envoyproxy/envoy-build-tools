@@ -7,7 +7,7 @@ ARCH="$(uname -m)"
 # Setup basic requirements and install them.
 apt-get update
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -y --no-install-recommends software-properties-common apt-transport-https
+apt-get install -y --no-install-recommends software-properties-common apt-transport-https curl
 
 # gcc-7
 add-apt-repository -y ppa:ubuntu-toolchain-r/test
@@ -29,9 +29,8 @@ case $ARCH in
         ;;
 esac
 apt-get update
-apt-get install -y --no-install-recommends docker-ce-cli
 
-apt-get install -y --no-install-recommends curl wget make cmake git python python-pip python-setuptools python3 python3-pip \
+apt-get install -y --no-install-recommends docker-ce-cli wget make cmake git python python-pip python-setuptools python3 python3-pip \
   unzip bc libtool ninja-build automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client
 
 LLVM_VERSION=9.0.0
