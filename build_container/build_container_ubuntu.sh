@@ -22,10 +22,10 @@ update-alternatives --config g++
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 case $ARCH in
     'ppc64le' )
-        sudo add-apt-repository "deb [arch=ppc64le] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        add-apt-repository "deb [arch=ppc64le] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
         ;;
     'x86_64' )
-        sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
         ;;
 esac
 apt-get update
