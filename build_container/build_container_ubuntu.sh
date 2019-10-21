@@ -7,7 +7,7 @@ ARCH="$(uname -m)"
 # Setup basic requirements and install them.
 apt-get update
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -y --no-install-recommends software-properties-common apt-transport-https
+apt-get install -y --no-install-recommends software-properties-common apt-transport-https curl
 
 # gcc-7
 add-apt-repository -y ppa:ubuntu-toolchain-r/test
@@ -18,7 +18,19 @@ update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 1000
 update-alternatives --config gcc
 update-alternatives --config g++
 
-apt-get install -y --no-install-recommends curl wget make cmake git python python-pip python-setuptools python3 python3-pip \
+# docker-ce-cli
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+case $ARCH in
+    'ppc64le' )
+        add-apt-repository "deb [arch=ppc64le] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        ;;
+    'x86_64' )
+        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        ;;
+esac
+apt-get update
+
+apt-get install -y --no-install-recommends docker-ce-cli wget make cmake git python python-pip python-setuptools python3 python3-pip \
   unzip bc libtool ninja-build automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client
 
 LLVM_VERSION=9.0.0

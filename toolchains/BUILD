@@ -10,6 +10,10 @@ platform(
           value: "SYS_PTRACE,NET_RAW,NET_ADMIN"
         }
         properties: {
+          name: "dockerSiblingContainers"
+          value: "true"
+        }
+        properties: {
           name: "dockerNetwork"
           value: "standard"
         }
