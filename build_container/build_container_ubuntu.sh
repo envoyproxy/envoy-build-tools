@@ -18,6 +18,12 @@ update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 1000
 update-alternatives --config gcc
 update-alternatives --config g++
 
+# Google Cloud SDK
+echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" \
+  | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+  apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+
 # docker-ce-cli
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 case $ARCH in
@@ -28,10 +34,10 @@ case $ARCH in
         add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
         ;;
 esac
-apt-get update
+apt-get update -y
 
 apt-get install -y --no-install-recommends docker-ce-cli wget make cmake git python python-pip python-setuptools python3 python3-pip \
-  unzip bc libtool ninja-build automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client
+  unzip bc libtool ninja-build automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client google-cloud-sdk
 
 LLVM_VERSION=9.0.0
 case $ARCH in
