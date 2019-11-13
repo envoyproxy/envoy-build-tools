@@ -42,16 +42,16 @@ _TOOLCHAIN_CONFIG_SUITE_SPEC = {
     "toolchain_config_suite_autogen_spec": _generated_toolchain_config_suite_autogen_spec,
 }
 
-def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, generator):
+def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, generator, force):
     if generator:
         rbe_autoconfig(
             name = name + "_gen",
-            export_configs = True,
             create_java_configs = False,
             digest = _ENVOY_BUILD_IMAGE_DIGEST,
+            env = env,
+            export_configs = True,
             registry = _ENVOY_BUILD_IMAGE_REGISTRY,
             repository = _ENVOY_BUILD_IMAGE_REPOSITORY,
-            env = env,
             toolchain_config_spec_name = toolchain_config_spec_name,
             toolchain_config_suite_spec = _TOOLCHAIN_CONFIG_SUITE_SPEC,
             use_checked_in_confs = "False",
@@ -61,14 +61,15 @@ def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, generator):
         name = name,
         create_java_configs = False,
         digest = _ENVOY_BUILD_IMAGE_DIGEST,
+        env = env,
         registry = _ENVOY_BUILD_IMAGE_REGISTRY,
         repository = _ENVOY_BUILD_IMAGE_REPOSITORY,
         toolchain_config_spec_name = toolchain_config_spec_name,
         toolchain_config_suite_spec = _TOOLCHAIN_CONFIG_SUITE_SPEC,
-        use_checked_in_confs = "Force",
+        use_checked_in_confs = "Force" if force else "Try",
     )
 
-def rbe_toolchains_config(generator = False):
-    _envoy_rbe_toolchain("rbe_ubuntu_clang", _CLANG_ENV, "clang", generator)
-    _envoy_rbe_toolchain("rbe_ubuntu_clang_libcxx", _CLANG_LIBCXX_ENV, "clang_libcxx", generator)
-    _envoy_rbe_toolchain("rbe_ubuntu_gcc", _GCC_ENV, "gcc", generator)
+def rbe_toolchains_config(generator = False, force = False):
+    _envoy_rbe_toolchain("rbe_ubuntu_clang", _CLANG_ENV, "clang", generator, force)
+    _envoy_rbe_toolchain("rbe_ubuntu_clang_libcxx", _CLANG_LIBCXX_ENV, "clang_libcxx", generator, force)
+    _envoy_rbe_toolchain("rbe_ubuntu_gcc", _GCC_ENV, "gcc", generator, force)
