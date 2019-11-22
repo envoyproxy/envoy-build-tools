@@ -37,3 +37,33 @@ chown -R root:root /opt/llvm
 rm "./${LLVM_RELEASE}.tar.xz"
 echo "/opt/llvm/lib" > /etc/ld.so.conf.d/llvm.conf
 ldconfig
+
+# MSAN
+export PATH="/opt/llvm/bin:${PATH}"
+
+WORKDIR=$(mktemp -d)
+function cleanup {
+  rm -rf "${WORKDIR}"
+}
+
+trap cleanup EXIT
+
+cd "${WORKDIR}"
+
+curl -sSfL "https://github.com/llvm/llvm-project/archive/llvmorg-${LLVM_VERSION}.tar.gz" | tar zx
+
+mkdir msan
+pushd msan
+
+cmake -GNinja -DLLVM_ENABLE_PROJECTS="libcxxabi;libcxx" -DLLVM_USE_LINKER=lld -DLLVM_USE_SANITIZER=Memory -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX="/opt/libcxx_msan" "../llvm-project-llvmorg-${LLVM_VERSION}/llvm"
+ninja install-cxx install-cxxabi
+
+if [[ ! -z "$(diff -r /opt/libcxx_msan/include/c++ /opt/llvm/include/c++)" ]]; then
+  echo "Different libc++ is installed";
+  exit 1
+fi
+
+rm -rf /opt/libcxx_msan/include
+
+popd
