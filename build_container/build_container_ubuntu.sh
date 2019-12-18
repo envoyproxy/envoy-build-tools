@@ -39,6 +39,11 @@ apt-get update -y
 apt-get install -y --no-install-recommends docker-ce-cli wget make cmake git python python-pip python-setuptools python3 python3-pip \
   unzip bc libtool ninja-build automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client google-cloud-sdk
 
+# Python 3.7
+add-apt-repository -y ppa:deadsnakes/ppa
+apt-get update
+apt install -y python3.7
+
 LLVM_VERSION=9.0.0
 case $ARCH in
     'ppc64le' )
