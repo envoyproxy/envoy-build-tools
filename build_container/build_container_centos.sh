@@ -1,9 +1,11 @@
 #!/bin/bash
 
 set -e
-
+ARCH="$(uname -m)"
 # Note: rh-git218 is needed to run `git -C` in docs build process.
-yum install -y centos-release-scl epel-release
+if [[ "${ARCH}" == "x86_64" ]]; then
+  yum install -y centos-release-scl epel-release
+fi
 yum update -y
 yum install -y devtoolset-7-gcc devtoolset-7-gcc-c++ devtoolset-7-binutils java-1.8.0-openjdk-headless rsync \
     rh-git218 wget unzip which make cmake3 patch ninja-build devtoolset-7-libatomic-devel openssl python27 \
@@ -14,7 +16,16 @@ ln -s /usr/bin/ninja-build /usr/bin/ninja
 
 # SLES 11 has older glibc than CentOS 7, so pre-built binary for it works on CentOS 7
 LLVM_VERSION=8.0.0
-LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-x86_64-linux-sles11.3"
+
+case $ARCH in
+    'x86_64' )
+        LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-x86_64-linux-sles11.3"
+        ;;
+    'aarch64' )
+        LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu"
+        ;;
+esac
+
 curl -OL "https://releases.llvm.org/${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz"
 tar Jxf "${LLVM_RELEASE}.tar.xz"
 mv "./${LLVM_RELEASE}" /opt/llvm

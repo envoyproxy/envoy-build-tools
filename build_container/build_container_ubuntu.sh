@@ -39,6 +39,16 @@ case $ARCH in
         apt-get update
         apt-get install -y --no-install-recommends clang-8 clang-format-8 clang-tidy-8 lld-8 libc++-8-dev libc++abi-8-dev llvm-8
         ;;
+    'aarch64' )
+        LLVM_VERSION=8.0.0
+        LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu"
+        wget "https://releases.llvm.org/${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz"
+        tar Jxf "${LLVM_RELEASE}.tar.xz"
+        mv "./${LLVM_RELEASE}" /opt/llvm
+        rm "./${LLVM_RELEASE}.tar.xz"
+        echo "/opt/llvm/lib" > /etc/ld.so.conf.d/llvm.conf
+        ldconfig
+        ;;
 esac
 
 # Bazel and related dependencies.
@@ -49,6 +59,18 @@ case $ARCH in
         curl -fSL https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_16.04/latest/${BAZEL_LATEST} \
           -o /usr/local/bin/bazel
         chmod +x /usr/local/bin/bazel
+        ;;
+    'aarch64' )
+        #Install bazel on Arm64 platform by Ubuntu PPA repository
+        if [ "$(lsb_release -cs)" == 'xenial' ]; then
+          apt install -y openjdk-8-jdk
+        else
+          apt install -y openjdk-11-jdk
+        fi
+
+        add-apt-repository ppa:kingofcodecplusplus/bazel120
+        apt-get update
+        apt install -y bazel
         ;;
 esac
 
