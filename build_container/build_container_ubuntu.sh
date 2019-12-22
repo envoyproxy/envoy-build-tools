@@ -37,7 +37,8 @@ esac
 apt-get update -y
 
 apt-get install -y --no-install-recommends docker-ce-cli wget make cmake git python python-pip python-setuptools python3 python3-pip \
-  unzip bc libtool ninja-build automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client google-cloud-sdk
+  unzip bc libtool ninja-build automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client google-cloud-sdk \
+  libncurses-dev
 
 # Python 3.8
 add-apt-repository -y ppa:deadsnakes/ppa
