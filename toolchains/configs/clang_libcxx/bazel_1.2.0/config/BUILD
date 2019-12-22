@@ -43,7 +43,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/envoy-ci/envoy-build@sha256:c2d9f3fdbe9f6ff5f8408a869983f4ddedccbe50bf426b0ee3f7fd78c165d737"
+          value:"docker://gcr.io/envoy-ci/envoy-build@sha256:3788a87461f2b3dc8048ad0ce5df40438a56e0a8f1a4ab0f61b4ef0d8c11ff1f"
         }
         properties {
            name: "OSFamily"

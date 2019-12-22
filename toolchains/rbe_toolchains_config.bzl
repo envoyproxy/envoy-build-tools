@@ -4,7 +4,7 @@ load("@envoy_build_tools//toolchains:configs/versions.bzl", _generated_toolchain
 
 _ENVOY_BUILD_IMAGE_REGISTRY = "gcr.io"
 _ENVOY_BUILD_IMAGE_REPOSITORY = "envoy-ci/envoy-build"
-_ENVOY_BUILD_IMAGE_DIGEST = "sha256:c2d9f3fdbe9f6ff5f8408a869983f4ddedccbe50bf426b0ee3f7fd78c165d737"
+_ENVOY_BUILD_IMAGE_DIGEST = "sha256:3788a87461f2b3dc8048ad0ce5df40438a56e0a8f1a4ab0f61b4ef0d8c11ff1f"
 _CONFIGS_OUTPUT_BASE = "toolchains/configs"
 
 _CLANG_ENV = {
