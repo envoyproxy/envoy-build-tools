@@ -29,6 +29,12 @@ if [[ "$(uname -m)" == "x86_64" ]]; then
   chmod +x /usr/local/bin/bazel
 fi
 
+if [[ "$(uname -m)" == "aarch64" ]]; then
+  download_and_check /usr/local/bin/bazel https://github.com/Tick-Tocker/bazelisk-arm64/releases/download/arm64/bazelisk-linux-arm64 \
+    bcbb11c014d78d4cb8c8d335daf41eefe274a64db9df778025ec12ad0aae3d80
+  chmod +x /usr/local/bin/bazel
+fi
+
 LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-${LLVM_DISTRO}"
 download_and_check "${LLVM_RELEASE}.tar.xz" "https://releases.llvm.org/${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz" "${LLVM_SHA256SUM}"
 tar Jxf "${LLVM_RELEASE}.tar.xz"
@@ -67,3 +73,4 @@ fi
 rm -rf /opt/libcxx_msan/include
 
 popd
+

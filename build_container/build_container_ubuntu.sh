@@ -33,6 +33,9 @@ case $ARCH in
     'x86_64' )
         add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
         ;;
+    'aarch64' )
+        add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        ;;
 esac
 apt-get update -y
 
@@ -55,6 +58,10 @@ case $ARCH in
         LLVM_DISTRO=x86_64-linux-gnu-ubuntu-16.04
         LLVM_SHA256SUM=5c1473c2611e1eac4ed1aeea5544eac5e9d266f40c5623bbaeb1c6555815a27d
         ;;
+    'aarch64' )
+        LLVM_DISTRO=aarch64-linux-gnu
+        LLVM_SHA256SUM=f8f3e6bdd640079a140a7ada4eb6f5f05aeae125cf54b94d44f733b0e8691dc2
+        ;;
 esac
 
 # Bazel and related dependencies.
@@ -65,6 +72,15 @@ case $ARCH in
         curl -fSL https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_16.04/latest/${BAZEL_LATEST} \
           -o /usr/local/bin/bazel
         chmod +x /usr/local/bin/bazel
+        ;;
+    'aarch64' )
+        if [ "$(lsb_release -cs)" == 'xenial' ]; then
+          apt install -y openjdk-8-jdk
+          apt install -y ca-certificates-java
+          update-ca-certificates -f
+        else
+          apt install -y openjdk-11-jdk
+        fi
         ;;
 esac
 
