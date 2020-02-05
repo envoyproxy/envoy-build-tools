@@ -4,6 +4,9 @@
 # CI logs.
 set -e
 
+# Enable docker experimental
+export DOCKER_CLI_EXPERIMENTAL=enabled
+
 IMAGE_ARCH=("amd64" "arm64")
 
 CONTAINER_SHA=$(git log -1 --pretty=format:"%H" .)
@@ -24,7 +27,7 @@ if [[ "${SOURCE_BRANCH}" == "refs/heads/master" ]]; then
         docker push envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA}-${arch}
     done
 
-    docker manifest create envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA} \
+    docker manifest create --amend envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA} \
 	    envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA}-arm64 \
 	    envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA}-amd64
 
