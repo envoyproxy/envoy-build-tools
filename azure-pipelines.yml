@@ -14,6 +14,11 @@ jobs:
     vmImage: 'ubuntu-16.04'
   container: google/cloud-sdk:latest
   steps:
+  - task: DockerInstaller@0
+    displayName: Docker Installer
+    inputs:
+      dockerVersion: 19.03.5
+      releaseType: stable
   - bash: |
       ./docker_push.sh
     workingDirectory: build_container
