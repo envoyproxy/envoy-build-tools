@@ -6,7 +6,7 @@ export RBE_AUTOCONF_ROOT=$(bazel info workspace)
 
 CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "${RBE_AUTOCONF_ROOT}/build_container")
 
-DOCKER_IMAGE=gcr.io/envoy-ci/envoy-build:${CONTAINER_TAG}
+DOCKER_IMAGE=gcr.io/envoy-ci/envoy-build:${CONTAINER_TAG}-amd64
 if ! docker pull ${DOCKER_IMAGE}; then
   echo "Image is not built, skip..."
   exit 0
@@ -22,7 +22,7 @@ cp -vf "${RBE_AUTOCONF_ROOT}/toolchains/empty.bzl" "${RBE_AUTOCONF_ROOT}/toolcha
 
 # Bazel query is the right command so bazel won't fail itself.
 # Keep bazel versions here at most two: current master version, next version
-for BAZEL_VERSION in "1.2.0" "2.0.0"; do
+for BAZEL_VERSION in "2.0.0" "2.1.0"; do
   USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_clang_gen//..."
   USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_clang_libcxx_gen//..."
   USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_gcc_gen//..."
