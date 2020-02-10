@@ -28,14 +28,14 @@ if [[ "${SOURCE_BRANCH}" == "refs/heads/master" ]]; then
     done
 
     docker manifest create --amend envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA} \
-	    envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA}-arm64 \
-	    envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA}-amd64
+        envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA}-arm64 \
+        envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA}-amd64
 
     for arch in "${IMAGE_ARCH[@]}"
     do
         docker manifest annotate envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA} \
-		envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA}-${arch} \
-		--os linux --arch ${arch}
+            envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA}-${arch} \
+            --os linux --arch ${arch}
     done
 
     docker manifest push envoyproxy/envoy-build-${LINUX_DISTRO}:${CONTAINER_SHA}
@@ -45,8 +45,8 @@ if [[ "${SOURCE_BRANCH}" == "refs/heads/master" ]]; then
         gcloud auth configure-docker --quiet
 
         echo "Updating gcr.io/envoy-ci/envoy-build image"
-        docker tag envoyproxy/envoy-build-"${LINUX_DISTRO}":"${CONTAINER_SHA}-${arch}" gcr.io/envoy-ci/envoy-build:"${CONTAINER_SHA}-${arch}"
-        docker push gcr.io/envoy-ci/envoy-build:"${CONTAINER_SHA}-${arch}"
+        docker tag envoyproxy/envoy-build-"${LINUX_DISTRO}":"${CONTAINER_SHA}-amd64" gcr.io/envoy-ci/envoy-build:"${CONTAINER_SHA}"
+        docker push gcr.io/envoy-ci/envoy-build:"${CONTAINER_SHA}"
     fi
 
 else

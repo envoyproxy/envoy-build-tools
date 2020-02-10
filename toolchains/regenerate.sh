@@ -6,7 +6,7 @@ export RBE_AUTOCONF_ROOT=$(bazel info workspace)
 
 CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "${RBE_AUTOCONF_ROOT}/build_container")
 
-DOCKER_IMAGE=gcr.io/envoy-ci/envoy-build:${CONTAINER_TAG}-amd64
+DOCKER_IMAGE=gcr.io/envoy-ci/envoy-build:${CONTAINER_TAG}
 if ! docker pull ${DOCKER_IMAGE}; then
   echo "Image is not built, skip..."
   exit 0
