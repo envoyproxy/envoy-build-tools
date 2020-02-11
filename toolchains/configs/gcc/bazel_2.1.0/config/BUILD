@@ -29,7 +29,7 @@ toolchain(
         "@bazel_tools//platforms:linux",
         "@bazel_tools//platforms:x86_64",
     ],
-    toolchain = "//toolchains/configs/gcc/bazel_1.2.0/cc:cc-compiler-k8",
+    toolchain = "//toolchains/configs/gcc/bazel_2.1.0/cc:cc-compiler-k8",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
@@ -43,7 +43,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/envoy-ci/envoy-build@sha256:55bcb192dbad8243e4f1d4f7c4d3f2842ec9a8033118262940f4e45eb7c85b44"
+          value:"docker://gcr.io/envoy-ci/envoy-build@sha256:e2db23ad15ff02d1e322e55c2b13b52b7b879904feb8decbd8e0476646009c6b"
         }
         properties {
            name: "OSFamily"
