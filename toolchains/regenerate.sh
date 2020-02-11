@@ -22,7 +22,7 @@ cp -vf "${RBE_AUTOCONF_ROOT}/toolchains/empty.bzl" "${RBE_AUTOCONF_ROOT}/toolcha
 
 # Bazel query is the right command so bazel won't fail itself.
 # Keep bazel versions here at most two: current master version, next version
-for BAZEL_VERSION in "1.2.0" "2.0.0"; do
+for BAZEL_VERSION in "2.0.0" "2.1.0"; do
   USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_clang_gen//..."
   USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_clang_libcxx_gen//..."
   USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_gcc_gen//..."

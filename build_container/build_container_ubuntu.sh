@@ -40,7 +40,7 @@ esac
 apt-get update -y
 
 apt-get install -y --no-install-recommends docker-ce-cli wget make cmake git python python-pip python-setuptools python3 python3-pip \
-  unzip bc libtool ninja-build automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client google-cloud-sdk \
+  python3-setuptools unzip bc libtool ninja-build automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client google-cloud-sdk \
   libncurses-dev doxygen graphviz
 
 # Python 3.8
@@ -94,7 +94,7 @@ chmod 750 /usr/sbin/tcpdump
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 
 # virtualenv
-pip3 install virtualenv
+pip3 install -U virtualenv
 
 source ./build_container_common.sh
 
