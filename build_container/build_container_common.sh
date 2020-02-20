@@ -9,6 +9,19 @@ function download_and_check () {
   echo "${sha256}  ${to}" | sha256sum --check
 }
 
+function install_gn(){
+    GN_COMMIT_ID="a899709c3b024eddade4cf7eab167b5962164fb0"
+    git clone https://gn.googlesource.com/gn
+    cd gn
+    git checkout ${GN_COMMIT_ID}
+    python build/gen.py
+    ninja -C out
+    cp out/gn /usr/bin/
+
+    # Clear environments
+    cd .. && rm -rf gn/
+}
+
 if [[ "$(uname -m)" == "x86_64" ]]; then
   # buildifier
   VERSION=0.29.0
@@ -46,6 +59,9 @@ ldconfig
 
 # MSAN
 export PATH="/opt/llvm/bin:${PATH}"
+
+# Install gn tools which will be used for envoy tests.
+install_gn
 
 WORKDIR=$(mktemp -d)
 function cleanup {
