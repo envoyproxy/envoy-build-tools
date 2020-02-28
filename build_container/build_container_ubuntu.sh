@@ -40,7 +40,7 @@ esac
 apt-get update -y
 
 apt-get install -y --no-install-recommends docker-ce-cli wget make cmake git python python-pip python-setuptools python3 python3-pip \
-  python3-setuptools unzip bc libtool ninja-build automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client google-cloud-sdk \
+  python3-setuptools unzip bc libtool automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client google-cloud-sdk \
   libncurses-dev doxygen graphviz
 
 # Python 3.8
@@ -48,19 +48,40 @@ add-apt-repository -y ppa:deadsnakes/ppa
 apt-get update
 apt install -y python3.8
 
-LLVM_VERSION=9.0.0
+# Install ninja-build 1.8.2 from binary
 case $ARCH in
     'ppc64le' )
+        ninja_deb="ninja-build_1.8.2-1_ppc64el.deb"
+        ;;
+    'x86_64' )
+        ninja_deb="ninja-build_1.8.2-1_amd64.deb"
+        ;;
+    'aarch64' )
+        ninja_deb="ninja-build_1.8.2-1_arm64.deb"
+        ;;
+esac
+wget https://launchpad.net/ubuntu/+archive/primary/+files/${ninja_deb}
+dpkg -i ${ninja_deb}
+rm ${ninja_deb}
+
+# Set LLVM version for each cpu architecture.
+case $ARCH in
+    'ppc64le' )
+        LLVM_VERSION=9.0.0
         LLVM_DISTRO=powerpc64le-linux-ubuntu-16.04
         LLVM_SHA256SUM=a8e7dc00e9eac47ea769eb1f5145e1e28f0610289f07f3275021f0556c169ddf
         ;;
     'x86_64' )
+        LLVM_VERSION=9.0.0
         LLVM_DISTRO=x86_64-linux-gnu-ubuntu-16.04
         LLVM_SHA256SUM=5c1473c2611e1eac4ed1aeea5544eac5e9d266f40c5623bbaeb1c6555815a27d
         ;;
     'aarch64' )
+        # When using clang 9.0.0 to build envoy test, there are some errors about toolchain.
+        # So we just use an older version to walk-around until clang 10.0.0 pubished.
+        LLVM_VERSION=8.0.0
         LLVM_DISTRO=aarch64-linux-gnu
-        LLVM_SHA256SUM=f8f3e6bdd640079a140a7ada4eb6f5f05aeae125cf54b94d44f733b0e8691dc2
+        LLVM_SHA256SUM=998e9ae6e89bd3f029ed031ad9355c8b43441302c0e17603cf1de8ee9939e5c9
         ;;
 esac
 
