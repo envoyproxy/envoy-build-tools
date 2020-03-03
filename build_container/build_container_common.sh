@@ -9,6 +9,20 @@ function download_and_check () {
   echo "${sha256}  ${to}" | sha256sum --check
 }
 
+function install_gn(){
+
+  # Install gn tools which will be used for building wee8
+  if [[ "$(uname -m)" == "x86_64" ]]; then
+    curl -fsSL --output /usr/local/bin/gn https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest
+    chmod +x /usr/local/bin/gn
+  elif [[ "$(uname -m)" == "aarch64" ]]; then
+    # install gn tools
+    download_and_check /usr/local/bin/gn https://github.com/Jingzhao123/google-gn/releases/download/gn-arm64/gn \
+      2114aaa98ed90e0a3ced6b49dca1e994c823ded2baf9adfd9b5abed9dca38dff
+    chmod +x /usr/local/bin/gn
+  fi
+}
+
 if [[ "$(uname -m)" == "x86_64" ]]; then
   # buildifier
   VERSION=0.29.0
@@ -46,6 +60,9 @@ ldconfig
 
 # MSAN
 export PATH="/opt/llvm/bin:${PATH}"
+
+# Install gn tools.
+install_gn
 
 WORKDIR=$(mktemp -d)
 function cleanup {
