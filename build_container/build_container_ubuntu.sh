@@ -12,9 +12,9 @@ apt-get install -y --no-install-recommends software-properties-common apt-transp
 # gcc-7
 add-apt-repository -y ppa:ubuntu-toolchain-r/test
 apt-get update
-apt-get install -y --no-install-recommends g++-7
-update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 1000
-update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 1000
+apt-get install -y --no-install-recommends g++-9
+update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 1000
+update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 1000
 update-alternatives --config gcc
 update-alternatives --config g++
 
