@@ -13,8 +13,10 @@ function install_gn(){
 
   # Install gn tools which will be used for building wee8
   if [[ "$(uname -m)" == "x86_64" ]]; then
-    curl -fsSL --output /usr/local/bin/gn https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest
-    chmod +x /usr/local/bin/gn
+    wget -O gntool.zip https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest
+    unzip gntool.zip -d gntool
+    cp gntool/gn /usr/local/bin/gn
+    rm -rf gntool*
   elif [[ "$(uname -m)" == "aarch64" ]]; then
     # install gn tools
     download_and_check /usr/local/bin/gn https://github.com/Jingzhao123/google-gn/releases/download/gn-arm64/gn \
