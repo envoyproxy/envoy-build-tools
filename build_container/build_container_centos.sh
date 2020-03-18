@@ -7,8 +7,8 @@ if [[ "${ARCH}" == "x86_64" ]]; then
   yum install -y centos-release-scl epel-release
 fi
 yum update -y
-yum install -y devtoolset-7-gcc devtoolset-7-gcc-c++ devtoolset-7-binutils java-1.8.0-openjdk-headless rsync \
-    rh-git218 wget unzip which make cmake3 patch ninja-build devtoolset-7-libatomic-devel openssl python27 \
+yum install -y devtoolset-9-gcc devtoolset-9-gcc-c++ devtoolset-9-binutils java-1.8.0-openjdk-headless rsync \
+    rh-git218 wget unzip which make cmake3 patch ninja-build devtoolset-9-libatomic-devel openssl python27 \
     libtool autoconf tcpdump graphviz doxygen
 
 ln -s /usr/bin/cmake3 /usr/bin/cmake
