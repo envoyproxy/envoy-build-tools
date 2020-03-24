@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This becomes the BUILD file for @local_config_cc// under non-FreeBSD unixes.
+# This becomes the BUILD file for @local_config_cc// under non-BSD unixes.
 
 package(default_visibility = ["//visibility:public"])
 
@@ -83,9 +83,9 @@ cc_toolchain_config(
     "/opt/llvm/lib/clang/9.0.0/include",
     "/usr/include/x86_64-linux-gnu",
     "/usr/include",
-    "/usr/include/c++/7.4.0",
-    "/usr/include/x86_64-linux-gnu/c++/7.4.0",
-    "/usr/include/c++/7.4.0/backward"],
+    "/usr/include/c++/9",
+    "/usr/include/x86_64-linux-gnu/c++/9",
+    "/usr/include/c++/9/backward"],
     tool_paths = {"ar": "/usr/bin/ar",
         "ld": "/usr/bin/ld",
         "cpp": "/usr/bin/cpp",
