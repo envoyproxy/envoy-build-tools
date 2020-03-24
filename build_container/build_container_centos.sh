@@ -14,6 +14,9 @@ yum install -y devtoolset-9-gcc devtoolset-9-gcc-c++ devtoolset-9-binutils java-
 ln -s /usr/bin/cmake3 /usr/bin/cmake
 ln -s /usr/bin/ninja-build /usr/bin/ninja
 
+# For LLVM to pick right libstdc++
+ln -s /opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9 /usr/lib/gcc/x86_64-redhat-linux
+
 # SLES 11 has older glibc than CentOS 7, so pre-built binary for it works on CentOS 7
 LLVM_VERSION=9.0.0
 
