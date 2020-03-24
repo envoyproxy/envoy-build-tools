@@ -1,6 +1,5 @@
 #!/bin/bash
 #The ppc64le is not supportted by google-cloud-sdk. So ppc64le is temporary removed.
-IMAGE_ARCH=("amd64" "arm64")
 
 build_image()
 {
@@ -36,6 +35,12 @@ docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 [[ -z "${LINUX_DISTRO}" ]] && LINUX_DISTRO="ubuntu"
 [[ -z "${IMAGE_NAME}" ]] && IMAGE_NAME=envoyproxy/envoy-build-"${LINUX_DISTRO}"
+
+if [[ "${LINUX_DISTRO}" == "ubuntu" ]]; then
+  IMAGE_ARCH=("amd64" "arm64")
+else
+  IMAGE_ARCH=("amd64")
+fi
 
 for arch in "${IMAGE_ARCH[@]}"
 do

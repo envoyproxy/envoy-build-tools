@@ -9,7 +9,7 @@ apt-get update
 export DEBIAN_FRONTEND=noninteractive
 apt-get install -y --no-install-recommends software-properties-common apt-transport-https curl
 
-# gcc-7
+# gcc-9
 add-apt-repository -y ppa:ubuntu-toolchain-r/test
 apt-get update
 apt-get install -y --no-install-recommends g++-9
@@ -40,8 +40,8 @@ esac
 apt-get update -y
 
 apt-get install -y --no-install-recommends docker-ce-cli wget make cmake git python python-pip python-setuptools python3 python3-pip \
-  python3-setuptools unzip bc libtool automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client google-cloud-sdk \
-  libncurses-dev doxygen graphviz
+  python3-setuptools python3-yaml unzip bc libtool automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client \
+  google-cloud-sdk libncurses-dev doxygen graphviz
 
 # Python 3.8
 add-apt-repository -y ppa:deadsnakes/ppa

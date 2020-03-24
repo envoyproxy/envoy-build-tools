@@ -7,7 +7,11 @@ set -e
 # Enable docker experimental
 export DOCKER_CLI_EXPERIMENTAL=enabled
 
-IMAGE_ARCH=("amd64" "arm64")
+if [[ "${LINUX_DISTRO}" == "ubuntu" ]]; then
+  IMAGE_ARCH=("amd64" "arm64")
+else
+  IMAGE_ARCH=("amd64")
+fi
 
 CONTAINER_SHA=$(git log -1 --pretty=format:"%H" .)
 
