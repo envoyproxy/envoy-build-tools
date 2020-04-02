@@ -28,6 +28,20 @@ jobs:
       DOCKERHUB_PASSWORD: $(DockerPassword)
       GCP_SERVICE_ACCOUNT_KEY: $(GcpServiceAccountKey)
 
+- job: build_container_windows
+  dependsOn: []
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - bash: |
+      ./docker_push_windows.sh
+    workingDirectory: build_container
+    env:
+      SOURCE_BRANCH: $(Build.SourceBranch)
+      DOCKERHUB_USERNAME: $(DockerUsername)
+      DOCKERHUB_PASSWORD: $(DockerPassword)
+      GCP_SERVICE_ACCOUNT_KEY: $(GcpServiceAccountKey)
+
 - job: generate_toolchains
   dependsOn: "build_container"
   pool:

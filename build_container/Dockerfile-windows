@@ -1,0 +1,11 @@
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
+
+ENV MSYS2_ARG_CONV_EXCL "*"
+
+ENV TMPDIR C:\Users\ContainerAdministrator\AppData\Local\Temp
+
+COPY ./build_container_windows.ps1 /
+
+RUN powershell.exe ./build_container_windows.ps1
+
+RUN rm .\\build_container_windows.ps1
