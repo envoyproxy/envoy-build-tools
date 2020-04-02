@@ -30,6 +30,7 @@ jobs:
 
 - job: build_container_windows
   dependsOn: []
+  timeoutInMinutes: 360
   pool:
     vmImage: 'windows-latest'
   steps:
