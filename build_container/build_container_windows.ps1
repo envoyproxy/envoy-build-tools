@@ -94,14 +94,14 @@ AddToPath $env:ProgramFiles\7-Zip
 # Start-Process pacman.exe -ArgumentList "-Syuu --noconfirm" -Wait -NoNewWindow
 # Start-Process pacman.exe -ArgumentList "-S --noconfirm --needed compression diffutils git patch" -Wait -NoNewWindow
 # Start-Process pacman.exe -ArgumentList "-Scc --noconfirm" -Wait -NoNewWindow
-#
-# # Python3 (do not install via msys2, that version behaves like posix)
-# DownloadAndCheck $env:TEMP\python3-installer.exe `
-#                  https://www.python.org/ftp/python/3.8.2/python-3.8.2-amd64.exe `
-#                  8e400e3f32cdcb746e62e0db4d3ae4cba1f927141ebc4d0d5a4006b0daee8921
-# Start-Process $env:TEMP\python3-installer.exe -ArgumentList "/quiet InstallAllUsers=1 Include_launcher=0 InstallLauncherAllUsers=0" -Wait -NoNewWindow
-# rm -Force $env:TEMP\python3-installer.exe
-# AddToPath $env:ProgramFiles\Python38
+
+# Python3 (do not install via msys2, that version behaves like posix)
+DownloadAndCheck $env:TEMP\python3-installer.exe `
+                 https://www.python.org/ftp/python/3.8.2/python-3.8.2-amd64.exe `
+                 8e400e3f32cdcb746e62e0db4d3ae4cba1f927141ebc4d0d5a4006b0daee8921
+Start-Process $env:TEMP\python3-installer.exe -ArgumentList "/quiet InstallAllUsers=1 Include_launcher=0 InstallLauncherAllUsers=0" -Wait -NoNewWindow
+rm -Force $env:TEMP\python3-installer.exe
+AddToPath $env:ProgramFiles\Python38
 
 # Clear out $env:TEMP to save space
 rm -Recurse -Force $env:TEMP\*
