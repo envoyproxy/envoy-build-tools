@@ -104,11 +104,11 @@ RunAndCheckError "bash.exe" @("-c", "pacman-key --populate msys2")
 # Force update of package db
 RunAndCheckError "pacman.exe" @("-Syy", "--noconfirm")
 # Update core packages (msys2, pacman, bash, etc.)
-RunAndCheckError "pacman.exe" @("-Su", "--noconfirm")
+# RunAndCheckError "pacman.exe" @("-Suu", "--noconfirm")
 # Update remaining packages (and package db refresh in case previous step requires it)
 # RunAndCheckError "pacman.exe" @("-Syu", "--noconfirm")
-# RunAndCheckError "pacman.exe" @("-S", "--noconfirm", "--needed", "compression", "diffutils", "git", "patch")
-# RunAndCheckError "pacman.exe" @("-Scc", "--noconfirm")
+RunAndCheckError "pacman.exe" @("-S", "--noconfirm", "--needed", "compression", "diffutils", "git", "patch")
+RunAndCheckError "pacman.exe" @("-Scc", "--noconfirm")
 
 echo "Cleaning up temporary files..."
 rm -Recurse -Force $env:TEMP\*
