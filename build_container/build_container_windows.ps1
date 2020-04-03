@@ -35,33 +35,33 @@ DownloadAndCheck C:\tools\bazel\bazel.exe `
 AddToPath C:\tools\bazel
 
 # VS Build Tools
-# DownloadAndCheck $env:TEMP\vs_buildtools.exe `
-#                  https://aka.ms/vs/16/release/vs_buildtools.exe `
-#                  4383a2e9eac72248bd56a25aed63051efb37393a7af3db4726868699c7cd99e4
-# echo @"
-# {
-#   "version": "1.0",
-#   "components": [
-#     "Microsoft.VisualStudio.Component.VC.CoreBuildTools",
-#     "Microsoft.VisualStudio.Component.VC.Redist.14.Latest",
-#     "Microsoft.VisualStudio.Component.Windows10SDK",
-#     "Microsoft.VisualStudio.Component.TestTools.BuildTools",
-#     "Microsoft.VisualStudio.Component.VC.ASAN",
-#     "Microsoft.VisualStudio.Component.VC.CMake.Project",
-#     "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
-#     "Microsoft.VisualStudio.Component.Windows10SDK.18362"
-#   ]
-# }
-# "@ > $env:TEMP\vs_buildtools_config
-# cmd.exe /s /c "$env:TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache --config $env:TEMP\vs_buildtools_config"
-# if ($LASTEXITCODE -ne 0) {
-#   echo "VS Build Tools install failed with $LASTEXITCODE"
-#   exit $LASTEXITCODE
-# }
-# rm -Force $env:TEMP\vs_buildtools*
-# AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.25.28610\bin\Hostx64\x64"
-# AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
-# AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja"
+DownloadAndCheck $env:TEMP\vs_buildtools.exe `
+                 https://aka.ms/vs/16/release/vs_buildtools.exe `
+                 4383a2e9eac72248bd56a25aed63051efb37393a7af3db4726868699c7cd99e4
+echo @"
+{
+  "version": "1.0",
+  "components": [
+    "Microsoft.VisualStudio.Component.VC.CoreBuildTools",
+    "Microsoft.VisualStudio.Component.VC.Redist.14.Latest",
+    "Microsoft.VisualStudio.Component.Windows10SDK",
+    "Microsoft.VisualStudio.Component.TestTools.BuildTools",
+    "Microsoft.VisualStudio.Component.VC.ASAN",
+    "Microsoft.VisualStudio.Component.VC.CMake.Project",
+    "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+    "Microsoft.VisualStudio.Component.Windows10SDK.18362"
+  ]
+}
+"@ > $env:TEMP\vs_buildtools_config
+cmd.exe /s /c "$env:TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache --config $env:TEMP\vs_buildtools_config"
+if ($LASTEXITCODE -ne 0) {
+  echo "VS Build Tools install failed with $LASTEXITCODE"
+  exit $LASTEXITCODE
+}
+rm -Force $env:TEMP\vs_buildtools*
+AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.25.28610\bin\Hostx64\x64"
+AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
+AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja"
 
 # 7z
 DownloadAndCheck $env:TEMP\7z.msi `
