@@ -71,7 +71,7 @@ echo @"
   ]
 }
 "@ > $env:TEMP\vs_buildtools_config
-RunAndCheckError "cmd.exe" $("/s", "/c", "$env:TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache --config $env:TEMP\vs_buildtools_config")
+RunAndCheckError "cmd.exe" $("/s", "/c", "$env:TEMP\vs_buildtools.exe --addProductLang en-US --quiet --wait --norestart --nocache --config $env:TEMP\vs_buildtools_config")
 AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.25.28610\bin\Hostx64\x64"
 AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
 AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja"
@@ -100,7 +100,7 @@ RunAndCheckError "7z.exe" @("x", "$env:TEMP\msys2.tar.xz", "-o$env:TEMP\msys2.ta
 RunAndCheckError "7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
 AddToPath C:\tools\msys64\usr\bin
 RunAndCheckError "bash.exe" @("-c", "pacman-key --init")
-# RunAndCheckError "bash.exe" @("-c", "pacman-key --populate msys2")
+RunAndCheckError "bash.exe" @("-c", "pacman-key --populate msys2")
 # RunAndCheckError "pacman.exe" @("-Syyuu", "--noconfirm")
 # RunAndCheckError "pacman.exe" @("-Syuu", "--noconfirm")
 # RunAndCheckError "pacman.exe" @("-S", "--noconfirm", "--needed", "diffutils", "git", "patch", "unzip", "zip")
