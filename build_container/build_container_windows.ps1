@@ -108,7 +108,7 @@ AddToPath C:\tools\msys64\usr\bin
 # RunAndCheckError "pacman.exe" @("-S", "--noconfirm", "--needed", "diffutils", "git", "patch", "unzip", "zip")
 # RunAndCheckError "pacman.exe" @("-Scc", "--noconfirm")
 
-echo "Cleaninup up temporary files..."
+echo "Cleaning up up temporary files..."
 rm -Recurse -Force $env:TEMP\*
 echo "done."
 
