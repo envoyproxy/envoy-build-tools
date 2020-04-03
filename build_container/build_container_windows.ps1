@@ -101,7 +101,7 @@ RunAndCheckError "7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
 AddToPath C:\tools\msys64\usr\bin
 RunAndCheckError "bash.exe" @("-c", "pacman-key --init")
 RunAndCheckError "bash.exe" @("-c", "pacman-key --populate msys2")
-RunAndCheckError "bash.exe" @("-c", "pacman.exe -Syyuu --noconfirm")
+RunAndCheckError "pacman.exe" @("-Syy", "--noconfirm")
 # RunAndCheckError "pacman.exe" @("-Syuu", "--noconfirm")
 # RunAndCheckError "pacman.exe" @("-S", "--noconfirm", "--needed", "compression", "diffutils", "git", "patch")
 # RunAndCheckError "pacman.exe" @("-Scc", "--noconfirm")
