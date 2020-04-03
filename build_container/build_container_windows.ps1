@@ -65,8 +65,6 @@ echo @"
     "Microsoft.VisualStudio.Component.VC.CoreBuildTools",
     "Microsoft.VisualStudio.Component.VC.Redist.14.Latest",
     "Microsoft.VisualStudio.Component.Windows10SDK",
-    "Microsoft.VisualStudio.Component.TestTools.BuildTools",
-    "Microsoft.VisualStudio.Component.VC.ASAN",
     "Microsoft.VisualStudio.Component.VC.CMake.Project",
     "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
     "Microsoft.VisualStudio.Component.Windows10SDK.18362"
@@ -101,7 +99,7 @@ DownloadAndCheck $env:TEMP\msys2.tar.xz `
 RunAndCheckError "7z.exe" @("x", "$env:TEMP\msys2.tar.xz", "-o$env:TEMP\msys2.tar", "-y")
 RunAndCheckError "7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
 AddToPath C:\tools\msys64\usr\bin
-# RunAndCheckError "bash.exe" @("-c", "pacman-key --init")
+RunAndCheckError "bash.exe" @("-c", "pacman-key --init")
 # RunAndCheckError "bash.exe" @("-c", "pacman-key --populate msys2")
 # RunAndCheckError "pacman.exe" @("-Syyuu", "--noconfirm")
 # RunAndCheckError "pacman.exe" @("-Syuu", "--noconfirm")
