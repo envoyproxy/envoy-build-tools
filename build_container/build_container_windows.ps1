@@ -73,10 +73,18 @@ echo @"
   ]
 }
 "@ > $env:TEMP\vs_buildtools_config
-# RunAndCheckError "cmd.exe" $("/s", "/c", "$env:TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache --config $env:TEMP\vs_buildtools_config")
+RunAndCheckError "cmd.exe" $("/s", "/c", "$env:TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache --config $env:TEMP\vs_buildtools_config")
 AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.25.28610\bin\Hostx64\x64"
 AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
 AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja"
+
+# Python3 (do not install via msys2, that version behaves like posix)
+DownloadAndCheck $env:TEMP\python3-installer.exe `
+                 https://www.python.org/ftp/python/3.8.2/python-3.8.2-amd64.exe `
+                 8e400e3f32cdcb746e62e0db4d3ae4cba1f927141ebc4d0d5a4006b0daee8921
+# python installer needs to be run as an installer with Start-Process
+RunAndCheckError "$env:TEMP\python3-installer.exe" @("/quiet", "InstallAllUsers=1", "Include_launcher=0", "InstallLauncherAllUsers=0") $true
+AddToPath $env:ProgramFiles\Python38
 
 # 7z
 DownloadAndCheck $env:TEMP\7z.msi `
@@ -98,15 +106,10 @@ RunAndCheckError "bash.exe" @("-c", "pacman-key --populate msys2")
 RunAndCheckError "pacman.exe" @("-Syyuu", "--noconfirm")
 RunAndCheckError "pacman.exe" @("-Syuu", "--noconfirm")
 RunAndCheckError "pacman.exe" @("-S", "--noconfirm", "--needed", "diffutils", "git", "patch", "unzip", "zip")
-# pacman.exe -Scc --noconfirm
+RunAndCheckError "pacman.exe" @("-Scc", "--noconfirm")
 
-# Python3 (do not install via msys2, that version behaves like posix)
-DownloadAndCheck $env:TEMP\python3-installer.exe `
-                 https://www.python.org/ftp/python/3.8.2/python-3.8.2-amd64.exe `
-                 8e400e3f32cdcb746e62e0db4d3ae4cba1f927141ebc4d0d5a4006b0daee8921
-# python installer needs to be run as an installer with Start-Process
-RunAndCheckError "$env:TEMP\python3-installer.exe" @("/quiet", "InstallAllUsers=1", "Include_launcher=0", "InstallLauncherAllUsers=0") $true
-AddToPath $env:ProgramFiles\Python38
-
-# Clear out $env:TEMP to save space
+echo "Cleaninup up temporary files..."
 rm -Recurse -Force $env:TEMP\*
+echo "done."
+
+echo "Finished software installation."
