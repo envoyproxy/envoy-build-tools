@@ -115,3 +115,4 @@ rm -Recurse -Force $env:TEMP\*
 echo "done."
 
 echo "Finished software installation."
+date
