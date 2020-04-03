@@ -7,5 +7,3 @@ ENV TMPDIR C:\Users\ContainerAdministrator\AppData\Local\Temp
 COPY ./build_container_windows.ps1 /
 
 RUN powershell.exe ./build_container_windows.ps1
-
-RUN rm .\\build_container_windows.ps1
