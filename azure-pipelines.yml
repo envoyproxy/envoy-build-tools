@@ -34,6 +34,15 @@ jobs:
     vmImage: 'windows-latest'
   steps:
   - bash: |
+      curl -fsSL --output "$TEMP/gcloud-sdk-installer.exe" "$GCLOUD_SDK_INSTALLER_URL"
+      echo "$GCLOUD_SDK_INSTALLER_CHECKSUM $TEMP/gcloud-sdk-installer.exe" | sha256sum --check
+      export MSYS2_ARG_CONV_EXCL=*
+      $TEMP/gcloud-sdk-installer.exe /S /noreporting /nostartmenu /nodesktop
+      echo "##vso[task.prependpath]C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin"
+    env:
+      GCLOUD_SDK_INSTALLER_URL: https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe
+      GCLOUD_SDK_INSTALLER_CHECKSUM: 307e3d883dff23d4de739555696c5d2688c5612e2aa3361cd31b85e2ac2e7de3
+  - bash: |
       ./docker_push_windows.sh
     workingDirectory: build_container
     env:
