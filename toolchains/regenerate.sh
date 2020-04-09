@@ -15,6 +15,7 @@ fi
 DOCKER_REPODIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${DOCKER_IMAGE} | grep -oE 'sha256:[0-9a-f]{64}')
 
 sed -i -E "s#_ENVOY_BUILD_IMAGE_DIGEST = \"sha256:[0-9a-f]{64}\"#_ENVOY_BUILD_IMAGE_DIGEST = \"${DOCKER_REPODIGEST}\"#" toolchains/rbe_toolchains_config.bzl
+sed -i -E "s#_ENVOY_BUILD_IMAGE_TAG = \"[0-9a-f]{40}\"#_ENVOY_BUILD_IMAGE_TAG = \"${CONTAINER_TAG}\"#" toolchains/rbe_toolchains_config.bzl
 
 mkdir -p "${RBE_AUTOCONF_ROOT}"/toolchains/configs
 rm -rf "${RBE_AUTOCONF_ROOT}"/toolchains/configs/*
@@ -22,7 +23,7 @@ cp -vf "${RBE_AUTOCONF_ROOT}/toolchains/empty.bzl" "${RBE_AUTOCONF_ROOT}/toolcha
 
 # Bazel query is the right command so bazel won't fail itself.
 # Keep bazel versions here at most two: current master version, next version
-for BAZEL_VERSION in "2.0.0" "2.2.0"; do
+for BAZEL_VERSION in "2.2.0" "3.0.0"; do
   USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_clang_gen//..."
   USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_clang_libcxx_gen//..."
   USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} "@rbe_ubuntu_gcc_gen//..."

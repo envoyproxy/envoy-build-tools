@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This becomes the BUILD file for @local_config_cc// under non-FreeBSD unixes.
+# This becomes the BUILD file for @local_config_cc// under non-BSD unixes.
 
 package(default_visibility = ["//visibility:public"])
 
@@ -83,7 +83,10 @@ cc_toolchain_config(
     "/opt/llvm/lib/clang/9.0.0/include",
     "/usr/include/x86_64-linux-gnu",
     "/usr/include",
-    "/opt/llvm/include/c++/v1"],
+    "/opt/llvm/lib/clang/9.0.0/share",
+    "/usr/include/c++/9",
+    "/usr/include/x86_64-linux-gnu/c++/9",
+    "/usr/include/c++/9/backward"],
     tool_paths = {"ar": "/usr/bin/ar",
         "ld": "/usr/bin/ld",
         "cpp": "/usr/bin/cpp",
@@ -108,16 +111,14 @@ cc_toolchain_config(
     "-ffunction-sections",
     "-fdata-sections"],
     dbg_compile_flags = ["-g"],
-    cxx_flags = ["-stdlib=libc++"],
+    cxx_flags = ["-std=c++0x"],
     link_flags = ["-fuse-ld=/usr/bin/ld.gold",
     "-Wl,-no-as-needed",
     "-Wl,-z,relro,-z,now",
     "-B/opt/llvm/bin",
     "-lm",
-    "-pthread",
     "-fuse-ld=lld"],
-    link_libs = ["-l:libc++.a",
-    "-l:libc++abi.a"],
+    link_libs = ["-l:libstdc++.a"],
     opt_link_flags = ["-Wl,--gc-sections"],
     unfiltered_compile_flags = ["-no-canonical-prefixes",
     "-Wno-builtin-macro-redefined",

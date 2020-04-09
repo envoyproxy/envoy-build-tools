@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This becomes the BUILD file for @local_config_cc// under non-FreeBSD unixes.
+# This becomes the BUILD file for @local_config_cc// under non-BSD unixes.
 
 package(default_visibility = ["//visibility:public"])
 
@@ -47,7 +47,7 @@ filegroup(
 cc_toolchain_suite(
     name = "toolchain",
     toolchains = {
-        "k8|clang": ":cc-compiler-k8",
+        "k8|gcc": ":cc-compiler-k8",
         "k8": ":cc-compiler-k8",
         "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
         "armeabi-v7a": ":cc-compiler-armeabi-v7a",
@@ -72,15 +72,16 @@ cc_toolchain(
 cc_toolchain_config(
     name = "local",
     cpu = "k8",
-    compiler = "clang",
+    compiler = "gcc",
     toolchain_identifier = "local",
     host_system_name = "local",
     target_system_name = "local",
     target_libc = "local",
     abi_version = "local",
     abi_libc_version = "local",
-    cxx_builtin_include_directories = ["/usr/local/include",
-    "/opt/llvm/lib/clang/9.0.0/include",
+    cxx_builtin_include_directories = ["/usr/lib/gcc/x86_64-linux-gnu/9/include",
+    "/usr/local/include",
+    "/usr/lib/gcc/x86_64-linux-gnu/9/include-fixed",
     "/usr/include/x86_64-linux-gnu",
     "/usr/include",
     "/usr/include/c++/9",
@@ -89,9 +90,9 @@ cc_toolchain_config(
     tool_paths = {"ar": "/usr/bin/ar",
         "ld": "/usr/bin/ld",
         "cpp": "/usr/bin/cpp",
-        "gcc": "/opt/llvm/bin/clang",
+        "gcc": "/usr/bin/gcc",
         "dwp": "/usr/bin/dwp",
-        "gcov": "/opt/llvm/bin/llvm-profdata",
+        "gcov": "None",
         "nm": "/usr/bin/nm",
         "objcopy": "/usr/bin/objcopy",
         "objdump": "/usr/bin/objdump",
@@ -99,9 +100,8 @@ cc_toolchain_config(
     compile_flags = ["-U_FORTIFY_SOURCE",
     "-fstack-protector",
     "-Wall",
-    "-Wthread-safety",
-    "-Wself-assign",
-    "-fcolor-diagnostics",
+    "-Wunused-but-set-parameter",
+    "-Wno-free-nonheap-object",
     "-fno-omit-frame-pointer"],
     opt_compile_flags = ["-g0",
     "-O2",
@@ -111,21 +111,21 @@ cc_toolchain_config(
     "-fdata-sections"],
     dbg_compile_flags = ["-g"],
     cxx_flags = ["-std=c++0x"],
-    link_flags = ["-fuse-ld=/usr/bin/ld.gold",
+    link_flags = ["-fuse-ld=gold",
     "-Wl,-no-as-needed",
     "-Wl,-z,relro,-z,now",
-    "-B/opt/llvm/bin",
-    "-lm",
-    "-fuse-ld=lld"],
+    "-B/usr/bin",
+    "-pass-exit-codes",
+    "-lm"],
     link_libs = ["-l:libstdc++.a"],
     opt_link_flags = ["-Wl,--gc-sections"],
-    unfiltered_compile_flags = ["-no-canonical-prefixes",
+    unfiltered_compile_flags = ["-fno-canonical-system-headers",
     "-Wno-builtin-macro-redefined",
     "-D__DATE__=\"redacted\"",
     "-D__TIMESTAMP__=\"redacted\"",
     "-D__TIME__=\"redacted\""],
-    coverage_compile_flags = ["-fprofile-instr-generate",  "-fcoverage-mapping"],
-    coverage_link_flags = ["-fprofile-instr-generate"],
+    coverage_compile_flags = ["--coverage"],
+    coverage_link_flags = ["--coverage"],
     supports_start_end_lib = True,
 )
 
