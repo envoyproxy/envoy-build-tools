@@ -34,14 +34,13 @@ jobs:
     vmImage: 'windows-latest'
   steps:
   - bash: |
-      curl -fsSL --output "$TEMP/gcloud-sdk-installer.exe" "$GCLOUD_SDK_INSTALLER_URL"
-      echo "$GCLOUD_SDK_INSTALLER_CHECKSUM $TEMP/gcloud-sdk-installer.exe" | sha256sum --check
-      export MSYS2_ARG_CONV_EXCL=*
-      $TEMP/gcloud-sdk-installer.exe /S /noreporting /nostartmenu /nodesktop
-      echo "##vso[task.prependpath]C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin"
+      curl -fsSL --output "$TEMP/gcloud-sdk.zip" "$GCLOUD_SDK_ARCHIVE_URL"
+      echo "$GCLOUD_SDK_ARCHIVE_CHECKSUM $TEMP/gcloud-sdk.zip" | sha256sum --check
+      unzip "$TEMP/gcloud-sdk.zip" -d "$PROGRAMFILES"
+      echo "##vso[task.prependpath]$PROGRAMFILES/google-cloud-sdk/bin"
     env:
-      GCLOUD_SDK_INSTALLER_URL: https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe
-      GCLOUD_SDK_INSTALLER_CHECKSUM: 307e3d883dff23d4de739555696c5d2688c5612e2aa3361cd31b85e2ac2e7de3
+      GCLOUD_SDK_ARCHIVE_URL: https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-289.0.0-windows-x86_64.zip
+      GCLOUD_SDK_ARCHIVE_CHECKSUM: c81e80040f7f609dbc50c42cd0cd402988a5c47f467372d40b5aaca0733f46f4
   - bash: |
       ./docker_push_windows.sh
     workingDirectory: build_container
