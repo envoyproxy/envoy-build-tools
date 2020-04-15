@@ -63,8 +63,8 @@ jobs:
       DOCKERHUB_PASSWORD: $(DockerPassword)
       GCP_SERVICE_ACCOUNT_KEY: $(GcpServiceAccountKey)
 
-- job: generate_toolchains
-  dependsOn: "build_container"
+- job: generate_toolchains_linux
+  dependsOn: "build_container_linux"
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
