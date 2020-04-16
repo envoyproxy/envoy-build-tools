@@ -2,13 +2,16 @@ trigger:
 - master
 
 jobs:
-- job: build_container
+- job: build_container_linux
   strategy:
     matrix:
       ubuntu:
-        LINUX_DISTRO: ubuntu
+        OS_DISTRO: ubuntu
+        PUSH_GCR_IMAGE: true
+        GCR_IMAGE_NAME: envoy-build
       centos:
-        LINUX_DISTRO: centos
+        OS_DISTRO: centos
+        PUSH_GCR_IMAGE: false
   dependsOn: []
   pool:
     vmImage: 'ubuntu-16.04'
@@ -23,13 +26,45 @@ jobs:
       ./docker_push.sh
     workingDirectory: build_container
     env:
+      OS_FAMILY: linux
+      IMAGE_ARCH: "amd64 arm64"
       SOURCE_BRANCH: $(Build.SourceBranch)
       DOCKERHUB_USERNAME: $(DockerUsername)
       DOCKERHUB_PASSWORD: $(DockerPassword)
       GCP_SERVICE_ACCOUNT_KEY: $(GcpServiceAccountKey)
 
-- job: generate_toolchains
-  dependsOn: "build_container"
+- job: build_container_windows
+  strategy:
+    matrix:
+      windows2019:
+        OS_DISTRO: windows2019
+        PUSH_GCR_IMAGE: true
+        GCR_IMAGE_NAME: envoy-build-windows
+  dependsOn: []
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - bash: |
+      curl -fsSL --output "$TEMP/gcloud-sdk.zip" "$GCLOUD_SDK_ARCHIVE_URL"
+      echo "$GCLOUD_SDK_ARCHIVE_CHECKSUM $TEMP/gcloud-sdk.zip" | sha256sum --check
+      unzip "$TEMP/gcloud-sdk.zip" -d "$PROGRAMFILES"
+      echo "##vso[task.prependpath]$PROGRAMFILES/google-cloud-sdk/bin"
+    env:
+      GCLOUD_SDK_ARCHIVE_URL: https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-289.0.0-windows-x86_64.zip
+      GCLOUD_SDK_ARCHIVE_CHECKSUM: c81e80040f7f609dbc50c42cd0cd402988a5c47f467372d40b5aaca0733f46f4
+  - bash: |
+      ./docker_push.sh
+    workingDirectory: build_container
+    env:
+      OS_FAMILY: windows
+      IMAGE_ARCH: "amd64"
+      SOURCE_BRANCH: $(Build.SourceBranch)
+      DOCKERHUB_USERNAME: $(DockerUsername)
+      DOCKERHUB_PASSWORD: $(DockerPassword)
+      GCP_SERVICE_ACCOUNT_KEY: $(GcpServiceAccountKey)
+
+- job: generate_toolchains_linux
+  dependsOn: "build_container_linux"
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
