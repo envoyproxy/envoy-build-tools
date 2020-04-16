@@ -31,7 +31,7 @@ if [[ "${SOURCE_BRANCH}" == "refs/heads/master" ]]; then
 
     for arch in ${IMAGE_ARCH}
     do
-        docker manifest "annotate envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}" \
+        docker manifest annotate "envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}" \
             "envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}-${arch}" \
             --os ${OS_FAMILY} --arch ${arch}
     done
