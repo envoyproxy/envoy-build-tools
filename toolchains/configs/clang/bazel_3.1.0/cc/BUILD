@@ -83,6 +83,7 @@ cc_toolchain_config(
     "/opt/llvm/lib/clang/9.0.0/include",
     "/usr/include/x86_64-linux-gnu",
     "/usr/include",
+    "/opt/llvm/lib/clang/9.0.0/share",
     "/usr/include/c++/9",
     "/usr/include/x86_64-linux-gnu/c++/9",
     "/usr/include/c++/9/backward"],

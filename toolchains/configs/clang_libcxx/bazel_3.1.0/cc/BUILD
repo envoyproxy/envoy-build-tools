@@ -83,6 +83,7 @@ cc_toolchain_config(
     "/opt/llvm/lib/clang/9.0.0/include",
     "/usr/include/x86_64-linux-gnu",
     "/usr/include",
+    "/opt/llvm/lib/clang/9.0.0/share",
     "/opt/llvm/include/c++/v1"],
     tool_paths = {"ar": "/usr/bin/ar",
         "ld": "/usr/bin/ld",
