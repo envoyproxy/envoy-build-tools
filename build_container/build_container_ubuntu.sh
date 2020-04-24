@@ -53,7 +53,6 @@ add-apt-repository -y ppa:deadsnakes/ppa
 apt-get update
 apt install -y python3.8
 
-
 # Install ninja-build 1.8.2 from binary
 case $ARCH in
     'ppc64le' )
