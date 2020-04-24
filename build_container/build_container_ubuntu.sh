@@ -41,28 +41,7 @@ apt-get update -y
 
 apt-get install -y --no-install-recommends docker-ce-cli wget make cmake git python python-pip python-setuptools python3 python3-pip \
   python3-setuptools python3-yaml unzip bc libtool automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client \
-  google-cloud-sdk libncurses-dev doxygen graphviz
-
-# Python 3.8
-add-apt-repository -y ppa:deadsnakes/ppa
-apt-get update
-apt install -y python3.8
-
-# Install ninja-build 1.8.2 from binary
-case $ARCH in
-    'ppc64le' )
-        ninja_deb="ninja-build_1.8.2-1_ppc64el.deb"
-        ;;
-    'x86_64' )
-        ninja_deb="ninja-build_1.8.2-1_amd64.deb"
-        ;;
-    'aarch64' )
-        ninja_deb="ninja-build_1.8.2-1_arm64.deb"
-        ;;
-esac
-wget https://launchpad.net/ubuntu/+archive/primary/+files/${ninja_deb}
-dpkg -i ${ninja_deb}
-rm ${ninja_deb}
+  google-cloud-sdk libncurses-dev doxygen graphviz python3.8 ninja-build
 
 # Set LLVM version for each cpu architecture.
 case $ARCH in
@@ -73,8 +52,8 @@ case $ARCH in
         ;;
     'x86_64' )
         LLVM_VERSION=9.0.0
-        LLVM_DISTRO=x86_64-linux-gnu-ubuntu-16.04
-        LLVM_SHA256SUM=5c1473c2611e1eac4ed1aeea5544eac5e9d266f40c5623bbaeb1c6555815a27d
+        LLVM_DISTRO=x86_64-linux-gnu-ubuntu-18.04
+        LLVM_SHA256SUM=a23b082b30c128c9831dbdd96edad26b43f56624d0ad0ea9edec506f5385038d
         ;;
     'aarch64' )
         # When using clang 9.0.0 to build envoy test, there are some errors about toolchain.

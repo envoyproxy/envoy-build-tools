@@ -14,7 +14,7 @@ jobs:
         PUSH_GCR_IMAGE: false
   dependsOn: []
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-18.04'
   container: google/cloud-sdk:latest
   steps:
   - task: DockerInstaller@0
@@ -66,10 +66,10 @@ jobs:
 - job: generate_toolchains_linux
   dependsOn: "build_container_linux"
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-18.04'
   steps:
   - bash: |
-      sudo curl -sSL -o /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.0/bazelisk-linux-amd64
+      sudo curl -sSL -o /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.4.0/bazelisk-linux-amd64
       sudo chmod +x /usr/local/bin/bazel
     displayName: Install Bazelisk
 
