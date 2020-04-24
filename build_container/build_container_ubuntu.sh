@@ -37,16 +37,22 @@ case $ARCH in
         add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
         ;;
 esac
+
+# CMake
+curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | apt-key add -
+apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+
 apt-get update -y
 
 apt-get install -y --no-install-recommends docker-ce-cli wget make cmake git python python-pip python-setuptools python3 python3-pip \
   python3-setuptools python3-yaml unzip bc libtool automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client \
-  google-cloud-sdk libncurses-dev doxygen graphviz
+  google-cloud-sdk libncurses-dev doxygen graphviz bzip2
 
 # Python 3.8
 add-apt-repository -y ppa:deadsnakes/ppa
 apt-get update
 apt install -y python3.8
+
 
 # Install ninja-build 1.8.2 from binary
 case $ARCH in
