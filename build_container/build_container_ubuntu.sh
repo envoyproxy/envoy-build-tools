@@ -5,9 +5,9 @@ set -e
 ARCH="$(uname -m)"
 
 # Setup basic requirements and install them.
-apt-get update
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -y --no-install-recommends software-properties-common apt-transport-https curl
+apt-get update -y
+apt-get install -y --no-install-recommends software-properties-common apt-transport-https curl gpg-agent
 
 # gcc-9
 add-apt-repository -y ppa:ubuntu-toolchain-r/test
