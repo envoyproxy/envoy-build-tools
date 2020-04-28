@@ -23,7 +23,7 @@ jobs:
       releaseType: stable
 
   - bash: .azure-pipelines/cleanup.sh
-      displayName: "Removing tools from agent"
+    displayName: "Removing tools from agent"
 
   - bash: |
       ./docker_push.sh
