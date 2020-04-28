@@ -81,7 +81,6 @@ cc_toolchain_config(
     abi_libc_version = "local",
     cxx_builtin_include_directories = ["/usr/lib/gcc/x86_64-linux-gnu/9/include",
     "/usr/local/include",
-    "/usr/lib/gcc/x86_64-linux-gnu/9/include-fixed",
     "/usr/include/x86_64-linux-gnu",
     "/usr/include",
     "/usr/include/c++/9",

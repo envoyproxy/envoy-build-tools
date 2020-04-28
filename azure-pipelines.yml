@@ -15,7 +15,6 @@ jobs:
   dependsOn: []
   pool:
     vmImage: 'ubuntu-18.04'
-  container: google/cloud-sdk:latest
   steps:
   - task: DockerInstaller@0
     displayName: Docker Installer
