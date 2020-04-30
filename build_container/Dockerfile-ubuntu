@@ -10,7 +10,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://github.com/multiarch/qemu-user-static/releases/download/v${QEMUVERSION}/qemu-${QEMUARCH}-static.tar.gz | tar zxvf - -C /usr/bin
 RUN chmod +x /usr/bin/qemu-*
 
-FROM ${IMAGEARCH}ubuntu:xenial
+FROM ${IMAGEARCH}ubuntu:bionic
 ARG QEMUARCH
 COPY --from=qemu /usr/bin/qemu-${QEMUARCH}-static /usr/bin/
 
