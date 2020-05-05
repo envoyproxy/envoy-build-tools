@@ -1,0 +1,69 @@
+{
+  "variables": {
+    "azure_pipelines_token": "null"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "region": "us-east-1",
+    "source_ami_filter": {
+      "filters": {
+        "virtualization-type": "hvm",
+        "name": "ubuntu/images/*ubuntu-bionic-18.04-arm64-server-*",
+        "root-device-type": "ebs"
+      },
+      "owners": ["099720109477"],
+      "most_recent": true
+    },
+    "instance_type": "a1.4xlarge",
+    "ssh_username": "ubuntu",
+    "ami_name": "envoy-azp-arm-large-{{timestamp}}",
+    "run_volume_tags": {
+      "Project": "Packer"
+    },
+    "run_tags": {
+      "Project": "Packer"
+    },
+    "tags": {
+      "Project": "envoy-azp-arm-large"
+    },
+    "security_group_ids": [
+      "sg-0e26fd7adddb1b9fa"
+    ],
+    "encrypt_boot": true
+  }],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sudo apt-get update",
+        "sudo apt -y install docker.io",
+        "sudo systemctl enable docker",
+        "sudo systemctl start docker"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo useradd -ms /bin/bash -G sudo,docker azure-pipelines",
+        "sudo su root -c -- 'mkdir -p /etc/sudoers.d && echo \"azure-pipelines ALL=(ALL) NOPASSWD:ALL\" | tee /etc/sudoers.d/azure-pipelines && chmod 0440 /etc/sudoers.d/azure-pipelines'"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo mkdir -p /srv/azure-pipelines",
+        "sudo chown -R azure-pipelines:azure-pipelines /srv/azure-pipelines/",
+        "sudo apt-get update",
+        "sudo apt-get -y install libunwind8 libcurl3 wget",
+        "sudo apt-add-repository -y ppa:git-core/ppa",
+        "sudo apt-get update",
+        "sudo apt-get -y install git",
+        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && wget https://vstsagentpackage.azureedge.net/agent/2.166.2/vsts-agent-linux-arm64-2.166.2.tar.gz -O vsts-agent-linux-arm64-2.166.2.tar.gz'",
+        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && tar xvzf vsts-agent-linux-arm64-2.166.2.tar.gz'",
+        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && rm vsts-agent-linux-arm64-2.166.2.tar.gz'",
+        "sudo -u azure-pipelines /bin/bash -c 'mkdir -p /home/azure-pipelines/.ssh && touch /home/azure-pipelines/.ssh/known_hosts'",
+        "sudo -u azure-pipelines /bin/bash -c 'ssh-keyscan github.com | tee /home/azure-pipelines/.ssh/known_hosts' || true"
+      ]
+    }
+  ]
+}
