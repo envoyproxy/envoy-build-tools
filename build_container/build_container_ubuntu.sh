@@ -46,7 +46,7 @@ apt-get update -y
 
 apt-get install -y --no-install-recommends docker-ce-cli wget make cmake git python python-pip python-setuptools python3 python3-pip \
   python3-setuptools python3-yaml unzip bc libtool automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client \
-  google-cloud-sdk libncurses-dev doxygen graphviz python3.8 ninja-build bzip2
+  google-cloud-sdk libncurses-dev doxygen graphviz python3.8 ninja-build bzip2 sudo
 
 # Set LLVM version for each cpu architecture.
 case $ARCH in

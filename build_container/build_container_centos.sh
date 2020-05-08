@@ -9,7 +9,7 @@ fi
 yum update -y
 yum install -y devtoolset-9-gcc devtoolset-9-gcc-c++ devtoolset-9-binutils java-1.8.0-openjdk-headless rsync \
     rh-git218 wget unzip which make cmake3 patch ninja-build devtoolset-9-libatomic-devel openssl python27 \
-    libtool autoconf tcpdump graphviz doxygen
+    libtool autoconf tcpdump graphviz doxygen sudo
 
 ln -s /usr/bin/cmake3 /usr/bin/cmake
 ln -s /usr/bin/ninja-build /usr/bin/ninja
