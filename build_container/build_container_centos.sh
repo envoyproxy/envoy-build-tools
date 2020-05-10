@@ -9,7 +9,7 @@ fi
 yum update -y
 yum install -y devtoolset-9-gcc devtoolset-9-gcc-c++ devtoolset-9-binutils java-1.8.0-openjdk-headless rsync \
     rh-git218 wget unzip which make cmake3 patch ninja-build devtoolset-9-libatomic-devel openssl python27 \
-    libtool autoconf tcpdump graphviz doxygen
+    libtool autoconf tcpdump graphviz doxygen sudo
 
 ln -s /usr/bin/cmake3 /usr/bin/cmake
 ln -s /usr/bin/ninja-build /usr/bin/ninja
@@ -18,16 +18,16 @@ ln -s /usr/bin/ninja-build /usr/bin/ninja
 ln -s /opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9 /usr/lib/gcc/x86_64-redhat-linux
 
 # SLES 11 has older glibc than CentOS 7, so pre-built binary for it works on CentOS 7
-LLVM_VERSION=9.0.0
+LLVM_VERSION=10.0.0
 
 case $ARCH in
     'x86_64' )
         LLVM_DISTRO="x86_64-linux-sles11.3"
-        LLVM_SHA256SUM="c80b5b10df191465df8cee8c273d9c46715e6f27f80fef118ad4ebb7d9f3a7d3"
+        LLVM_SHA256SUM="a7a3c2a7aff813bb10932636a6f1612e308256a5e6b5a5655068d5c5b7f80e86"
         ;;
     'aarch64' )
         LLVM_DISTRO="aarch64-linux-gnu"
-        LLVM_SHA256SUM="f8f3e6bdd640079a140a7ada4eb6f5f05aeae125cf54b94d44f733b0e8691dc2"
+        LLVM_SHA256SUM="c2072390dc6c8b4cc67737f487ef384148253a6a97b38030e012c4d7214b7295"
         ;;
 esac
 
