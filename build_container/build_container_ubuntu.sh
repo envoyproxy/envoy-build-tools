@@ -46,26 +46,25 @@ apt-get update -y
 
 apt-get install -y --no-install-recommends docker-ce-cli wget make cmake git python python-pip python-setuptools python3 python3-pip \
   python3-setuptools python3-yaml unzip bc libtool automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client \
-  google-cloud-sdk libncurses-dev doxygen graphviz python3.8 ninja-build bzip2
+  google-cloud-sdk libncurses-dev doxygen graphviz python3.8 ninja-build bzip2 sudo
 
 # Set LLVM version for each cpu architecture.
+LLVM_VERSION=10.0.0
 case $ARCH in
     'ppc64le' )
-        LLVM_VERSION=9.0.0
         LLVM_DISTRO=powerpc64le-linux-ubuntu-16.04
-        LLVM_SHA256SUM=a8e7dc00e9eac47ea769eb1f5145e1e28f0610289f07f3275021f0556c169ddf
+        LLVM_SHA256SUM=2d6298720d6aae7fcada4e909f0949d63e94fd0370d20b8882cdd91ceae7511c
         ;;
     'x86_64' )
+        # Holding Ubuntu x86_64 off at 9.0.0 until we fix full test build
         LLVM_VERSION=9.0.0
         LLVM_DISTRO=x86_64-linux-gnu-ubuntu-18.04
         LLVM_SHA256SUM=a23b082b30c128c9831dbdd96edad26b43f56624d0ad0ea9edec506f5385038d
+        LLVM_DOWNLOAD_PREFIX=https://releases.llvm.org/
         ;;
     'aarch64' )
-        # When using clang 9.0.0 to build envoy test, there are some errors about toolchain.
-        # So we just use an older version to walk-around until clang 10.0.0 pubished.
-        LLVM_VERSION=8.0.0
         LLVM_DISTRO=aarch64-linux-gnu
-        LLVM_SHA256SUM=998e9ae6e89bd3f029ed031ad9355c8b43441302c0e17603cf1de8ee9939e5c9
+        LLVM_SHA256SUM=c2072390dc6c8b4cc67737f487ef384148253a6a97b38030e012c4d7214b7295
         ;;
 esac
 
