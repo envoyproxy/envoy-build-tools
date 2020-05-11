@@ -4,6 +4,9 @@ ENV MSYS2_ARG_CONV_EXCL "*"
 
 ENV TMPDIR C:\\Users\\ContainerAdministrator\\AppData\\Local\\Temp
 
+# Ensures paths rooted at /c/ can be found by programs running via msys2 shell
+RUN cmd.exe /c "mklink /D C:\c C:\"
+
 COPY ./build_container_windows.ps1 /
 
 RUN powershell.exe .\\build_container_windows.ps1
