@@ -65,6 +65,14 @@ ldconfig
 # Install gn tools.
 install_gn
 
+# Install lcov
+LCOV_VERSION=1.14
+download_and_check lcov-${LCOV_VERSION}.tar.gz https://github.com/linux-test-project/lcov/releases/download/v${LCOV_VERSION}/lcov-${LCOV_VERSION}.tar.gz \
+  14995699187440e0ae4da57fe3a64adc0a3c5cf14feab971f8db38fb7d8f071a
+tar zxf lcov-${LCOV_VERSION}.tar.gz
+make -C lcov-${LCOV_VERSION} install
+rm -rf "lcov-${LCOV_VERSION}" "./lcov-${LCOV_VERSION}.tar.gz"
+
 # MSAN
 export PATH="/opt/llvm/bin:${PATH}"
 
