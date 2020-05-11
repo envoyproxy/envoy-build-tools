@@ -66,7 +66,6 @@ echo @"
     "Microsoft.VisualStudio.Component.VC.CoreBuildTools",
     "Microsoft.VisualStudio.Component.VC.Redist.14.Latest",
     "Microsoft.VisualStudio.Component.Windows10SDK",
-    "Microsoft.VisualStudio.Component.VC.CMake.Project",
     "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
     "Microsoft.VisualStudio.Component.Windows10SDK.18362"
   ]
@@ -74,8 +73,21 @@ echo @"
 "@ > $env:TEMP\vs_buildtools_config
 RunAndCheckError "cmd.exe" $("/s", "/c", "$env:TEMP\vs_buildtools.exe --addProductLang en-US --quiet --wait --norestart --nocache --config $env:TEMP\vs_buildtools_config")
 AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.25.28610\bin\Hostx64\x64"
-AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
-AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja"
+
+# CMake (to ensure a 64-bit build of the tool, VS BuildTools ships a 32-bit build)
+DownloadAndCheck $env:TEMP\cmake.msi `
+                 https://github.com/Kitware/CMake/releases/download/v3.17.2/cmake-3.17.2-win64-x64.msi `
+                 06e999be9e50f9d33945aeae698b9b83678c3f98cedb3139a84e19636d2f6433
+RunAndCheckError "msiexec.exe" @("/i", "$env:TEMP\cmake.msi", "/quiet", "/norestart") $true
+AddToPath $env:ProgramFiles\CMake\bin
+
+# Ninja
+mkdir -Force C:\tools\ninja
+DownloadAndCheck $env:TEMP\ninja.zip `
+                 https://github.com/ninja-build/ninja/releases/download/v1.10.0/ninja-win.zip `
+                 919fd158c16bf135e8a850bb4046ec1ce28a7439ee08b977cd0b7f6b3463d178
+Expand-Archive -Path $env:TEMP\ninja.zip -DestinationPath C:\tools\ninja
+AddToPath C:\tools\ninja
 
 # Python3 (do not install via msys2, that version behaves like posix)
 DownloadAndCheck $env:TEMP\python3-installer.exe `
