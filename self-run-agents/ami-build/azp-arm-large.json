@@ -1,7 +1,5 @@
 {
-  "variables": {
-    "azure_pipelines_token": "null"
-  },
+  "variables": {},
   "builders": [{
     "type": "amazon-ebs",
     "region": "us-east-1",
@@ -49,7 +47,7 @@
     {
       "type": "shell",
       "inline": [
-        "sudo useradd -ms /bin/bash -G sudo,docker azure-pipelines"
+        "sudo useradd -ms /bin/bash -G docker azure-pipelines"
       ]
     },
     {
@@ -58,13 +56,13 @@
         "sudo mkdir -p /srv/azure-pipelines",
         "sudo chown -R azure-pipelines:azure-pipelines /srv/azure-pipelines/",
         "sudo apt-get update",
-        "sudo apt-get -y install libunwind8 libcurl3 wget",
+        "sudo apt-get -y install libunwind8 libcurl3",
         "sudo apt-add-repository -y ppa:git-core/ppa",
         "sudo apt-get update",
         "sudo apt-get -y install git",
-        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && wget https://vstsagentpackage.azureedge.net/agent/2.166.2/vsts-agent-linux-arm64-2.166.2.tar.gz -O vsts-agent-linux-arm64-2.166.2.tar.gz'",
-        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && tar xvzf vsts-agent-linux-arm64-2.166.2.tar.gz'",
-        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && rm vsts-agent-linux-arm64-2.166.2.tar.gz'",
+        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && wget https://vstsagentpackage.azureedge.net/agent/2.168.1/vsts-agent-linux-arm64-2.168.1.tar.gz -O vsts-agent-linux-arm64-2.168.1.tar.gz'",
+        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && tar xvzf vsts-agent-linux-arm64-2.168.1.tar.gz'",
+        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && rm vsts-agent-linux-arm64-2.168.1.tar.gz'",
         "sudo -u azure-pipelines /bin/bash -c 'mkdir -p /home/azure-pipelines/.ssh && touch /home/azure-pipelines/.ssh/known_hosts'",
         "sudo -u azure-pipelines /bin/bash -c 'ssh-keyscan github.com | tee /home/azure-pipelines/.ssh/known_hosts'",
         "sudo -u azure-pipelines /bin/bash -c 'ssh-keygen -l -f /home/azure-pipelines/.ssh/known_hosts | grep github.com | grep \"SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8\"'"
