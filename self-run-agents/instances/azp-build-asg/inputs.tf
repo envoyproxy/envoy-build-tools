@@ -1,0 +1,9 @@
+variable "ami_prefix" { type = string }
+variable "aws_account_id" { type = string }
+variable "azp_pool_name" { type = string }
+variable "azp_token" { type = string }
+variable "disk_size_gb" { type = number }
+variable "guaranteed_instances_count" { type = number }
+variable "instance_type" { type = string }
+variable "sns_lifecycle_arn" { type = string }
+variable "sns_lifecyle_role_arn" { type = string }
