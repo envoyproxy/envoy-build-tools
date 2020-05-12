@@ -32,7 +32,7 @@ resource "aws_launch_template" "build_pool" {
   instance_type = var.instance_type
 
   block_device_mappings {
-    device_name = "/dev/xvda"
+    device_name = "/dev/sda1"
 
     ebs {
       volume_size           = var.disk_size_gb
