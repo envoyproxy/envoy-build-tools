@@ -34,7 +34,12 @@
       "type": "shell",
       "inline": [
         "sudo apt-get update",
-        "sudo apt -y install docker.io",
+        "sudo apt -y install apt-transport-https ca-certificates gnupg-agent software-properties-common wget",
+        "wget -q -O - https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
+        "sudo apt-key adv --list-public-keys --with-fingerprint --with-colons 0EBFCD88 2>/dev/null | grep 'fpr' | head -n1 | grep '9DC858229FC7DD38854AE2D88D81803C0EBFCD88'",
+        "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
+        "sudo apt-get update",
+        "sudo apt-get install -y docker-ce docker-ce-cli containerd.io",
         "sudo systemctl enable docker",
         "sudo systemctl start docker"
       ]
@@ -42,8 +47,7 @@
     {
       "type": "shell",
       "inline": [
-        "sudo useradd -ms /bin/bash -G sudo,docker azure-pipelines",
-        "sudo su root -c -- 'mkdir -p /etc/sudoers.d && echo \"azure-pipelines ALL=(ALL) NOPASSWD:ALL\" | tee /etc/sudoers.d/azure-pipelines && chmod 0440 /etc/sudoers.d/azure-pipelines'"
+        "sudo useradd -ms /bin/bash -G docker azure-pipelines"
       ]
     },
     {
@@ -51,15 +55,16 @@
       "inline": [
         "sudo mkdir -p /srv/azure-pipelines",
         "sudo chown -R azure-pipelines:azure-pipelines /srv/azure-pipelines/",
-        "sudo apt install -y libunwind8 libcurl3 wget",
+        "sudo apt install -y libunwind8 libcurl3",
         "sudo apt-add-repository -y ppa:git-core/ppa",
         "sudo apt-get update",
         "sudo apt-get -y install git",
-        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && wget https://vstsagentpackage.azureedge.net/agent/2.166.2/vsts-agent-linux-x64-2.166.2.tar.gz -O vsts-agent-linux-x64-2.166.2.tar.gz'",
-        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && tar xvzf vsts-agent-linux-x64-2.166.2.tar.gz'",
-        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && rm vsts-agent-linux-x64-2.166.2.tar.gz'",
+        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && wget https://vstsagentpackage.azureedge.net/agent/2.168.1/vsts-agent-linux-x64-2.168.1.tar.gz -O vsts-agent-linux-x64-2.168.1.tar.gz'",
+        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && tar xvzf vsts-agent-linux-x64-2.168.1.tar.gz'",
+        "sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && rm vsts-agent-linux-x64-2.168.1.tar.gz'",
         "sudo -u azure-pipelines /bin/bash -c 'mkdir -p /home/azure-pipelines/.ssh && touch /home/azure-pipelines/.ssh/known_hosts'",
-        "sudo -u azure-pipelines /bin/bash -c 'ssh-keyscan github.com | tee /home/azure-pipelines/.ssh/known_hosts' || true"
+        "sudo -u azure-pipelines /bin/bash -c 'ssh-keyscan github.com | tee /home/azure-pipelines/.ssh/known_hosts'",
+        "sudo -u azure-pipelines /bin/bash -c 'ssh-keygen -l -f /home/azure-pipelines/.ssh/known_hosts | grep github.com | grep \"SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8\"'"
       ]
     }
   ]

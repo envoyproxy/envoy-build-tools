@@ -78,6 +78,10 @@ resource "aws_autoscaling_group" "build_pool" {
         launch_template_id = aws_launch_template.build_pool.id
         version            = "$Latest"
       }
+
+      override {
+        instance_type = var.instance_type
+      }
     }
 
     instances_distribution {

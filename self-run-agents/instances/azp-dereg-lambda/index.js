@@ -6,31 +6,30 @@ const ec2 = new AWS.EC2();
 const AZP_USER = process.env['AZP_USER'];
 const AZP_TOKEN = process.env['AZP_TOKEN'];
 
-function completeAsLifecycleAction(lifecycleParams, callback) {
-  as.completeLifecycleAction(lifecycleParams, function (err, data) {
-    if (err) {
-      console.log('ERROR: AS lifecycle completion failed.\nDetails:\n', err);
-      callback(err);
-    } else {
-      console.log(
-        'INFO: CompleteLifecycleAction Successful.\nReported:\n',
-        data,
-      );
-      callback(null);
-    }
+async function completeAsLifecycleAction(lifecycleParams) {
+  await new Promise((resolve, reject) => {
+    as.completeLifecycleAction(lifecycleParams, function (err, data) {
+      if (err) {
+        console.log('ERROR: AS lifecycle completion failed.\nDetails:\n', err);
+        reject(err);
+      } else {
+        console.log(
+          'INFO: CompleteLifecycleAction Successful.\nReported:\n',
+          data,
+        );
+        resolve(data);
+      }
+    });
   });
 }
 
-function terminate(asgName, hookName, token, success, cb) {
-  completeAsLifecycleAction(
-    {
-      AutoScalingGroupName: asgName,
-      LifecycleHookName: hookName,
-      LifecycleActionToken: token,
-      LifecycleActionResult: success ? 'CONTINUE' : 'ABANDON',
-    },
-    cb,
-  );
+async function terminate(asgName, hookName, token, success) {
+  await completeAsLifecycleAction({
+    AutoScalingGroupName: asgName,
+    LifecycleHookName: hookName,
+    LifecycleActionToken: token,
+    LifecycleActionResult: success ? 'CONTINUE' : 'ABANDON',
+  });
 }
 
 exports.handler = async function (notification, context) {
@@ -61,7 +60,7 @@ exports.handler = async function (notification, context) {
     })[0]['Value'];
 
     // Next turn the Azure Pool Name into an Azure Pool ID.
-    const azpPoolId = await axios.get(
+    const azpPoolResp = await axios.get(
       `https://dev.azure.com/cncf/_apis/distributedtask/pools?poolName=${azpPoolName}&api-version=5.1`,
       {
         auth: {
@@ -69,10 +68,14 @@ exports.handler = async function (notification, context) {
           password: AZP_TOKEN,
         },
       },
-    )['data']['value'][0]['id'];
+    );
+    if (azpPoolResp['data'] == null) {
+      console.log('Failed to call AZP Resp: ', azpPoolResp);
+    }
+    const azpPoolId = azpPoolResp['data']['value'][0]['id'];
 
     // Finally turn the AZP Agent Name to an ID.
-    const azpAgentId = await axios.get(
+    const azpAgentPool = await axios.get(
       `https://dev.azure.com/cncf/_apis/distributedtask/pools/${azpPoolId}/agents?agentName=${instanceId}&api-version=5.1`,
       {
         auth: {
@@ -80,7 +83,11 @@ exports.handler = async function (notification, context) {
           password: AZP_TOKEN,
         },
       },
-    )['data']['value'][0]['id'];
+    );
+    if (azpAgentPool['data'] == null) {
+      console.log('Failed to call AZP Agent Pool: ', azpAgentPool);
+    }
+    const azpAgentId = azpAgentPool['data']['value'][0]['id'];
 
     // Deregister the instance from the pool for Azure.
     await axios.delete(
@@ -94,23 +101,21 @@ exports.handler = async function (notification, context) {
     );
 
     // Allow the instance to terminate.
-    terminate(asgName, lifecycleHookName, lifecycleToken, true, (err) => {
-      if (err != null) {
-        console.log('Failed to update termination lifecycle hook: ', err);
-        context.fail();
-      } else {
-        context.succeed();
-      }
-    });
+    try {
+      await terminate(asgName, lifecycleHookName, lifecycleToken, true);
+    } catch (error) {
+      console.log('Failed to update termination lifecycle hook: ', error);
+      context.fail();
+    }
+    context.succeed();
   } catch (error) {
     console.log('Caught Error: ', error);
-    terminate(asgName, lifecycleHookName, lifecycleToken, false, (err) => {
-      if (err != null) {
-        console.log('Failed to update termination lifecycle hook: ', err);
-        context.fail();
-      } else {
-        context.succeed();
-      }
-    });
+    try {
+      await terminate(asgName, lifecycleHookName, lifecycleToken, false);
+      context.succeed();
+    } catch (new_error) {
+      console.log('Failed to update termination lifecycle hook: ', new_error);
+      context.fail();
+    }
   }
 };
