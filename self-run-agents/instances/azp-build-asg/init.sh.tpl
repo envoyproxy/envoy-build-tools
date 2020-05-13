@@ -45,7 +45,8 @@ RandomizedDelaySec=30m
 WantedBy=timers.target" > /lib/systemd/system/aws-token-refresh.timer
 systemctl daemon-reload
 systemctl enable aws-token-refresh.service aws-token-refresh.timer
-
+systemctl start aws-token-refresh.service aws-token-refresh.timer
+/usr/local/bin/aws-token-refresh.sh
 
 # Block Azure Pipelines from Making Requests to Local Instance User Data.
 iface=$(ls /sys/class/net/ | grep -v lo | grep -v docker0)
