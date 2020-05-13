@@ -8,7 +8,7 @@ data "aws_iam_policy_document" "asg_scale_in_protection" {
     ]
 
     resources = [
-      "arn:aws:autoscaling:*:${var.aws_account_id}:autoScalingGroup:*:autoScalingGroupName/${var.ami_prefix}_${var.azp_pool_name}_build_pool",
+      "arn:aws:autoscaling:*:${var.aws_account_id}:autoScalingGroup:*:autoScalingGroupName/${local.asg_name}",
     ]
   }
 }
