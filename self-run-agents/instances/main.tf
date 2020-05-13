@@ -10,7 +10,7 @@ module "x64-large-build-pool" {
   aws_account_id             = "457956385456"
   azp_pool_name              = "x64-large"
   azp_token                  = var.azp_token
-  disk_size_gb               = 200
+  disk_size_gb               = 500
   guaranteed_instances_count = 2
   instance_type              = "r5.4xlarge"
 
