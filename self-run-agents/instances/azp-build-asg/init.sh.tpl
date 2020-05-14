@@ -16,7 +16,9 @@ mkdir -p /usr/local/bin
 echo '#!/usr/bin/env bash
 
 mkdir -p /run/aws-protection-data/
-wget -q -O - http://169.254.169.254/latest/meta-data/identity-credentials/ec2/security-credentials/ec2-instance > /run/aws-protection-data/creds.json
+
+role_name=$(wget -q -O - http://169.254.169.254/latest/meta-data/iam/security-credentials)
+wget -q -O - "http://169.254.169.254/latest/meta-data/iam/security-credentials/$role_name" > /run/aws-protection-data/creds.json
 wget -q -O - http://169.254.169.254/latest/dynamic/instance-identity/document > /run/aws-protection-data/iid.json
 echo -n "${asg_name}" > /run/aws-protection-data/asg-name
 
