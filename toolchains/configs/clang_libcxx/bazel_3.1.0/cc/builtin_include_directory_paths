@@ -5,8 +5,8 @@ paths change, Bazel will make sure to rerun the action, even though none of
 declared action inputs or the action commandline changes.
 
 /usr/local/include
-/opt/llvm/lib/clang/9.0.0/include
+/opt/llvm/lib/clang/10.0.0/include
 /usr/include/x86_64-linux-gnu
 /usr/include
-/opt/llvm/lib/clang/9.0.0/share
+/opt/llvm/lib/clang/10.0.0/share
 /opt/llvm/include/c++/v1
