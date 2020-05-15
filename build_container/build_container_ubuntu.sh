@@ -56,11 +56,8 @@ case $ARCH in
         LLVM_SHA256SUM=2d6298720d6aae7fcada4e909f0949d63e94fd0370d20b8882cdd91ceae7511c
         ;;
     'x86_64' )
-        # Holding Ubuntu x86_64 off at 9.0.0 until we fix full test build
-        LLVM_VERSION=9.0.0
         LLVM_DISTRO=x86_64-linux-gnu-ubuntu-18.04
-        LLVM_SHA256SUM=a23b082b30c128c9831dbdd96edad26b43f56624d0ad0ea9edec506f5385038d
-        LLVM_DOWNLOAD_PREFIX=https://releases.llvm.org/
+        LLVM_SHA256SUM=b25f592a0c00686f03e3b7db68ca6dc87418f681f4ead4df4745a01d9be63843
         ;;
     'aarch64' )
         LLVM_DISTRO=aarch64-linux-gnu
