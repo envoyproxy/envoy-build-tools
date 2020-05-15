@@ -1,3 +1,7 @@
+locals {
+  asg_name = "${var.ami_prefix}_${var.azp_pool_name}_build_pool"
+}
+
 data "aws_ami" "azp_ci_image" {
   most_recent = true
   owners      = [var.aws_account_id]
@@ -16,6 +20,7 @@ data "aws_ami" "azp_ci_image" {
 data "template_file" "init" {
   template = file("${path.module}/init.sh.tpl")
   vars = {
+    asg_name      = local.asg_name
     azp_pool_name = var.azp_pool_name
     azp_token     = var.azp_token
   }
@@ -60,9 +65,8 @@ resource "aws_launch_template" "build_pool" {
   vpc_security_group_ids = ["sg-0e26fd7adddb1b9fa"]
 }
 
-
 resource "aws_autoscaling_group" "build_pool" {
-  name            = "${var.ami_prefix}_${var.azp_pool_name}_build_pool"
+  name            = "${local.asg_name}"
   placement_group = aws_placement_group.spread.id
 
   min_size         = var.guaranteed_instances_count
