@@ -51,8 +51,16 @@
       ]
     },
     {
+      "type": "file",
+      "source": "set-instance-protection.sh",
+      "destination": "/home/ubuntu/set-instance-protection.sh"
+    },
+    {
       "type": "shell",
       "inline": [
+        "sudo mv /home/ubuntu/set-instance-protection.sh /usr/local/bin/set-instance-protection.sh",
+        "sudo chown azure-pipelines:azure-pipelines /usr/local/bin/set-instance-protection.sh",
+        "sudo chmod 0755 /usr/local/bin/set-instance-protection.sh",
         "sudo mkdir -p /srv/azure-pipelines",
         "sudo chown -R azure-pipelines:azure-pipelines /srv/azure-pipelines/",
         "sudo apt-get update",
