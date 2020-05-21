@@ -36,36 +36,6 @@ jobs:
       DOCKERHUB_PASSWORD: $(DockerPassword)
       GCP_SERVICE_ACCOUNT_KEY: $(GcpServiceAccountKey)
 
-- job: build_container_windows
-  strategy:
-    matrix:
-      windows2019:
-        OS_DISTRO: windows2019
-        PUSH_GCR_IMAGE: true
-        GCR_IMAGE_NAME: envoy-build-windows
-  dependsOn: []
-  pool:
-    vmImage: 'windows-latest'
-  steps:
-  - bash: |
-      curl -fsSL --output "$TEMP/gcloud-sdk.zip" "$GCLOUD_SDK_ARCHIVE_URL"
-      echo "$GCLOUD_SDK_ARCHIVE_CHECKSUM $TEMP/gcloud-sdk.zip" | sha256sum --check
-      unzip "$TEMP/gcloud-sdk.zip" -d "$PROGRAMFILES"
-      echo "##vso[task.prependpath]$PROGRAMFILES/google-cloud-sdk/bin"
-    env:
-      GCLOUD_SDK_ARCHIVE_URL: https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-289.0.0-windows-x86_64.zip
-      GCLOUD_SDK_ARCHIVE_CHECKSUM: c81e80040f7f609dbc50c42cd0cd402988a5c47f467372d40b5aaca0733f46f4
-  - bash: |
-      ./docker_push.sh
-    workingDirectory: build_container
-    env:
-      OS_FAMILY: windows
-      IMAGE_ARCH: "amd64"
-      SOURCE_BRANCH: $(Build.SourceBranch)
-      DOCKERHUB_USERNAME: $(DockerUsername)
-      DOCKERHUB_PASSWORD: $(DockerPassword)
-      GCP_SERVICE_ACCOUNT_KEY: $(GcpServiceAccountKey)
-
 - job: generate_toolchains_linux
   dependsOn: "build_container_linux"
   pool:
@@ -88,6 +58,8 @@ jobs:
       toolchains/regenerate.sh
     env:
       COMMIT_TOOLCHAINS: "true"
+      GCR_IMAGE_NAME: envoy-build
+      OS_FAMILY: linux
       SOURCE_BRANCH: $(Build.SourceBranch)
     displayName: Generate toolchains
 
@@ -99,3 +71,66 @@ jobs:
     inputs:
       artifactName: 'envoy-build-tools'
 
+- job: build_container_windows
+  strategy:
+    matrix:
+      windows2019:
+        OS_DISTRO: windows2019
+        PUSH_GCR_IMAGE: true
+        GCR_IMAGE_NAME: envoy-build-windows
+  dependsOn: "generate_toolchains_linux"
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - bash: |
+      curl -fsSL --output "$TEMP/gcloud-sdk.zip" "$GCLOUD_SDK_ARCHIVE_URL"
+      echo "$GCLOUD_SDK_ARCHIVE_CHECKSUM $TEMP/gcloud-sdk.zip" | sha256sum --check
+      unzip "$TEMP/gcloud-sdk.zip" -d "$PROGRAMFILES"
+      echo "##vso[task.prependpath]$PROGRAMFILES/google-cloud-sdk/bin"
+    env:
+      GCLOUD_SDK_ARCHIVE_URL: https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-289.0.0-windows-x86_64.zip
+      GCLOUD_SDK_ARCHIVE_CHECKSUM: c81e80040f7f609dbc50c42cd0cd402988a5c47f467372d40b5aaca0733f46f4
+  - bash: |
+      ./docker_push.sh
+    workingDirectory: build_container
+    env:
+      OS_FAMILY: windows
+      IMAGE_ARCH: "amd64"
+      SOURCE_BRANCH: $(Build.SourceBranch)
+      DOCKERHUB_USERNAME: $(DockerUsername)
+      DOCKERHUB_PASSWORD: $(DockerPassword)
+      GCP_SERVICE_ACCOUNT_KEY: $(GcpServiceAccountKey)
+
+- job: generate_toolchains_windows
+  dependsOn: "build_container_windows"
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - bash: |
+      curl -sSL -o /usr/bin/bazel.exe https://github.com/bazelbuild/bazelisk/releases/download/v1.4.0/bazelisk-windows-amd64.exe
+    displayName: Install Bazelisk
+
+  - task: InstallSSHKey@0
+    inputs:
+      hostName: "github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=="
+      sshPublicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCns5kFJ6w7c/zH/FYBNvSpqhpSL147fizsru+PYwaw36RMCkJ4wqHVqusq6zF6K8SPloA4AlzPWx50i2NhRj8NEKgg3IkO35uFciEBcTwqr5+o+e96CvryNwGDZfavgUfrMwTQBYWdM7aaBoWUk31zmUixtlalgBEC1JGdEFxYpN3AmqN50mbu9ZvV8IEv8/AInqvqkS+dIzE9EcZQZQ98uDRU99S1YDCcvZO6xidGZz42AbS8CJ6idrreBoqy/eXmgio4YjGGFRnqr1tdXG5GKWSxfcrSC/gE8OzpFTJ1WOWH+SdZCptev8er6MBoFgRNkDhRckzpsAjhIYxSIAaL"
+      sshPassphrase: "$(SshKeyPassphrase)"
+      sshKeySecureFile: id_rsa_envoy_ci
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+
+  - bash: |
+      toolchains/regenerate.sh
+    env:
+      COMMIT_TOOLCHAINS: "true"
+      GCR_IMAGE_NAME: envoy-build-windows
+      OS_FAMILY: windows
+      SOURCE_BRANCH: $(Build.SourceBranch)
+    displayName: Generate toolchains
+
+  - bash: |
+      git archive HEAD | gzip > $(Build.ArtifactStagingDirectory)/envoy-build-tools.tar.gz
+    displayName: Create artifacts
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      artifactName: 'envoy-build-tools'
