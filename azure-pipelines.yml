@@ -91,10 +91,3 @@ jobs:
       bazeliskReleaseFilename: bazelisk-windows-amd64.exe
       gcrImageName: "envoy-build-windows"
       osFamily: "windows"
-  # Publish build artifacts in last step of the pipeline
-  - bash: |
-      git archive HEAD | gzip -9 > "$(Build.ArtifactStagingDirectory)/envoy-build-tools.tar.gz"
-    displayName: Create artifacts
-  - task: PublishBuildArtifacts@1
-    inputs:
-      artifactName: 'envoy-build-tools'
