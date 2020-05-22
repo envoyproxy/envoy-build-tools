@@ -6,7 +6,7 @@
   "scripts": {
     "format": "prettier --single-quote --trailing-comma all --write '*.js'",
     "lint": "prettier --single-quote --trailing-comma all --check '*.js'",
-    "build": "rm -rf ./node_modules/ && npm install --production && zip -r ../lambda.zip ."
+    "build": "rm -rf ./node_modules/ && npm install --production && zip -r ../lambda-dereg.zip ."
   },
   "license": "MIT",
   "dependencies": {
