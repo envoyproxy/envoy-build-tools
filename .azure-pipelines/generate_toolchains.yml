@@ -18,7 +18,7 @@ parameters:
 
 steps:
 - bash: |
-    ${{  parameters.bazeliskInstallCommandPrefix  }} curl -sSL -o ${{  parameters.bazeliskInstallPath  }} usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.4.0/bazelisk-linux-amd64
+    ${{  parameters.bazeliskInstallCommandPrefix  }} curl -sSL -o ${{  parameters.bazeliskInstallPath  }} https://github.com/bazelbuild/bazelisk/releases/download/v1.4.0/bazelisk-linux-amd64
     ${{  parameters.bazeliskInstallCommandPrefix  }} chmod +x ${{  parameters.bazeliskInstallPath  }}
   displayName: Install Bazelisk
 - task: InstallSSHKey@0
