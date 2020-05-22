@@ -1,0 +1,16 @@
+{
+  "name": "azp-cleanup-snapshots",
+  "version": "1.0.0",
+  "description": "An Lambda that cleans up snapshots within AWS that were built for AZP.",
+  "main": "index.js",
+  "scripts": {
+    "format": "prettier --single-quote --trailing-comma all --write '*.js'",
+    "lint": "prettier --single-quote --trailing-comma all --check '*.js'",
+    "build": "rm -rf ./node_modules/ && npm install --production && zip -r ../lambda-cleanup.zip ."
+  },
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "prettier": "^2.0.5"
+  }
+}
