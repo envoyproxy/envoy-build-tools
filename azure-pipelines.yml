@@ -93,7 +93,7 @@ jobs:
       osFamily: "windows"
   # Publish build artifacts in last step of the pipeline
   - bash: |
-      git archive HEAD | gzip > $(Build.ArtifactStagingDirectory)/envoy-build-tools.tar.gz
+      git archive HEAD | gzip -9 > "$(Build.ArtifactStagingDirectory)/envoy-build-tools.tar.gz"
     displayName: Create artifacts
   - task: PublishBuildArtifacts@1
     inputs:
