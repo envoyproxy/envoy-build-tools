@@ -7,6 +7,10 @@ parameters:
   displayName: "Bazelisk Install Path"
   type: string
   default: "/usr/local/bin/bazel"
+- name: bazeliskReleaseFilename
+  displayName: "Bazelisk Relase Filename"
+  type: string
+  default: bazelisk-linux-amd64
 - name: osFamily
   displayName: "OS Family"
   type: string
@@ -18,7 +22,7 @@ parameters:
 
 steps:
 - bash: |
-    ${{  parameters.bazeliskInstallCommandPrefix  }} curl -sSL -o ${{  parameters.bazeliskInstallPath  }} https://github.com/bazelbuild/bazelisk/releases/download/v1.4.0/bazelisk-linux-amd64
+    ${{  parameters.bazeliskInstallCommandPrefix  }} curl -sSL -o ${{  parameters.bazeliskInstallPath  }} https://github.com/bazelbuild/bazelisk/releases/download/v1.4.0/${{  parameters.bazeliskReleaseFilename  }}
     ${{  parameters.bazeliskInstallCommandPrefix  }} chmod +x ${{  parameters.bazeliskInstallPath  }}
   displayName: Install Bazelisk
 - task: InstallSSHKey@0

@@ -45,6 +45,7 @@ jobs:
     parameters:
       bazeliskInstallCommandPrefix: "sudo"
       bazeliskInstallPath: "/usr/local/bin/bazel"
+      bazeliskReleaseFilename: bazelisk-linux-amd64
       gcrImageName: "envoy-build"
       osFamily: "linux"
 
@@ -87,6 +88,7 @@ jobs:
     parameters:
       bazeliskInstallCommandPrefix: ""
       bazeliskInstallPath: "/usr/bin/bazel.exe"
+      bazeliskReleaseFilename: bazelisk-windows-amd64.exe
       gcrImageName: "envoy-build-windows"
       osFamily: "windows"
   # Publish build artifacts in last step of the pipeline
