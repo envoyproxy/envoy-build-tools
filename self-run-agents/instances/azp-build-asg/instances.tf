@@ -66,7 +66,7 @@ resource "aws_launch_template" "build_pool" {
 }
 
 resource "aws_autoscaling_group" "build_pool" {
-  name            = "${local.asg_name}"
+  name            = local.asg_name
   placement_group = aws_placement_group.spread.id
 
   min_size         = var.guaranteed_instances_count
