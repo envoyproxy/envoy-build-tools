@@ -47,6 +47,8 @@ if [[ -z "$(git diff HEAD --name-only)" ]]; then
 fi
 
 if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
+  git pull --ff-only
+
   COMMIT_MSG="Regenerate ${OS_FAMILY} toolchains from $(git rev-parse HEAD)
 
   [skip ci]
