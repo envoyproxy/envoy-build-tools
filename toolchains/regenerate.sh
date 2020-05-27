@@ -16,6 +16,7 @@ UCASE_OS_FAMILY=`echo ${OS_FAMILY} | tr "[:lower:]" "[:upper:]"`
 DOCKER_REPODIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${DOCKER_IMAGE} | grep -oE 'sha256:[0-9a-f]{64}')
 
 sed -i -E "s#(_ENVOY_BUILD_IMAGE_DIGEST_${UCASE_OS_FAMILY} =) \"sha256:[0-9a-f]{64}\"#\1 \"${DOCKER_REPODIGEST}\"#" toolchains/rbe_toolchains_config.bzl
+sed -i -E "s#(_ENVOY_BUILD_IMAGE_TAG =) \"[0-9a-f]{40}\"#\1 \"${CONTAINER_TAG}\"#" toolchains/rbe_toolchains_config.bzl
 
 mkdir -p "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
 rm -rf "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}/*"
