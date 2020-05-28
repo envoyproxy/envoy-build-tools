@@ -2,7 +2,9 @@ FROM mcr.microsoft.com/windows/servercore:ltsc2019
 
 ENV MSYS2_ARG_CONV_EXCL "*"
 
-ENV TMPDIR C:\\Users\\ContainerAdministrator\\AppData\\Local\\Temp
+ENV TMPDIR C:\\Windows\\Temp
+ENV TMP C:\\Windows\\Temp
+ENV TEMP C:\\Windows\\Temp
 
 # Ensures paths rooted at /c/ can be found by programs running via msys2 shell
 RUN cmd.exe /c "mklink /D C:\c C:\"
