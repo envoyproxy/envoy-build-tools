@@ -45,7 +45,7 @@ function ensureCredentials() {
 }
 
 ensureCredentials
-if [[ "$1" == "on" ]]
+if [[ "$1" == "on" ]]; then
   aws autoscaling set-instance-protection --instance-ids "$instance_id" --auto-scaling-group-name "$CURRENT_ASG_NAME" --protected-from-scale-in
 else
   aws autoscaling set-instance-protection --instance-ids "$instance_id" --auto-scaling-group-name "$CURRENT_ASG_NAME" --no-protected-from-scale-in
