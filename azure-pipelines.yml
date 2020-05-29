@@ -56,7 +56,7 @@ jobs:
         OS_DISTRO: windows2019
         PUSH_GCR_IMAGE: true
         GCR_IMAGE_NAME: envoy-build-windows
-  dependsOn: "generate_toolchains_linux"
+  dependsOn: []
   pool:
     vmImage: 'windows-latest'
   steps:
@@ -80,7 +80,7 @@ jobs:
       GCP_SERVICE_ACCOUNT_KEY: $(GcpServiceAccountKey)
 
 - job: generate_toolchains_windows
-  dependsOn: "build_container_windows"
+  dependsOn: ["build_container_windows", "generate_toolchains_linux"]
   pool:
     vmImage: 'windows-latest'
   steps:
