@@ -133,8 +133,15 @@ RunAndCheckError "pacman.exe" @("-Syy", "--noconfirm")
 # RunAndCheckError "pacman.exe" @("-Suu", "--noconfirm")
 # Update remaining packages (and package db refresh in case previous step requires it)
 # RunAndCheckError "pacman.exe" @("-Syu", "--noconfirm")
-RunAndCheckError "pacman.exe" @("-S", "--noconfirm", "--needed", "diffutils", "git", "patch", "unzip", "zip")
+RunAndCheckError "pacman.exe" @("-S", "--noconfirm", "--needed", "diffutils", "patch", "unzip", "zip")
 RunAndCheckError "pacman.exe" @("-Scc", "--noconfirm")
+
+# Git
+DownloadAndCheck $env:TEMP\git-setup.exe `
+                 https://github.com/git-for-windows/git/releases/download/v2.26.2.windows.1/Git-2.26.2-64-bit.exe `
+                 cdf76510979dace4d3f5368e2f55d4289c405e249399e7ed09049765489da6e8
+RunAndCheckError "$env:TEMP\git-setup.exe" @("/SILENT") $true
+AddToPath $env:ProgramFiles\Git\bin
 
 echo "Cleaning up temporary files..."
 rm -Recurse -Force $env:TEMP\*
