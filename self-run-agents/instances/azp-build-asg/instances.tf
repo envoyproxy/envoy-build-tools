@@ -107,6 +107,10 @@ resource "aws_autoscaling_group" "build_pool" {
     }
   ]
 
+  lifecycle {
+    ignore_changes = ["desired_capacity"]
+  }
+
   # use1-az6, use1-az2, use1-az4
   # The ones with a1.4xl's.
   vpc_zone_identifier = ["subnet-29a65576", "subnet-33e41912", "subnet-b88b0df5"]
