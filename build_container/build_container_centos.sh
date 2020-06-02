@@ -49,3 +49,5 @@ if [[ $(uname -m) == "aarch64" ]] && grep -q -e rhel /etc/*-release ; then
 fi
 
 source ./build_container_common.sh
+
+yum clean all
