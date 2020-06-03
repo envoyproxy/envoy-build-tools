@@ -55,10 +55,10 @@ DownloadAndCheck C:\tools\bazel\bazel.exe `
 AddToPath C:\tools\bazel
 
 # VS 2019 Build Tools
-# Pinned to version downloaded on 5/9/2020 via https://aka.ms/vs/16/release/vs_buildtools.exe
+# Pinned to version downloaded on 6/3/2020 via https://aka.ms/vs/16/release/vs_buildtools.exe
 DownloadAndCheck $env:TEMP\vs_buildtools.exe `
-                 https://download.visualstudio.microsoft.com/download/pr/ac28b571-7709-4635-83d0-6277d6102ecb/ae0caec52ee10d6efc9b855bec5b934cf8054a638e08372e0de4f6351a25ea5d/vs_BuildTools.exe `
-                 ae0caec52ee10d6efc9b855bec5b934cf8054a638e08372e0de4f6351a25ea5d
+                 https://download.visualstudio.microsoft.com/download/pr/17a0244e-301e-4801-a919-f630bc21177d/9821a63671d5768de1920147a2637f0e079c3b1804266c1383f61bb95e2cc18b/vs_BuildTools.exe `
+                 9821a63671d5768de1920147a2637f0e079c3b1804266c1383f61bb95e2cc18b
 echo @"
 {
   "version": "1.0",
