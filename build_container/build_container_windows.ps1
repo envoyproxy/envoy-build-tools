@@ -72,7 +72,7 @@ echo @"
 }
 "@ > $env:TEMP\vs_buildtools_config
 RunAndCheckError "cmd.exe" $("/s", "/c", "$env:TEMP\vs_buildtools.exe --addProductLang en-US --quiet --wait --norestart --nocache --config $env:TEMP\vs_buildtools_config")
-AddToPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.25.28610\bin\Hostx64\x64"
+AddToPath (Resolve-Path "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\*\bin\Hostx64\x64").Path
 
 # CMake (to ensure a 64-bit build of the tool, VS BuildTools ships a 32-bit build)
 DownloadAndCheck $env:TEMP\cmake.msi `

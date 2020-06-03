@@ -13,6 +13,7 @@ jobs:
         OS_DISTRO: centos
         PUSH_GCR_IMAGE: false
   dependsOn: []
+  timeoutInMinutes: 120
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
