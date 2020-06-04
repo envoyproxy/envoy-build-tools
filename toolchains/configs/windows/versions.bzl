@@ -4,8 +4,8 @@
 toolchain_config_spec0 = struct(config_repos = [], create_cc_configs = True, create_java_configs = False, env = {}, java_home = None, name = "msvc-cl")
 _TOOLCHAIN_CONFIG_SPECS = [toolchain_config_spec0]
 _BAZEL_TO_CONFIG_SPEC_NAMES = {"3.0.0": ["msvc-cl"], "3.1.0": ["msvc-cl"]}
-LATEST = "sha256:8acd35d210896ad31afd3f8af75fcfc970a80d360dfeb30f7f0495c67ba74c67"
-CONTAINER_TO_CONFIG_SPEC_NAMES = {"sha256:8acd35d210896ad31afd3f8af75fcfc970a80d360dfeb30f7f0495c67ba74c67": ["msvc-cl"]}
+LATEST = "sha256:f90d66e4d25f3ff40b7546c265a5d97e971a7214977e8a4983247fd1b8f711f4"
+CONTAINER_TO_CONFIG_SPEC_NAMES = {"sha256:f90d66e4d25f3ff40b7546c265a5d97e971a7214977e8a4983247fd1b8f711f4": ["msvc-cl"]}
 _DEFAULT_TOOLCHAIN_CONFIG_SPEC = toolchain_config_spec0
 TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct(
         bazel_to_config_spec_names_map = _BAZEL_TO_CONFIG_SPEC_NAMES,
