@@ -6,9 +6,6 @@ ENV TMPDIR C:\\Windows\\Temp
 ENV TMP C:\\Windows\\Temp
 ENV TEMP C:\\Windows\\Temp
 
-# Ensures paths rooted at /c/ can be found by programs running via msys2 shell
-RUN cmd.exe /c "mklink /D C:\c C:\"
-
 COPY ./build_container_windows.ps1 /
 
 RUN powershell.exe .\\build_container_windows.ps1
