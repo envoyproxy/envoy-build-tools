@@ -45,6 +45,15 @@ function RunAndCheckError
     echo "done."
 }
 
+# Ensures paths rooted at /c/ can be found by programs running via msys2 shell
+RunAndCheckError "cmd.exe" @("/s", "/c", "mklink /D C:\c C:\")
+
+# Enable localhost DNS name resolution
+Add-Content -Path "C:\Windows\System32\drivers\etc\hosts" -Encoding ASCII -Value "
+127.0.0.1 localhost
+::1       localhost
+"
+
 mkdir -Force C:\tools
 
 # Bazelisk
@@ -71,7 +80,7 @@ echo @"
   ]
 }
 "@ > $env:TEMP\vs_buildtools_config
-RunAndCheckError "cmd.exe" $("/s", "/c", "$env:TEMP\vs_buildtools.exe --addProductLang en-US --quiet --wait --norestart --nocache --config $env:TEMP\vs_buildtools_config")
+RunAndCheckError "cmd.exe" @("/s", "/c", "$env:TEMP\vs_buildtools.exe --addProductLang en-US --quiet --wait --norestart --nocache --config $env:TEMP\vs_buildtools_config")
 AddToPath (Resolve-Path "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\*\bin\Hostx64\x64").Path
 
 # CMake (to ensure a 64-bit build of the tool, VS BuildTools ships a 32-bit build)
