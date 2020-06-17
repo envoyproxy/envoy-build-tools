@@ -12,7 +12,7 @@
       "owners": ["099720109477"],
       "most_recent": true
     },
-    "instance_type": "m6g.4xlarge",
+    "instance_type": "r6g.large",
     "ssh_username": "ubuntu",
     "ami_name": "envoy-azp-arm-large-{{timestamp}}",
     "run_volume_tags": {
@@ -32,8 +32,13 @@
   "provisioners": [
     {
       "type": "file",
-      "source": "set-instance-protection.sh",
-      "destination": "/home/ubuntu/set-instance-protection.sh"
+      "source": "scripts",
+      "destination": "/home/ubuntu/scripts"
+    },
+    {
+      "type": "file",
+      "source": "services",
+      "destination": "/home/ubuntu/services"
     },
     {
       "type": "shell",

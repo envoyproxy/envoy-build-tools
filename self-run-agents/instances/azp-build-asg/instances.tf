@@ -51,10 +51,6 @@ resource "aws_launch_template" "build_pool" {
     arn = aws_iam_instance_profile.asg_iam_instance_profile.arn
   }
 
-  # You can still terminate these instances, but it requires an
-  # Extra manual step which is ideal to make sure no ones builds
-  # get wrecked.
-  disable_api_termination              = true
   instance_initiated_shutdown_behavior = "terminate"
   key_name                             = "envoy-shared"
   metadata_options {
@@ -69,8 +65,8 @@ resource "aws_autoscaling_group" "build_pool" {
   name            = local.asg_name
   placement_group = aws_placement_group.spread.id
 
-  min_size         = var.guaranteed_instances_count
-  desired_capacity = var.guaranteed_instances_count
+  min_size         = var.idle_instances_count
+  desired_capacity = var.idle_instances_count
   max_size         = 50
 
   health_check_grace_period = 300
@@ -89,15 +85,12 @@ resource "aws_autoscaling_group" "build_pool" {
     }
 
     instances_distribution {
-      on_demand_base_capacity = var.guaranteed_instances_count
-      # TODO(cynthia): Rework to allow spots and bring this down to 0 again.
-      on_demand_percentage_above_base_capacity = 100
-      spot_allocation_strategy                 = "capacity-optimized"
+      on_demand_base_capacity                  = var.on_demand_instances_count
+      on_demand_percentage_above_base_capacity = 0
+      spot_allocation_strategy                 = "lowest-price"
+      spot_instance_pools                      = 5
     }
   }
-
-  # Instances will set manually.
-  protect_from_scale_in = false
 
   tags = [
     {
@@ -107,13 +100,14 @@ resource "aws_autoscaling_group" "build_pool" {
     }
   ]
 
-  lifecycle {
-    ignore_changes = ["desired_capacity"]
-  }
-
   # use1-az6, use1-az2, use1-az4
-  # The ones with a1.4xl's.
-  vpc_zone_identifier = ["subnet-29a65576", "subnet-33e41912", "subnet-b88b0df5"]
+  # The ones with r6g.4xl's.
+  vpc_zone_identifier = [
+    "subnet-224abd44", # us-east-1a
+    "subnet-b88b0df5", # us-east-1c
+    "subnet-29a65576", # us-east-1d
+    "subnet-45db734b", # us-east-1f
+  ]
 }
 
 # Can't use the recommend initial_lifecycle_hook due to:

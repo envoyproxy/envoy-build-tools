@@ -5,6 +5,7 @@ data "aws_iam_policy_document" "asg_scale_in_protection" {
   statement {
     actions = [
       "autoscaling:SetInstanceProtection",
+      "autoscaling:DetachInstances"
     ]
 
     resources = [
