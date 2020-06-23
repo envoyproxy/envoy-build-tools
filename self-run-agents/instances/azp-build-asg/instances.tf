@@ -100,11 +100,11 @@ resource "aws_autoscaling_group" "build_pool" {
     }
   ]
 
-  # The ones with r6g.* available.
+  # The ones with r6g.* availability.
   availability_zones = [
-    "us-east-1a",
-    "us-east-1c",
-    "us-east-1d",
-    "us-east-1f",
+    "subnet-224abd44", # use1-az1
+    "subnet-b88b0df5", # use1-az4
+    "subnet-29a65576", # use1-az6
+    "subnet-45db734b", # use1-az5
   ]
 }
