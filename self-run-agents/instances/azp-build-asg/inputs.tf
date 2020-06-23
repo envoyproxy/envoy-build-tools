@@ -9,5 +9,3 @@ variable "on_demand_instances_count" {
 }
 variable "idle_instances_count" { type = number }
 variable "instance_type" { type = string }
-variable "sns_lifecycle_arn" { type = string }
-variable "sns_lifecyle_role_arn" { type = string }

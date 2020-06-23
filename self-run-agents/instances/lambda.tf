@@ -30,17 +30,3 @@ resource "aws_lambda_function" "cleanup_lambda" {
 
   source_code_hash = filebase64sha256("lambda-cleanup.zip")
 }
-
-resource "aws_sns_topic_subscription" "lambda_to_sns" {
-  topic_arn = aws_sns_topic.lifecycle_updates.arn
-  protocol  = "lambda"
-  endpoint  = aws_lambda_function.dereg_lambda.arn
-}
-
-resource "aws_lambda_permission" "allow_sns" {
-  statement_id  = "AllowExecutionFromSns"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.dereg_lambda.function_name
-  principal     = "sns.amazonaws.com"
-  source_arn    = aws_sns_topic.lifecycle_updates.arn
-}

@@ -23,7 +23,6 @@ iptables -I DOCKER-USER -d 169.254.169.254 -j DROP
 
 # Start AZP Agent.
 function terminate {
-    sudo -u azure-pipelines /bin/bash -c 'cd /srv/azure-pipelines && ./config.sh remove --unattended --url https://dev.azure.com/cncf/ --token ${azp_token}'
     # Terminate instances in 1 min
     shutdown -h +1
 }
