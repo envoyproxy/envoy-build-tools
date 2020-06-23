@@ -100,12 +100,11 @@ resource "aws_autoscaling_group" "build_pool" {
     }
   ]
 
-  # use1-az6, use1-az2, use1-az4
-  # The ones with r6g.4xl's.
-  vpc_zone_identifier = [
-    "subnet-224abd44", # us-east-1a
-    "subnet-b88b0df5", # us-east-1c
-    "subnet-29a65576", # us-east-1d
-    "subnet-45db734b", # us-east-1f
+  # The ones with r6g.* available.
+  availability_zones = [
+    "us-east-1a",
+    "us-east-1c",
+    "us-east-1d",
+    "us-east-1f",
   ]
 }
