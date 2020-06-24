@@ -1,0 +1,10 @@
+[Unit]
+Description=Refersh User Data Credentials for AZP
+Wants=aws-metadata-refresh.timer
+
+[Service]
+ExecStart=/usr/local/bin/aws-metadata-refresh.sh
+User=root
+
+[Install]
+WantedBy=multi-user.target

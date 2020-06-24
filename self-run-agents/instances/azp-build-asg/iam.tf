@@ -1,10 +1,10 @@
 # Creates an IAM Role where instances themselves can then set instance
 # protection on themselves.
 
-data "aws_iam_policy_document" "asg_scale_in_protection" {
+data "aws_iam_policy_document" "asg_detach_instances" {
   statement {
     actions = [
-      "autoscaling:SetInstanceProtection",
+      "autoscaling:DetachInstances"
     ]
 
     resources = [
@@ -32,7 +32,7 @@ resource "aws_iam_role" "asg_iam_role" {
 resource "aws_iam_role_policy" "asg_iam_role_policy" {
   name   = "${var.ami_prefix}_${var.azp_pool_name}_IAMRolePolicy"
   role   = aws_iam_role.asg_iam_role.id
-  policy = data.aws_iam_policy_document.asg_scale_in_protection.json
+  policy = data.aws_iam_policy_document.asg_detach_instances.json
 }
 
 resource "aws_iam_instance_profile" "asg_iam_instance_profile" {

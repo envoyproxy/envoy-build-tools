@@ -1,0 +1,11 @@
+[Unit]
+Description=Renew AWS Creds once every half hour
+Requires=aws-metadata-refresh.service
+
+[Timer]
+Unit=aws-metadata-refresh.service
+OnUnitInactiveSec=30m
+RandomizedDelaySec=30m
+
+[Install]
+WantedBy=timers.target

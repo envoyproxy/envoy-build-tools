@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -eu -o pipefail
 
 # Check Pre-Reqs, and that we're running on an AWS Instance Seemingly.
 if ! hash aws >/dev/null 2>&1 ; then
@@ -22,14 +22,15 @@ if [[ ! "$instance_id" =~ ^i- ]]; then
 fi
 
 function ensureCredentials() {
-  if [[ ! -f "/run/aws-protection-data/creds.json" ]] || [[ ! -f "/run/aws-protection-data/asg-name" ]] || [[ ! -f "/run/aws-protection-data/iid.json" ]]; then
+  if [[ ! -f "/run/aws-metadata/creds.json" ]] || [[ ! -f "/run/aws-metadata/asg-name" ]] || [[ ! -f "/run/aws-metadata/iid.json" ]] || \
+     [[ ! -r "/run/aws-metadata/creds.json" ]] || [[ ! -r "/run/aws-metadata/asg-name" ]] || [[ ! -r "/run/aws-metadata/iid.json" ]]; then
     echo "Failed to find Credentials for AWS Instance."
     exit 5
   fi
 
-  local readonly credentials_json=$(< /run/aws-protection-data/creds.json)
-  local readonly iid_json=$(< /run/aws-protection-data/iid.json)
-  local readonly asg_name=$(< /run/aws-protection-data/asg-name)
+  local readonly credentials_json=$(< /run/aws-metadata/creds.json)
+  local readonly iid_json=$(< /run/aws-metadata/iid.json)
+  local readonly asg_name=$(< /run/aws-metadata/asg-name)
   local readonly aws_access_key=$(echo -n "$credentials_json" | jq -r .AccessKeyId)
   local readonly secret_access_key=$(echo -n "$credentials_json" | jq -r .SecretAccessKey)
   local readonly session_token=$(echo -n "$credentials_json" | jq -r .Token)
@@ -45,8 +46,4 @@ function ensureCredentials() {
 }
 
 ensureCredentials
-if [[ "$1" == "on" ]]; then
-  aws autoscaling set-instance-protection --instance-ids "$instance_id" --auto-scaling-group-name "$CURRENT_ASG_NAME" --protected-from-scale-in
-else
-  aws autoscaling set-instance-protection --instance-ids "$instance_id" --auto-scaling-group-name "$CURRENT_ASG_NAME" --no-protected-from-scale-in
-fi
+aws autoscaling detach-instances --instance-ids "$instance_id" --auto-scaling-group-name "$CURRENT_ASG_NAME" --no-should-decrement-desired-capacity
