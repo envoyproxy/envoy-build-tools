@@ -1,10 +1,10 @@
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
+load("@bazel_toolchains//rules/exec_properties:exec_properties.bzl", "create_rbe_exec_properties_dict", "rbe_exec_properties")
 load("@envoy_build_tools//toolchains:configs/linux/versions.bzl", _generated_toolchain_config_suite_autogen_spec_linux = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC")
 load("@envoy_build_tools//toolchains:configs/windows/versions.bzl", _generated_toolchain_config_suite_autogen_spec_windows = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC")
 
 _ENVOY_BUILD_IMAGE_REGISTRY = "gcr.io"
-
 _ENVOY_BUILD_IMAGE_TAG = "f21773ab398a879f976936f72c78c9dd3718ca1e"
 
 _ENVOY_BUILD_IMAGE_REPOSITORY_LINUX = "envoy-ci/envoy-build"
@@ -84,6 +84,8 @@ def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, toolchain_config
         repository = toolchain_config_suite_spec["container_repo"],
         toolchain_config_spec_name = toolchain_config_spec_name,
         toolchain_config_suite_spec = toolchain_config_suite_spec,
+        use_legacy_platform_definition = False,
+        exec_properties = create_rbe_exec_properties_dict(docker_add_capabilities = "SYS_PTRACE,NET_RAW,NET_ADMIN"),
         use_checked_in_confs = "Force" if force else "Try",
     )
 
