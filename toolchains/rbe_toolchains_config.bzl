@@ -1,5 +1,6 @@
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
+load("@bazel_toolchains//rules/exec_properties:exec_properties.bzl", "create_rbe_exec_properties_dict")
 load("@envoy_build_tools//toolchains:configs/linux/versions.bzl", _generated_toolchain_config_suite_autogen_spec_linux = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC")
 load("@envoy_build_tools//toolchains:configs/windows/versions.bzl", _generated_toolchain_config_suite_autogen_spec_windows = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC")
 
@@ -60,7 +61,7 @@ _TOOLCHAIN_CONFIG_SUITE_SPEC_WINDOWS = {
     "toolchain_config_suite_autogen_spec": _generated_toolchain_config_suite_autogen_spec_windows,
 }
 
-def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, toolchain_config_suite_spec, container_image_digest, generator, force):
+def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, toolchain_config_suite_spec, container_image_digest, exec_properties, generator, force):
     if generator:
         rbe_autoconfig(
             name = name + "_gen",
@@ -73,7 +74,7 @@ def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, toolchain_config
             toolchain_config_spec_name = toolchain_config_spec_name,
             toolchain_config_suite_spec = toolchain_config_suite_spec,
             use_legacy_platform_definition = False,
-            exec_properties = create_rbe_exec_properties_dict(docker_add_capabilities = "SYS_PTRACE,NET_RAW,NET_ADMIN"),
+            exec_properties = exec_properties,
             use_checked_in_confs = "False",
         )
 
@@ -87,12 +88,13 @@ def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, toolchain_config
         toolchain_config_spec_name = toolchain_config_spec_name,
         toolchain_config_suite_spec = toolchain_config_suite_spec,
         use_legacy_platform_definition = False,
-        exec_properties = create_rbe_exec_properties_dict(docker_add_capabilities = "SYS_PTRACE,NET_RAW,NET_ADMIN"),
+        exec_properties = exec_properties,
         use_checked_in_confs = "Force" if force else "Try",
     )
 
 def rbe_toolchains_config(generator = False, force = False):
-    _envoy_rbe_toolchain("rbe_ubuntu_clang", _CLANG_ENV, "clang", _TOOLCHAIN_CONFIG_SUITE_SPEC_LINUX, _ENVOY_BUILD_IMAGE_DIGEST_LINUX, generator, force)
-    _envoy_rbe_toolchain("rbe_ubuntu_clang_libcxx", _CLANG_LIBCXX_ENV, "clang_libcxx", _TOOLCHAIN_CONFIG_SUITE_SPEC_LINUX, _ENVOY_BUILD_IMAGE_DIGEST_LINUX, generator, force)
-    _envoy_rbe_toolchain("rbe_ubuntu_gcc", _GCC_ENV, "gcc", _TOOLCHAIN_CONFIG_SUITE_SPEC_LINUX, _ENVOY_BUILD_IMAGE_DIGEST_LINUX, generator, force)
+    linux_exec_properties = create_rbe_exec_properties_dict(docker_add_capabilities = "SYS_PTRACE,NET_RAW,NET_ADMIN")
+    _envoy_rbe_toolchain("rbe_ubuntu_clang", _CLANG_ENV, "clang", _TOOLCHAIN_CONFIG_SUITE_SPEC_LINUX, _ENVOY_BUILD_IMAGE_DIGEST_LINUX, linux_exec_properties, generator, force)
+    _envoy_rbe_toolchain("rbe_ubuntu_clang_libcxx", _CLANG_LIBCXX_ENV, "clang_libcxx", _TOOLCHAIN_CONFIG_SUITE_SPEC_LINUX, _ENVOY_BUILD_IMAGE_DIGEST_LINUX, linux_exec_properties, generator, force)
+    _envoy_rbe_toolchain("rbe_ubuntu_gcc", _GCC_ENV, "gcc", _TOOLCHAIN_CONFIG_SUITE_SPEC_LINUX, _ENVOY_BUILD_IMAGE_DIGEST_LINUX, linux_exec_properties, generator, force)
     _envoy_rbe_toolchain("rbe_windows_msvc_cl", _MSVC_CL_ENV, "msvc-cl", _TOOLCHAIN_CONFIG_SUITE_SPEC_WINDOWS, _ENVOY_BUILD_IMAGE_DIGEST_WINDOWS, generator, force)
