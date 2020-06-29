@@ -72,6 +72,8 @@ def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, toolchain_config
             repository = toolchain_config_suite_spec["container_repo"],
             toolchain_config_spec_name = toolchain_config_spec_name,
             toolchain_config_suite_spec = toolchain_config_suite_spec,
+            use_legacy_platform_definition = False,
+            exec_properties = create_rbe_exec_properties_dict(docker_add_capabilities = "SYS_PTRACE,NET_RAW,NET_ADMIN"),
             use_checked_in_confs = "False",
         )
 
@@ -84,6 +86,8 @@ def _envoy_rbe_toolchain(name, env, toolchain_config_spec_name, toolchain_config
         repository = toolchain_config_suite_spec["container_repo"],
         toolchain_config_spec_name = toolchain_config_spec_name,
         toolchain_config_suite_spec = toolchain_config_suite_spec,
+        use_legacy_platform_definition = False,
+        exec_properties = create_rbe_exec_properties_dict(docker_add_capabilities = "SYS_PTRACE,NET_RAW,NET_ADMIN"),
         use_checked_in_confs = "Force" if force else "Try",
     )
 
