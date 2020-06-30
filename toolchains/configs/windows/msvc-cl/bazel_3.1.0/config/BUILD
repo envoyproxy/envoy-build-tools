@@ -38,14 +38,5 @@ platform(
         "@bazel_tools//platforms:windows",
         "@bazel_tools//platforms:x86_64",
     ],
-    remote_execution_properties = """
-        properties: {
-          name: "container-image"
-          value:"docker://gcr.io/envoy-ci/envoy-build-windows@sha256:02d4ff5c2e4c703944e4ec3770c5fa51cdfc6781f95607e91648e19c14b38346"
-        }
-        properties {
-           name: "OSFamily"
-           value:  "Windows"
-        }
-        """, 
+    exec_properties = {"container-image": "docker://gcr.io/envoy-ci/envoy-build-windows@sha256:02d4ff5c2e4c703944e4ec3770c5fa51cdfc6781f95607e91648e19c14b38346", "OSFamily": "Windows"},
 )
