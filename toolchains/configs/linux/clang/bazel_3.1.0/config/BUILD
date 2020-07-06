@@ -40,14 +40,5 @@ platform(
         "@bazel_tools//platforms:x86_64",
         "@bazel_tools//tools/cpp:clang",
     ],
-    remote_execution_properties = """
-        properties: {
-          name: "container-image"
-          value:"docker://gcr.io/envoy-ci/envoy-build@sha256:09a7c4a4e337d0497d6abbddba91dedfff14b340ade01a9654486c48acf11972"
-        }
-        properties {
-           name: "OSFamily"
-           value:  "Linux"
-        }
-        """, 
+    exec_properties = {"container-image": "docker://gcr.io/envoy-ci/envoy-build@sha256:09a7c4a4e337d0497d6abbddba91dedfff14b340ade01a9654486c48acf11972", "OSFamily": "Linux", "dockerAddCapabilities": "SYS_PTRACE,NET_RAW,NET_ADMIN"},
 )
