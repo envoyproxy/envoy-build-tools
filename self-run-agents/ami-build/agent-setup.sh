@@ -16,13 +16,14 @@ sudo add-apt-repository -y "deb [arch=${ARCH}] https://download.docker.com/linux
 sudo apt-add-repository -y ppa:git-core/ppa
 
 sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io libunwind8 libcurl3 git awscli jq inotify-tools
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io git awscli jq inotify-tools
 
 sudo mkdir -p /etc/docker
 echo '{
   "ipv6": true,
   "fixed-cidr-v6": "2001:db8:1::/64"
 }' | sudo tee /etc/docker/daemon.json
+echo "::1 localhost" | sudo tee -a /etc/hosts
 
 sudo systemctl enable docker
 sudo systemctl start docker
@@ -32,10 +33,12 @@ sudo mkdir -p /srv/azure-pipelines
 sudo chown -R azure-pipelines:azure-pipelines /srv/azure-pipelines/
 
 [[ "${ARCH}" == "amd64" ]] && ARCH=x64
-AGENT_VERSION=2.170.1
+AGENT_VERSION=2.171.1
 AGENT_FILE=vsts-agent-linux-${ARCH}-${AGENT_VERSION}
 
 sudo -u azure-pipelines /bin/bash -c "wget -q -O - https://vstsagentpackage.azureedge.net/agent/${AGENT_VERSION}/${AGENT_FILE}.tar.gz | tar zx -C /srv/azure-pipelines"
+sudo /srv/azure-pipelines/bin/installdependencies.sh
+
 sudo -u azure-pipelines /bin/bash -c 'mkdir -p /home/azure-pipelines/.ssh && touch /home/azure-pipelines/.ssh/known_hosts'
 sudo -u azure-pipelines /bin/bash -c 'ssh-keyscan github.com | tee /home/azure-pipelines/.ssh/known_hosts'
 sudo -u azure-pipelines /bin/bash -c 'ssh-keygen -l -f /home/azure-pipelines/.ssh/known_hosts | grep github.com | grep "SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"'
@@ -44,8 +47,8 @@ sudo chown root:root /home/ubuntu/scripts/*.sh /home/ubuntu/services/*
 sudo chmod 0755 /home/ubuntu/scripts/*.sh
 sudo mv /home/ubuntu/scripts/*.sh /usr/local/bin
 
-sudo mv /home/ubuntu/services/* /lib/systemd/system
-sudo systemctl daemon-reload
-sudo systemctl enable aws-metadata-refresh.service aws-metadata-refresh.timer
+sudo install-bazel-remote.sh
+sudo rm -rf /usr/local/bin/install-bazel-remote.sh
+sudo useradd -rms /bin/bash bazel-remote
 
 rm -rf /home/ubuntu/scripts /home/ubuntu/services

@@ -9,3 +9,5 @@ variable "on_demand_instances_count" {
 }
 variable "idle_instances_count" { type = number }
 variable "instance_type" { type = string }
+variable "bazel_cache_bucket" { type = string }
+variable "cache_prefix" { type = string }

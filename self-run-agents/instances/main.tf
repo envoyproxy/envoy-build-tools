@@ -13,6 +13,8 @@ module "x64-large-build-pool" {
   disk_size_gb         = 2000
   idle_instances_count = 1
   instance_type        = "r5.8xlarge"
+  bazel_cache_bucket   = aws_s3_bucket.build-cache.bucket
+  cache_prefix         = "public-x64"
 
   providers = {
     aws = aws
@@ -26,9 +28,11 @@ module "arm-build-pool" {
   aws_account_id       = "457956385456"
   azp_pool_name        = "arm-large"
   azp_token            = var.azp_token
-  disk_size_gb         = 500
+  disk_size_gb         = 1000
   idle_instances_count = 1
-  instance_type        = "r6g.2xlarge"
+  instance_type        = "r6g.4xlarge"
+  bazel_cache_bucket   = aws_s3_bucket.build-cache.bucket
+  cache_prefix         = "public-arm64"
 
   providers = {
     aws = aws

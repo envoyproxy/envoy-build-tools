@@ -1,5 +1,5 @@
 locals {
-  asg_name = "${var.ami_prefix}_${var.azp_pool_name}_build_pool"
+  asg_name = "${var.ami_prefix}_${var.azp_pool_name}_pool"
 }
 
 data "aws_ami" "azp_ci_image" {
@@ -20,9 +20,12 @@ data "aws_ami" "azp_ci_image" {
 data "template_file" "init" {
   template = file("${path.module}/init.sh.tpl")
   vars = {
-    asg_name      = local.asg_name
-    azp_pool_name = var.azp_pool_name
-    azp_token     = var.azp_token
+    asg_name             = local.asg_name
+    azp_pool_name        = var.azp_pool_name
+    instance_profile_arn = aws_iam_instance_profile.asg_iam_instance_profile.arn
+    role_name            = aws_iam_role.asg_iam_role.name
+    bazel_cache_bucket   = var.bazel_cache_bucket
+    cache_prefix         = var.cache_prefix
   }
 }
 
@@ -48,7 +51,11 @@ resource "aws_launch_template" "build_pool" {
   }
 
   iam_instance_profile {
-    arn = aws_iam_instance_profile.asg_iam_instance_profile.arn
+    arn = aws_iam_instance_profile.asg_init_iam_instance_profile.arn
+  }
+
+  monitoring {
+    enabled = true
   }
 
   instance_initiated_shutdown_behavior = "terminate"
@@ -87,8 +94,7 @@ resource "aws_autoscaling_group" "build_pool" {
     instances_distribution {
       on_demand_base_capacity                  = var.on_demand_instances_count
       on_demand_percentage_above_base_capacity = 0
-      spot_allocation_strategy                 = "lowest-price"
-      spot_instance_pools                      = 5
+      spot_allocation_strategy                 = "capacity-optimized"
     }
   }
 
@@ -101,7 +107,7 @@ resource "aws_autoscaling_group" "build_pool" {
   ]
 
   # The ones with r6g.* availability.
-  availability_zones = [
+  vpc_zone_identifier = [
     "subnet-224abd44", # use1-az1
     "subnet-b88b0df5", # use1-az4
     "subnet-29a65576", # use1-az6
