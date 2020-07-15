@@ -103,3 +103,15 @@ rm -rf /opt/libcxx_msan/include
 
 popd
 
+if [[ "$(uname -m)" == "x86_64" ]]; then
+  mkdir tsan
+  pushd tsan
+
+  cmake -GNinja -DLLVM_ENABLE_PROJECTS="libcxxabi;libcxx" -DLLVM_USE_LINKER=lld -DLLVM_USE_SANITIZER=Thread -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX="/opt/libcxx_tsan" "../llvm-project-llvmorg-${LLVM_VERSION}/llvm"
+  ninja install-cxx install-cxxabi
+
+  rm -rf /opt/libcxx_tsan/include
+
+  popd
+fi
