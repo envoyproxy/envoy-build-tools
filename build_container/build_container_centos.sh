@@ -35,7 +35,7 @@ echo "/opt/rh/httpd24/root/usr/lib64" > /etc/ld.so.conf.d/httpd24.conf
 ldconfig
 
 # Setup tcpdump for non-root.
-groupadd pcap
+groupadd -r pcap
 chgrp pcap /usr/sbin/tcpdump
 chmod 750 /usr/sbin/tcpdump
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump

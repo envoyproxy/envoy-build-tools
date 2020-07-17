@@ -89,7 +89,7 @@ apt-get install -y aspell
 rm -rf /var/lib/apt/lists/*
 
 # Setup tcpdump for non-root.
-groupadd pcap
+groupadd -r pcap
 chgrp pcap /usr/sbin/tcpdump
 chmod 750 /usr/sbin/tcpdump
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
