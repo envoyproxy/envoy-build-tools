@@ -29,7 +29,7 @@ toolchain(
         "@bazel_tools//platforms:linux",
         "@bazel_tools//platforms:x86_64",
     ],
-    toolchain = "//toolchains/configs/linux/gcc/bazel_3.3.1/cc:cc-compiler-k8",
+    toolchain = "//toolchains/configs/linux/clang/bazel_3.4.1/cc:cc-compiler-k8",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
