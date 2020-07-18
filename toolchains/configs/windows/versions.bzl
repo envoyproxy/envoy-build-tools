@@ -3,9 +3,9 @@
 """Definitions to be used in rbe_repo attr of an rbe_autoconf rule  """
 toolchain_config_spec0 = struct(config_repos = [], create_cc_configs = True, create_java_configs = False, env = {}, java_home = None, name = "msvc-cl")
 _TOOLCHAIN_CONFIG_SPECS = [toolchain_config_spec0]
-_BAZEL_TO_CONFIG_SPEC_NAMES = {"3.1.0": ["msvc-cl"], "3.3.1": ["msvc-cl"]}
-LATEST = "sha256:cab0ab04cc1835b984da58a295ef229b8ce7f1e1b60599684bdf3a85ca15665f"
-CONTAINER_TO_CONFIG_SPEC_NAMES = {"sha256:cab0ab04cc1835b984da58a295ef229b8ce7f1e1b60599684bdf3a85ca15665f": ["msvc-cl"]}
+_BAZEL_TO_CONFIG_SPEC_NAMES = {"3.3.1": ["msvc-cl"], "3.4.1": ["msvc-cl"]}
+LATEST = "sha256:8873581d1aa3bec7acb0c0c5a9f6f45928e151c8e77f10d19843722bdf4ba281"
+CONTAINER_TO_CONFIG_SPEC_NAMES = {"sha256:8873581d1aa3bec7acb0c0c5a9f6f45928e151c8e77f10d19843722bdf4ba281": ["msvc-cl"]}
 _DEFAULT_TOOLCHAIN_CONFIG_SPEC = toolchain_config_spec0
 TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct(
         bazel_to_config_spec_names_map = _BAZEL_TO_CONFIG_SPEC_NAMES,
