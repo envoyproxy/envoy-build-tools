@@ -41,6 +41,16 @@ filegroup(
     srcs = glob(["extra_tools/**"], allow_empty = True) + [":builtin_include_directory_paths"],
 )
 
+filegroup(
+    name = "cross_aarch64_files",
+    srcs = glob([
+        "aarch64-none-linux-gnu/**",
+        "libexec/**",
+        "lib/gcc/aarch64-none-linux-gnu/**",
+        "include/**",
+    ]),
+)
+
 # This is the entry point for --crosstool_top.  Toolchains are found
 # by lopping off the name of --crosstool_top and searching for
 # the "${CPU}" entry in the toolchains attribute.
@@ -51,6 +61,8 @@ cc_toolchain_suite(
         "k8": ":cc-compiler-k8",
         "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
         "armeabi-v7a": ":cc-compiler-armeabi-v7a",
+        "aarch64-cross|gcc": ":cc-compiler-aarch64-cross",
+        "aarch64-cross": ":cc-compiler-aarch64-cross",
     },
 )
 
@@ -146,3 +158,97 @@ cc_toolchain(
 )
 
 armeabi_cc_toolchain_config(name = "stub_armeabi-v7a")
+
+cc_toolchain(
+    name = "cc-compiler-aarch64-cross",
+    toolchain_identifier = "cross_aarch64",
+    toolchain_config = ":cross_aarch64",
+    all_files = ":cross_aarch64_files",
+    ar_files = ":empty",
+    as_files = ":empty",
+    compiler_files = ":cross_aarch64_files",
+    dwp_files = ":empty",
+    linker_files = ":cross_aarch64_files",
+    objcopy_files = ":cross_aarch64_files",
+    strip_files = ":cross_aarch64_files",
+    supports_param_files = 1,
+)
+
+cc_toolchain_config(
+    name = "cross_aarch64",
+    cpu = "aarch64",
+    compiler = "gcc",
+    toolchain_identifier = "cross_aarch64",
+    host_system_name = "local",
+    target_system_name = "aarch64-linux-gnu",
+    target_libc = "aarch64",
+    abi_version = "aarch64",
+    abi_libc_version = "aarch64",
+    cxx_builtin_include_directories = [
+        "/usr/lib/gcc-cross/aarch64-linux-gnu/9/include",
+        "/usr/aarch64-linux-gnu/include",
+        "/usr/include",
+        "/usr/aarch64-linux-gnu/include/c++/9",
+        "/usr/aarch64-linux-gnu/include/c++/9/aarch64-linux-gnu",
+        "/usr/aarch64-linux-gnu/include/c++/9/backward",
+    ],
+    tool_paths = {
+        "ar": "/usr/bin/aarch64-linux-gnu-ar",
+        "compat-ld": "/usr/bin/aarch64-linux-gnu-ld",
+        "ld": "/usr/bin/aarch64-linux-gnu-ld",
+        "cpp": "/usr/bin/aarch64-linux-gnu-cpp",
+        "gcc": "/usr/bin/aarch64-linux-gnu-gcc",
+        "dwp": "/usr/bin/aarch64-linux-gnu-dwp",
+        "gcov": "/usr/bin/aarch64-linux-gnu-gcov",
+        "nm": "/usr/bin/aarch64-linux-gnu-nm",
+        "objcopy": "/usr/bin/aarch64-linux-gnu-objcopy",
+        "objdump": "/usr/bin/aarch64-linux-gnu-objdump",
+        "strip": "/usr/bin/aarch64-linux-gnu-strip",
+    },
+    compile_flags = [
+        "-U_FORTIFY_SOURCE",
+        "-fstack-protector",
+        "-Wall",
+        "-Wunused-but-set-parameter",
+        "-Wno-free-nonheap-object",
+        "-fno-omit-frame-pointer",
+        # GCC uses unsigned char by default for all non-x86
+        # architectures which breaks opentracing-cpp and
+        # lightstep-tracer-cpp builds, as they are using
+        # signed characters. Using signed char by default
+        # fixes that.
+        "-fsigned-char",
+        # Disable assembly code in BoringSSL.
+        # TODO(mrostecki): Fix BoringSSL assembly code for
+        # aarch64.
+        "-DOPENSSL_NO_ASM",
+    ],
+    opt_compile_flags = [
+        "-g0",
+        "-O2",
+        "-D_FORTIFY_SOURCE=1",
+        "-DNDEBUG",
+        "-ffunction-sections",
+        "-fdata-sections",
+    ],
+    dbg_compile_flags = ["-g"],
+    cxx_flags = ["-std=c++0x"],
+    link_flags = [
+        "-Wl,-no-as-needed",
+        "-Wl,-z,relro,-z,now",
+        "-pass-exit-codes",
+        "-lm",
+    ],
+    link_libs = ["-l:libstdc++.a"],
+    opt_link_flags = ["-Wl,--gc-sections"],
+    unfiltered_compile_flags = [
+        "-fno-canonical-system-headers",
+        "-Wno-builtin-macro-redefined",
+        "-D__DATE__=\"redacted\"",
+        "-D__TIMESTAMP__=\"redacted\"",
+        "-D__TIME__=\"redacted\"",
+    ],
+    coverage_compile_flags = ["--coverage"],
+    coverage_link_flags = ["--coverage"],
+    supports_start_end_lib = False,
+)
