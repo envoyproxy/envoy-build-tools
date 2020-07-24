@@ -98,6 +98,21 @@ DownloadAndCheck $env:TEMP\ninja.zip `
 Expand-Archive -Path $env:TEMP\ninja.zip -DestinationPath C:\tools\ninja
 AddToPath C:\tools\ninja
 
+# LLVM
+DownloadAndCheck $env:TEMP\LLVM-win64.exe `
+                 https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win64.exe `
+                 893f8a12506f8ad29ca464d868fb432fdadd782786a10655b86575fc7fc1a562
+RunAndCheckError $env:TEMP\LLVM-win64.exe @("/S") $true
+AddToPath $env:ProgramFiles\LLVM\bin
+
+# NASM
+$nasmVersion = "2.15.03"
+DownloadAndCheck $env:TEMP\nasm-win64.zip `
+                 https://www.nasm.us/pub/nasm/releasebuilds/$nasmVersion/win64/nasm-$nasmVersion-win64.zip `
+                 e598d1a9c98345f8436750f42d1f7c5d75ba739919eef37cd9ae8406e6a38802
+Expand-Archive -Path $env:TEMP\nasm-win64.zip -DestinationPath C:\tools\
+AddToPath C:\tools\nasm-$nasmVersion
+
 # Python3 (do not install via msys2, that version behaves like posix)
 DownloadAndCheck $env:TEMP\python3-installer.exe `
                  https://www.python.org/ftp/python/3.8.2/python-3.8.2-amd64.exe `
