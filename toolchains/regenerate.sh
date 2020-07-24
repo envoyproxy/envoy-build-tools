@@ -32,7 +32,7 @@ case ${OS_FAMILY} in
     RBE_BAZEL_TARGET_LIST="@rbe_ubuntu_clang_gen//... @rbe_ubuntu_clang_libcxx_gen//... @rbe_ubuntu_gcc_gen//..."
     ;;
   windows)
-    RBE_BAZEL_TARGET_LIST="@rbe_windows_msvc_cl_gen//..."
+    RBE_BAZEL_TARGET_LIST="@rbe_windows_msvc_cl_gen//... @rbe_windows_clang_cl_gen//..."
     ;;
 esac
 
