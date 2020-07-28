@@ -59,8 +59,8 @@ mkdir -Force C:\tools
 # Bazelisk
 mkdir -Force C:\tools\bazel
 DownloadAndCheck C:\tools\bazel\bazel.exe `
-                 https://github.com/bazelbuild/bazelisk/releases/download/v1.3.0/bazelisk-windows-amd64.exe `
-                 31fa9fcf250fe64aa3c5c83b69d76e1e9571b316a58bb5c714084495623e38b0
+                 https://github.com/bazelbuild/bazelisk/releases/download/v1.5.0/bazelisk-windows-amd64.exe `
+                 67149e87d51eb2b34d8b22ee0aa4ae63550919d3f2792f863eaabf9e78826a60
 AddToPath C:\tools\bazel
 
 # VS 2019 Build Tools
@@ -76,7 +76,6 @@ echo @"
     "Microsoft.VisualStudio.Component.VC.Redist.14.Latest",
     "Microsoft.VisualStudio.Component.Windows10SDK",
     "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
-    "Microsoft.VisualStudio.Component.Windows10SDK.18362"
   ]
 }
 "@ > $env:TEMP\vs_buildtools_config
@@ -85,8 +84,8 @@ AddToPath (Resolve-Path "C:\Program Files (x86)\Microsoft Visual Studio\2019\Bui
 
 # CMake (to ensure a 64-bit build of the tool, VS BuildTools ships a 32-bit build)
 DownloadAndCheck $env:TEMP\cmake.msi `
-                 https://github.com/Kitware/CMake/releases/download/v3.17.2/cmake-3.17.2-win64-x64.msi `
-                 06e999be9e50f9d33945aeae698b9b83678c3f98cedb3139a84e19636d2f6433
+                 https://github.com/Kitware/CMake/releases/download/v3.18.0/cmake-3.18.0-win64-x64.msi `
+                 1597eef91b39fe4b34bab506158e34aa3a89490c519c97ac75a7c5d45885e345
 RunAndCheckError "msiexec.exe" @("/i", "$env:TEMP\cmake.msi", "/quiet", "/norestart") $true
 AddToPath $env:ProgramFiles\CMake\bin
 
@@ -115,8 +114,8 @@ AddToPath C:\tools\nasm-$nasmVersion
 
 # Python3 (do not install via msys2, that version behaves like posix)
 DownloadAndCheck $env:TEMP\python3-installer.exe `
-                 https://www.python.org/ftp/python/3.8.2/python-3.8.2-amd64.exe `
-                 8e400e3f32cdcb746e62e0db4d3ae4cba1f927141ebc4d0d5a4006b0daee8921
+                 https://www.python.org/ftp/python/3.8.5/python-3.8.5-amd64.exe `
+                 cd427c7b17337d7c13761ca20877d2d8be661bd30415ddc17072a31a65a91b64
 # python installer needs to be run as an installer with Start-Process
 RunAndCheckError "$env:TEMP\python3-installer.exe" @("/quiet", "InstallAllUsers=1", "Include_launcher=0", "InstallLauncherAllUsers=0") $true
 AddToPath $env:ProgramFiles\Python38
@@ -139,8 +138,8 @@ AddToPath $env:ProgramFiles\7-Zip
 
 # msys2 and required packages
 DownloadAndCheck $env:TEMP\msys2.tar.xz `
-                 http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20190524.tar.xz `
-                 168e156fa9f00d90a8445676c023c63be6e82f71487f4e2688ab5cb13b345383
+                 http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20200720.tar.xz `
+                 24f0a7a3f499d9309bb55bcde5d34a08e752922c3bee9de3a33d2c40896a1496
 RunAndCheckError "7z.exe" @("x", "$env:TEMP\msys2.tar.xz", "-o$env:TEMP\msys2.tar", "-y")
 RunAndCheckError "7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
 AddToPath C:\tools\msys64\usr\bin
@@ -162,8 +161,8 @@ RunAndCheckError "pacman.exe" @("-Scc", "--noconfirm")
 
 # Git
 DownloadAndCheck $env:TEMP\git-setup.exe `
-                 https://github.com/git-for-windows/git/releases/download/v2.26.2.windows.1/Git-2.26.2-64-bit.exe `
-                 cdf76510979dace4d3f5368e2f55d4289c405e249399e7ed09049765489da6e8
+                 https://github.com/git-for-windows/git/releases/download/v2.28.0.windows.1/Git-2.28.0-64-bit.exe `
+                 a8ef3311ac0c8747ba2f5aef3e475ad42fbc084ada7e6fb5060481a78c1a9cf2
 RunAndCheckError "$env:TEMP\git-setup.exe" @("/SILENT") $true
 AddToPath $env:ProgramFiles\Git\bin
 
