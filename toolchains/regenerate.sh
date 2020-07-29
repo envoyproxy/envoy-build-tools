@@ -2,6 +2,8 @@
 
 set -e
 
+# trivial change to get toolchains to be regenerated
+
 export RBE_AUTOCONF_ROOT=$(bazel info workspace)
 
 CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "${RBE_AUTOCONF_ROOT}/build_container")
