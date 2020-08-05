@@ -1,0 +1,19 @@
+# https://travis-ci.org/#!/phlax/envoy-docs
+
+dist: bionic
+
+script:
+  - export COMPOSE_FILE=./composition/docker-compose.yml
+  - docker build -f build_container/Dockerfile-docs -t phlax/envoy-build build_container
+  - docker images
+
+before_deploy:
+  - echo $DOCKER_ACCESS_TOKEN | docker login -u phlax --password-stdin
+
+deploy:
+  provider: script
+  script: docker push phlax/envoy-build
+  skip_cleanup: true
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^(master)$
