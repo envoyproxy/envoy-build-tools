@@ -6,8 +6,8 @@ toolchain_config_spec1 = struct(config_repos = [], create_cc_configs = True, cre
 toolchain_config_spec2 = struct(config_repos = [], create_cc_configs = True, create_java_configs = False, env = {"BAZEL_COMPILER": "gcc", "BAZEL_LINKLIBS": "-l%:libstdc++.a", "BAZEL_LINKOPTS": "-lm", "CC": "gcc", "CXX": "g++", "PATH": "/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/llvm/bin"}, java_home = None, name = "gcc")
 _TOOLCHAIN_CONFIG_SPECS = [toolchain_config_spec0,toolchain_config_spec1,toolchain_config_spec2]
 _BAZEL_TO_CONFIG_SPEC_NAMES = {"3.3.1": ["clang", "clang_libcxx", "gcc"], "3.4.1": ["clang", "clang_libcxx", "gcc"]}
-LATEST = "sha256:bd84ff9d56ca771042b9d355d395ee3b23dd3c8cfd4950a5ddb6c5b398517227"
-CONTAINER_TO_CONFIG_SPEC_NAMES = {"sha256:bd84ff9d56ca771042b9d355d395ee3b23dd3c8cfd4950a5ddb6c5b398517227": ["clang", "clang_libcxx", "gcc"]}
+LATEST = "sha256:0d87f0e11faab88c8e0f1041a8b36f71d3cb11cc7a1f61a3368edc6e82f5c574"
+CONTAINER_TO_CONFIG_SPEC_NAMES = {"sha256:0d87f0e11faab88c8e0f1041a8b36f71d3cb11cc7a1f61a3368edc6e82f5c574": ["clang", "clang_libcxx", "gcc"]}
 _DEFAULT_TOOLCHAIN_CONFIG_SPEC = toolchain_config_spec0
 TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct(
         bazel_to_config_spec_names_map = _BAZEL_TO_CONFIG_SPEC_NAMES,
