@@ -4,9 +4,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "bazel_toolchains",
-    sha256 = "0f73f35190708dd03066b58bf3a50be2ff9368c654d1cfb8ff4230de10b90dca",
-    strip_prefix = "bazel-toolchains-04f865f8e7f412d82051d3a2de422ee31ba0502d",
-    urls = ["https://github.com/greenhouse-org/bazel-toolchains/archive/04f865f8e7f412d82051d3a2de422ee31ba0502d.tar.gz"],
+    sha256 = "e2589210b2af5299c6b46e7017315d6a1bd1e91d1f0c419f4efd29e89c6106c7",
+    strip_prefix = "bazel-toolchains-c2c03dc21182b10f703bda7fdb5d01617fa0e741",
+    urls = ["https://github.com/greenhouse-org/bazel-toolchains/archive/c2c03dc21182b10f703bda7fdb5d01617fa0e741.tar.gz"],
 )
 
 load(
