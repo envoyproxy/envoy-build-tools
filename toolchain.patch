@@ -1,0 +1,45 @@
+diff --git a/rules/rbe_repo/extract.sh.tpl b/rules/rbe_repo/extract.sh.tpl
+index 90118d4..2c58d50 100644
+--- a/rules/rbe_repo/extract.sh.tpl
++++ b/rules/rbe_repo/extract.sh.tpl
+@@ -18,6 +18,7 @@ set -ex
+ 
+ # This is a generated file that runs a docker container, waits for it to
+ # finish running and copies a file to an output location.
++env
+ 
+ DOCKER="%{docker_tool_path}"
+ 
+diff --git a/rules/rbe_repo/util.bzl b/rules/rbe_repo/util.bzl
+index 71a0e9e..677455b 100644
+--- a/rules/rbe_repo/util.bzl
++++ b/rules/rbe_repo/util.bzl
+@@ -18,7 +18,7 @@ load(
+     "default_toolchain_config_suite_spec",
+ )
+ 
+-_VERBOSE = False
++_VERBOSE = True
+ _SUPPORTED_OS_FAMILIES = ["Linux", "Windows"]
+ 
+ DOCKER_PATH = "DOCKER_PATH"
+@@ -199,13 +199,13 @@ def print_exec_results(prefix, exec_result, fail_on_error = False, args = None):
+       args: args passed to ctx.execute(...).
+ 
+     """
+-    if _VERBOSE and exec_result.return_code != 0:
+-        print(prefix + "::error::" + exec_result.stderr)
+-    elif _VERBOSE:
+-        print(prefix + "::success::" + exec_result.stdout)
++
++    # if _VERBOSE and exec_result.return_code != 0:
++    # elif _VERBOSE:
++    print(prefix + "::stdout::" + exec_result.stdout)
++    print(prefix + "::stderr::" + exec_result.stderr)
+     if fail_on_error and exec_result.return_code != 0:
+-        if _VERBOSE and args:
+-            print("failed to run execute with the following args:" + str(args))
++        print("failed to run execute with the following args:" + str(args))
+         fail("Failed to run:" + prefix + ":" + exec_result.stderr)
+ 
+ def copy_to_test_dir(ctx):

@@ -22,7 +22,17 @@ parameters:
 
 steps:
 - bash: |
-    ${{  parameters.bazeliskInstallCommandPrefix  }} curl -sSL -o ${{  parameters.bazeliskInstallPath  }} https://github.com/bazelbuild/bazelisk/releases/download/v1.4.0/${{  parameters.bazeliskReleaseFilename  }}
+    rm -rf /c/Windows/System32/bash.exe
+  condition: eq(variables['Agent.OS'], 'Windows_NT')
+- script: |
+    where bash
+    docker info
+    echo PATH=%PATH%
+    bash -c 'echo PATH=$PATH'
+    del /f C:\Windows\System32\bash.exe
+  condition: eq(variables['Agent.OS'], 'Windows_NT')
+- bash: |
+    ${{  parameters.bazeliskInstallCommandPrefix  }} curl -sSL -o ${{  parameters.bazeliskInstallPath  }} https://github.com/bazelbuild/bazelisk/releases/download/v1.6.0/${{  parameters.bazeliskReleaseFilename  }}
     ${{  parameters.bazeliskInstallCommandPrefix  }} chmod +x ${{  parameters.bazeliskInstallPath  }}
   displayName: Install Bazelisk
 - task: InstallSSHKey@0
@@ -33,9 +43,14 @@ steps:
     sshKeySecureFile: id_rsa_envoy_ci
   condition: ne(variables['Build.Reason'], 'PullRequest')
 - bash: |
+    where bazel
+    where bazelisk
+    bazel version
+    bazelisk version
+    export BAZEL_BASH="C:\Program Files\Git\bin\bash.exe"
     toolchains/regenerate.sh
   env:
-    COMMIT_TOOLCHAINS: "true"
+    #    COMMIT_TOOLCHAINS: "true"
     GCR_IMAGE_NAME: ${{  parameters.gcrImageName }}
     OS_FAMILY: ${{  parameters.osFamily  }}
     SOURCE_BRANCH: $(Build.SourceBranch)
