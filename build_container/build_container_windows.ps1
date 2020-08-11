@@ -157,18 +157,22 @@ RunAndCheckError "pacman.exe" @("-Syy", "--noconfirm")
 # RunAndCheckError "pacman.exe" @("-Suu", "--noconfirm")
 # Update remaining packages (and package db refresh in case previous step requires it)
 # RunAndCheckError "pacman.exe" @("-Syu", "--noconfirm")
-RunAndCheckError "pacman.exe" @("-S", "--noconfirm", "--needed", "diffutils", "patch", "unzip", "zip")
+RunAndCheckError "pacman.exe" @("-S", "--noconfirm", "--needed", "git", "subversion", "diffutils", "patch", "unzip", "zip")
 RunAndCheckError "pacman.exe" @("-Scc", "--noconfirm")
 
-# Git
-DownloadAndCheck $env:TEMP\git-setup.exe `
-                 https://github.com/git-for-windows/git/releases/download/v2.28.0.windows.1/Git-2.28.0-64-bit.exe `
-                 a8ef3311ac0c8747ba2f5aef3e475ad42fbc084ada7e6fb5060481a78c1a9cf2
-RunAndCheckError "$env:TEMP\git-setup.exe" @("/SILENT") $true
-AddToPath $env:ProgramFiles\Git\bin
-
-echo "Cleaning up temporary files..."
-rm -Recurse -Force $env:TEMP\*
+echo "Cleaning up unnecessary files..."
+rm -Recurse -Force -ErrorAction SilentlyContinue $env:TEMP\*
+# This action makes all installed components not upgradable, non-removable.
+# To update Visual Studio and other installed Windows components, regenerate
+# the docker image from scratch.
+rm -Recurse -Force -ErrorAction SilentlyContinue "$env:ProgramData\Package Cache\*"
+rm -Recurse -Force -ErrorAction SilentlyContinue "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer"
+# Remove x86 tools and libraries we cannot use.
+# GCP silently fails to execute 32-bit binaries and we do not expect to target x86 32 bit builds
+rm -Recurse -Force -ErrorAction SilentlyContinue (ls -recurse "C:\Program Files*" -ErrorAction SilentlyContinue | where-object { $_.PSIsContainer -and $_.Name.EndsWith("x86") })
+# Remove documentation we do not expect users to use
+rm -Recurse -Force -ErrorAction SilentlyContinue "$env:ProgramFiles\CMake\doc"
+rm -Recurse -Force -ErrorAction SilentlyContinue "$env:ProgramFiles\CMake\man"
 echo "done."
 
 echo "Finished software installation."
