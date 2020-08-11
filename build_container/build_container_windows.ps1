@@ -68,13 +68,15 @@ AddToPath C:\tools\bazel
 DownloadAndCheck $env:TEMP\vs_buildtools.exe `
                  https://download.visualstudio.microsoft.com/download/pr/17a0244e-301e-4801-a919-f630bc21177d/9821a63671d5768de1920147a2637f0e079c3b1804266c1383f61bb95e2cc18b/vs_BuildTools.exe `
                  9821a63671d5768de1920147a2637f0e079c3b1804266c1383f61bb95e2cc18b
+# See: https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019#c-build-tools
+# The "Microsoft.VisualStudio.Workload.MSBuildTools" and it's components are added
+# by the installer and cannot be supressed.
 echo @"
 {
   "version": "1.0",
   "components": [
-    "Microsoft.VisualStudio.Component.VC.CoreBuildTools",
-    "Microsoft.VisualStudio.Component.VC.Redist.14.Latest",
-    "Microsoft.VisualStudio.Component.Windows10SDK",
+    "Microsoft.VisualStudio.Workload.VCTools",
+    "Microsoft.VisualStudio.Component.Windows10SDK.18362",
     "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
   ]
 }
@@ -128,20 +130,20 @@ RunAndCheckError "python.exe" @("-m", "pip", "install", "--upgrade", "pip")
 # Install wheel so rules_python rules will run
 RunAndCheckError "pip.exe" @("install", "wheel")
 
-# 7z
-DownloadAndCheck $env:TEMP\7z.msi `
-                 https://www.7-zip.org/a/7z1900-x64.msi `
-                 a7803233eedb6a4b59b3024ccf9292a6fffb94507dc998aa67c5b745d197a5dc
+# 7z only to unpack msys2
+DownloadAndCheck $env:TEMP\7z-installer.exe `
+                 https://www.7-zip.org/a/7z1900-x64.exe `
+                 0f5d4dbbe5e55b7aa31b91e5925ed901fdf46a367491d81381846f05ad54c45e
 # msiexec needs to be run as an installer with Start-Process
-RunAndCheckError "msiexec.exe" @("/i", "$env:TEMP\7z.msi", "/passive", "/norestart") $true
-AddToPath $env:ProgramFiles\7-Zip
+$quo = '"'
+RunAndCheckError "$env:TEMP\7z-installer.exe" @("/S", "/D=$quo$env:TEMP\7z$quo")
 
 # msys2 and required packages
 DownloadAndCheck $env:TEMP\msys2.tar.xz `
                  http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20200720.tar.xz `
                  24f0a7a3f499d9309bb55bcde5d34a08e752922c3bee9de3a33d2c40896a1496
-RunAndCheckError "7z.exe" @("x", "$env:TEMP\msys2.tar.xz", "-o$env:TEMP\msys2.tar", "-y")
-RunAndCheckError "7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
+RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar.xz", "-o$env:TEMP\msys2.tar", "-y")
+RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
 AddToPath C:\tools\msys64\usr\bin
 RunAndCheckError "bash.exe" @("-c", "pacman-key --init")
 RunAndCheckError "bash.exe" @("-c", "pacman-key --populate msys2")
