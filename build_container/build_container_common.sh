@@ -20,8 +20,8 @@ function install_gn(){
     rm -rf gntool*
   elif [[ "$(uname -m)" == "aarch64" ]]; then
     # install gn tools
-    download_and_check /usr/local/bin/gn https://github.com/Jingzhao123/google-gn/releases/download/gn-arm64/gn \
-      2114aaa98ed90e0a3ced6b49dca1e994c823ded2baf9adfd9b5abed9dca38dff
+    download_and_check /usr/local/bin/gn https://github.com/envoyproxy/envoy-build-tools/releases/download/build-tools/gn-arm64 \
+      37f2960d488251760c56683dcf2cc4dfb2c2c13af476f86475eee206fafe21e2
     chmod +x /usr/local/bin/gn
   fi
 }
