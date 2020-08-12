@@ -64,17 +64,19 @@ DownloadAndCheck C:\tools\bazel\bazel.exe `
 AddToPath C:\tools\bazel
 
 # VS 2019 Build Tools
-# Pinned to version downloaded on 6/3/2020 via https://aka.ms/vs/16/release/vs_buildtools.exe
+# Pinned to version 16.7 downloaded on 8/11/2020 via https://aka.ms/vs/16/release/vs_buildtools.exe
 DownloadAndCheck $env:TEMP\vs_buildtools.exe `
-                 https://download.visualstudio.microsoft.com/download/pr/17a0244e-301e-4801-a919-f630bc21177d/9821a63671d5768de1920147a2637f0e079c3b1804266c1383f61bb95e2cc18b/vs_BuildTools.exe `
-                 9821a63671d5768de1920147a2637f0e079c3b1804266c1383f61bb95e2cc18b
+                 https://download.visualstudio.microsoft.com/download/pr/e3850c73-59c6-4c05-9db6-a47a74b67daf/dcb113a854b2cb2141755b6a35c4b9aac6f109081bee45649ec2fcc594b0d7a6/vs_BuildTools.exe `
+                 dcb113a854b2cb2141755b6a35c4b9aac6f109081bee45649ec2fcc594b0d7a6
+# See: https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019#c-build-tools
+# The "Microsoft.VisualStudio.Workload.MSBuildTools" and it's components are added
+# by the installer and cannot be supressed.
 echo @"
 {
   "version": "1.0",
   "components": [
-    "Microsoft.VisualStudio.Component.VC.CoreBuildTools",
-    "Microsoft.VisualStudio.Component.VC.Redist.14.Latest",
-    "Microsoft.VisualStudio.Component.Windows10SDK",
+    "Microsoft.VisualStudio.Workload.VCTools",
+    "Microsoft.VisualStudio.Component.Windows10SDK.18362",
     "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
   ]
 }
@@ -82,14 +84,14 @@ echo @"
 RunAndCheckError "cmd.exe" @("/s", "/c", "$env:TEMP\vs_buildtools.exe --addProductLang en-US --quiet --wait --norestart --nocache --config $env:TEMP\vs_buildtools_config")
 AddToPath (Resolve-Path "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\*\bin\Hostx64\x64").Path
 
-# CMake (to ensure a 64-bit build of the tool, VS BuildTools ships a 32-bit build)
+# CMake to ensure a 64-bit build of the tool (VS BuildTools ships a 32-bit build)
 DownloadAndCheck $env:TEMP\cmake.msi `
                  https://github.com/Kitware/CMake/releases/download/v3.18.0/cmake-3.18.0-win64-x64.msi `
                  1597eef91b39fe4b34bab506158e34aa3a89490c519c97ac75a7c5d45885e345
 RunAndCheckError "msiexec.exe" @("/i", "$env:TEMP\cmake.msi", "/quiet", "/norestart") $true
 AddToPath $env:ProgramFiles\CMake\bin
 
-# Ninja
+# Ninja to ensure a 64-bit build of the tool (VS BuildTools ships a 32-bit build)
 mkdir -Force C:\tools\ninja
 DownloadAndCheck $env:TEMP\ninja.zip `
                  https://github.com/ninja-build/ninja/releases/download/v1.10.0/ninja-win.zip `
@@ -97,14 +99,14 @@ DownloadAndCheck $env:TEMP\ninja.zip `
 Expand-Archive -Path $env:TEMP\ninja.zip -DestinationPath C:\tools\ninja
 AddToPath C:\tools\ninja
 
-# LLVM
+# LLVM to ensure a 64-bit build of the tool (VS BuildTools ships a 32-bit build)
 DownloadAndCheck $env:TEMP\LLVM-win64.exe `
                  https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win64.exe `
                  893f8a12506f8ad29ca464d868fb432fdadd782786a10655b86575fc7fc1a562
 RunAndCheckError $env:TEMP\LLVM-win64.exe @("/S") $true
 AddToPath $env:ProgramFiles\LLVM\bin
 
-# NASM
+# NASM (preferred by some OSS projects over MS ml.exe, closer to gnu/intel syntax)
 $nasmVersion = "2.15.03"
 DownloadAndCheck $env:TEMP\nasm-win64.zip `
                  https://www.nasm.us/pub/nasm/releasebuilds/$nasmVersion/win64/nasm-$nasmVersion-win64.zip `
@@ -112,7 +114,7 @@ DownloadAndCheck $env:TEMP\nasm-win64.zip `
 Expand-Archive -Path $env:TEMP\nasm-win64.zip -DestinationPath C:\tools\
 AddToPath C:\tools\nasm-$nasmVersion
 
-# Python3 (do not install via msys2, that version behaves like posix)
+# Python3 (do not install via msys2 or the MS store's flavors, this version follows Win32 semantics)
 DownloadAndCheck $env:TEMP\python3-installer.exe `
                  https://www.python.org/ftp/python/3.8.5/python-3.8.5-amd64.exe `
                  cd427c7b17337d7c13761ca20877d2d8be661bd30415ddc17072a31a65a91b64
@@ -128,20 +130,19 @@ RunAndCheckError "python.exe" @("-m", "pip", "install", "--upgrade", "pip")
 # Install wheel so rules_python rules will run
 RunAndCheckError "pip.exe" @("install", "wheel")
 
-# 7z
-DownloadAndCheck $env:TEMP\7z.msi `
-                 https://www.7-zip.org/a/7z1900-x64.msi `
-                 a7803233eedb6a4b59b3024ccf9292a6fffb94507dc998aa67c5b745d197a5dc
-# msiexec needs to be run as an installer with Start-Process
-RunAndCheckError "msiexec.exe" @("/i", "$env:TEMP\7z.msi", "/passive", "/norestart") $true
-AddToPath $env:ProgramFiles\7-Zip
+# 7z only to unpack msys2
+DownloadAndCheck $env:TEMP\7z-installer.exe `
+                 https://www.7-zip.org/a/7z1900-x64.exe `
+                 0f5d4dbbe5e55b7aa31b91e5925ed901fdf46a367491d81381846f05ad54c45e
+$quo = '"'
+RunAndCheckError "$env:TEMP\7z-installer.exe" @("/S", "/D=$quo$env:TEMP\7z$quo")
 
-# msys2 and required packages
+# msys2 with additional required packages
 DownloadAndCheck $env:TEMP\msys2.tar.xz `
                  http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20200720.tar.xz `
                  24f0a7a3f499d9309bb55bcde5d34a08e752922c3bee9de3a33d2c40896a1496
-RunAndCheckError "7z.exe" @("x", "$env:TEMP\msys2.tar.xz", "-o$env:TEMP\msys2.tar", "-y")
-RunAndCheckError "7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
+RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar.xz", "-o$env:TEMP\msys2.tar", "-y")
+RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
 AddToPath C:\tools\msys64\usr\bin
 RunAndCheckError "bash.exe" @("-c", "pacman-key --init")
 RunAndCheckError "bash.exe" @("-c", "pacman-key --populate msys2")
@@ -156,18 +157,22 @@ RunAndCheckError "pacman.exe" @("-Syy", "--noconfirm")
 # RunAndCheckError "pacman.exe" @("-Suu", "--noconfirm")
 # Update remaining packages (and package db refresh in case previous step requires it)
 # RunAndCheckError "pacman.exe" @("-Syu", "--noconfirm")
-RunAndCheckError "pacman.exe" @("-S", "--noconfirm", "--needed", "diffutils", "patch", "unzip", "zip")
+RunAndCheckError "pacman.exe" @("-S", "--noconfirm", "--needed", "git", "subversion", "diffutils", "patch", "unzip", "zip")
 RunAndCheckError "pacman.exe" @("-Scc", "--noconfirm")
 
-# Git
-DownloadAndCheck $env:TEMP\git-setup.exe `
-                 https://github.com/git-for-windows/git/releases/download/v2.28.0.windows.1/Git-2.28.0-64-bit.exe `
-                 a8ef3311ac0c8747ba2f5aef3e475ad42fbc084ada7e6fb5060481a78c1a9cf2
-RunAndCheckError "$env:TEMP\git-setup.exe" @("/SILENT") $true
-AddToPath $env:ProgramFiles\Git\bin
-
-echo "Cleaning up temporary files..."
-rm -Recurse -Force $env:TEMP\*
+echo "Cleaning up unnecessary files..."
+rm -Recurse -Force -ErrorAction SilentlyContinue $env:TEMP\*
+# This action makes all installed components not upgradable, non-removable.
+# To update Visual Studio and other installed Windows components, regenerate
+# the docker image from scratch.
+rm -Recurse -Force -ErrorAction SilentlyContinue "$env:ProgramData\Package Cache\*"
+rm -Recurse -Force -ErrorAction SilentlyContinue "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer"
+# Remove x86 tools and libraries we cannot use.
+# GCP silently fails to execute 32-bit binaries and we do not expect to target x86 32 bit builds
+rm -Recurse -Force -ErrorAction SilentlyContinue (ls -recurse "C:\Program Files*" -ErrorAction SilentlyContinue | where-object { $_.PSIsContainer -and $_.Name.EndsWith("x86") })
+# Remove documentation we do not expect users to use
+rm -Recurse -Force -ErrorAction SilentlyContinue "$env:ProgramFiles\CMake\doc"
+rm -Recurse -Force -ErrorAction SilentlyContinue "$env:ProgramFiles\CMake\man"
 echo "done."
 
 echo "Finished software installation."
