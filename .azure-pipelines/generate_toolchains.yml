@@ -22,6 +22,9 @@ parameters:
 
 steps:
 - bash: |
+    rm -rf /c/Windows/System32/bash.exe
+  condition: eq(variables['Agent.OS'], 'Windows_NT')
+- bash: |
     ${{  parameters.bazeliskInstallCommandPrefix  }} curl -sSL -o ${{  parameters.bazeliskInstallPath  }} https://github.com/bazelbuild/bazelisk/releases/download/v1.4.0/${{  parameters.bazeliskReleaseFilename  }}
     ${{  parameters.bazeliskInstallCommandPrefix  }} chmod +x ${{  parameters.bazeliskInstallPath  }}
   displayName: Install Bazelisk
