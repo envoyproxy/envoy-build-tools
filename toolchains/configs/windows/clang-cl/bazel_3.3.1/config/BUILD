@@ -28,7 +28,7 @@ toolchain(
         "@bazel_tools//platforms:windows",
         "@bazel_tools//platforms:x86_64",
     ],
-    toolchain = "//toolchains/configs/windows/msvc-cl/bazel_3.0.0/cc:cc-compiler-x64_windows",
+    toolchain = "//toolchains/configs/windows/clang-cl/bazel_3.3.1/cc:cc-compiler-x64_windows",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
@@ -38,5 +38,5 @@ platform(
         "@bazel_tools//platforms:windows",
         "@bazel_tools//platforms:x86_64",
     ],
-    exec_properties = {"container-image": "docker://gcr.io/envoy-ci/envoy-build-windows@sha256:02d4ff5c2e4c703944e4ec3770c5fa51cdfc6781f95607e91648e19c14b38346", "OSFamily": "Windows"},
+    exec_properties = {"container-image": "docker://gcr.io/envoy-ci/envoy-build-windows@sha256:3630d327958ee45679e160906e96f6b43cf4e90f575c8d99a21eb29e26ced366", "OSFamily": "Windows"},
 )
