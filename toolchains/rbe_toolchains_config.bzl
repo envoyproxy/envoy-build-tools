@@ -44,7 +44,9 @@ _GCC_ENV = {
 
 _MSVC_CL_ENV = {}
 
-_CLANG_CL_ENV = {}
+_CLANG_CL_ENV = {
+    "USE_CLANG_CL": "1",
+}
 
 _TOOLCHAIN_CONFIG_SUITE_SPEC_LINUX = {
     "container_registry": _ENVOY_BUILD_IMAGE_REGISTRY,
