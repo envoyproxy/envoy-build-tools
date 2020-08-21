@@ -96,8 +96,8 @@ cc_toolchain_config(
         "objdump": "c:/tools/msys64/usr/bin/objdump",
         "strip": "c:/tools/msys64/usr/bin/strip"},
     tool_bin_path = "c:/tools/msys64/usr/bin",
-    dbg_mode_debug_flag = "/DEBUG:FULL",
-    fastbuild_mode_debug_flag = "/DEBUG:FASTLINK",
+    dbg_mode_debug_flag = "/DEBUG",
+    fastbuild_mode_debug_flag = "/DEBUG",
 )
 
 toolchain(
@@ -153,8 +153,8 @@ cc_toolchain_config(
         "objcopy": "c:/tools/msys64/mingw64/bin/objcopy",
         "objdump": "c:/tools/msys64/mingw64/bin/objdump",
         "strip": "c:/tools/msys64/mingw64/bin/strip"},
-    dbg_mode_debug_flag = "/DEBUG:FULL",
-    fastbuild_mode_debug_flag = "/DEBUG:FASTLINK",
+    dbg_mode_debug_flag = "/DEBUG",
+    fastbuild_mode_debug_flag = "/DEBUG",
 )
 
 toolchain(
@@ -200,32 +200,33 @@ cc_toolchain_config(
     msvc_env_tmp = "C:\\Windows\\Temp",
     msvc_env_path = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.27.29110\\bin\\HostX64\\x64;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\MSBuild\\Current\\bin\\Roslyn;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.18362.0\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\x64;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\\\MSBuild\\Current\\Bin;C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\Common7\\IDE\\;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\Common7\\Tools\\;;C:\\Windows\\system32",
     msvc_env_include = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.27.29110\\include;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\um;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\winrt;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\cppwinrt",
-    msvc_env_lib = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.27.29110\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.18362.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.18362.0\\um\\x64",
-    msvc_cl_path = "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.27.29110/bin/HostX64/x64/cl.exe",
+    msvc_env_lib = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.27.29110\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.18362.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.18362.0\\um\\x64;C:\\Program Files\\LLVM\\lib\\clang\\10.0.0\\lib\\windows",
+    msvc_cl_path = "C:/Program Files/LLVM/bin/clang-cl.exe",
     msvc_ml_path = "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.27.29110/bin/HostX64/x64/ml64.exe",
-    msvc_link_path = "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.27.29110/bin/HostX64/x64/link.exe",
-    msvc_lib_path = "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.27.29110/bin/HostX64/x64/lib.exe",
+    msvc_link_path = "C:/Program Files/LLVM/bin/lld-link.exe",
+    msvc_lib_path = "C:/Program Files/LLVM/bin/llvm-lib.exe",
     cxx_builtin_include_directories = [        "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.27.29110\\include",
         "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\ucrt",
         "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\shared",
         "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\um",
         "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\winrt",
-        "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\cppwinrt"],
+        "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\cppwinrt",
+        "C:\\Program Files\\LLVM\\lib\\clang\\10.0.0\\include"],
     tool_paths = {
-        "ar": "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.27.29110/bin/HostX64/x64/lib.exe",
+        "ar": "C:/Program Files/LLVM/bin/llvm-lib.exe",
         "ml": "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.27.29110/bin/HostX64/x64/ml64.exe",
-        "cpp": "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.27.29110/bin/HostX64/x64/cl.exe",
-        "gcc": "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.27.29110/bin/HostX64/x64/cl.exe",
+        "cpp": "C:/Program Files/LLVM/bin/clang-cl.exe",
+        "gcc": "C:/Program Files/LLVM/bin/clang-cl.exe",
         "gcov": "wrapper/bin/msvc_nop.bat",
-        "ld": "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.27.29110/bin/HostX64/x64/link.exe",
+        "ld": "C:/Program Files/LLVM/bin/lld-link.exe",
         "nm": "wrapper/bin/msvc_nop.bat",
         "objcopy": "wrapper/bin/msvc_nop.bat",
         "objdump": "wrapper/bin/msvc_nop.bat",
         "strip": "wrapper/bin/msvc_nop.bat",
     },
     default_link_flags = ["/MACHINE:X64"],
-    dbg_mode_debug_flag = "/DEBUG:FULL",
-    fastbuild_mode_debug_flag = "/DEBUG:FASTLINK",
+    dbg_mode_debug_flag = "/DEBUG",
+    fastbuild_mode_debug_flag = "/DEBUG",
 )
 
 toolchain(
@@ -270,7 +271,7 @@ cc_toolchain_config(
     msvc_env_tmp = "C:\\Windows\\Temp",
     msvc_env_path = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.27.29110\\bin\\HostX64\\x64;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\MSBuild\\Current\\bin\\Roslyn;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.18362.0\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\x64;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\\\MSBuild\\Current\\Bin;C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\Common7\\IDE\\;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\Common7\\Tools\\;;C:\\Windows\\system32",
     msvc_env_include = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.27.29110\\include;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\um;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\winrt;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\cppwinrt;C:\\Program Files\\LLVM\\lib\\clang\\10.0.0\\include",
-    msvc_env_lib = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.27.29110\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.18362.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.18362.0\\um\\x64;C:\\Program Files\\LLVM\\lib\\clang\\10.0.0\\lib\\windows",
+    msvc_env_lib = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.27.29110\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.18362.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.18362.0\\um\\x64;C:\\Program Files\\LLVM\\lib\\clang\\10.0.0\\lib\\windows;C:\\Program Files\\LLVM\\lib\\clang\\10.0.0\\lib\\windows",
     msvc_cl_path = "C:/Program Files/LLVM/bin/clang-cl.exe",
     msvc_ml_path = "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.27.29110/bin/HostX64/x64/ml64.exe",
     msvc_link_path = "C:/Program Files/LLVM/bin/lld-link.exe",
@@ -281,6 +282,7 @@ cc_toolchain_config(
         "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\um",
         "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\winrt",
         "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\cppwinrt",
+        "C:\\Program Files\\LLVM\\lib\\clang\\10.0.0\\include",
         "C:\\Program Files\\LLVM\\lib\\clang\\10.0.0\\include"],
     tool_paths = {
         "ar": "C:/Program Files/LLVM/bin/llvm-lib.exe",
