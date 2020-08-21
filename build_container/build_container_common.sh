@@ -10,7 +10,6 @@ function download_and_check () {
 }
 
 function install_gn(){
-
   # Install gn tools which will be used for building wee8
   if [[ "$(uname -m)" == "x86_64" ]]; then
     wget -O gntool.zip https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest
@@ -47,6 +46,7 @@ if [[ "$(uname -m)" == "x86_64" ]]; then
 fi
 
 if [[ "$(uname -m)" == "aarch64" ]]; then
+  # bazelisk
   VERSION=1.6.0
   download_and_check /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v${VERSION}/bazelisk-linux-arm64 \
     4a74d233008ec4a59d07fd8ba67cb4acbf7331acb0458aead16f8a4eb1995f9e
@@ -74,7 +74,12 @@ tar zxf lcov-${LCOV_VERSION}.tar.gz
 make -C lcov-${LCOV_VERSION} install
 rm -rf "lcov-${LCOV_VERSION}" "./lcov-${LCOV_VERSION}.tar.gz"
 
-# MSAN
+
+# Install sanitizer instrumented libc++, skipping for architectures other than x86_64 for now.
+if [[ "$(uname -m)" != "x86_64" ]]; then
+  exit 0
+fi
+
 export PATH="/opt/llvm/bin:${PATH}"
 
 WORKDIR=$(mktemp -d)
@@ -83,36 +88,31 @@ function cleanup {
 }
 
 trap cleanup EXIT
-
-cd "${WORKDIR}"
-
+pushd "${WORKDIR}"
 curl -sSfL "https://github.com/llvm/llvm-project/archive/llvmorg-${LLVM_VERSION}.tar.gz" | tar zx
 
-mkdir msan
-pushd msan
+function install_libcxx() {
+  local LLVM_USE_SANITIZER=$1
+  local LIBCXX_PATH=$2
 
-cmake -GNinja -DLLVM_ENABLE_PROJECTS="libcxxabi;libcxx" -DLLVM_USE_LINKER=lld -DLLVM_USE_SANITIZER=Memory -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX="/opt/libcxx_msan" "../llvm-project-llvmorg-${LLVM_VERSION}/llvm"
-ninja install-cxx install-cxxabi
+  mkdir "${LIBCXX_PATH}"
+  pushd "${LIBCXX_PATH}"
 
-if [[ ! -z "$(diff -r /opt/libcxx_msan/include/c++ /opt/llvm/include/c++)" ]]; then
-  echo "Different libc++ is installed";
-  exit 1
-fi
-
-rm -rf /opt/libcxx_msan/include
-
-popd
-
-if [[ "$(uname -m)" == "x86_64" ]]; then
-  mkdir tsan
-  pushd tsan
-
-  cmake -GNinja -DLLVM_ENABLE_PROJECTS="libcxxabi;libcxx" -DLLVM_USE_LINKER=lld -DLLVM_USE_SANITIZER=Thread -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX="/opt/libcxx_tsan" "../llvm-project-llvmorg-${LLVM_VERSION}/llvm"
+  cmake -GNinja -DLLVM_ENABLE_PROJECTS="libcxxabi;libcxx" -DLLVM_USE_LINKER=lld -DLLVM_USE_SANITIZER=${LLVM_USE_SANITIZER} -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX="/opt/libcxx_${LIBCXX_PATH}" "../llvm-project-llvmorg-${LLVM_VERSION}/llvm"
   ninja install-cxx install-cxxabi
 
-  rm -rf /opt/libcxx_tsan/include
+  if [[ ! -z "$(diff -r /opt/libcxx_${LIBCXX_PATH}/include/c++ /opt/llvm/include/c++)" ]]; then
+    echo "Different libc++ is installed";
+    exit 1
+  fi
+
+  rm -rf "/opt/libcxx_${LIBCXX_PATH}/include"
 
   popd
-fi
+}
+
+install_libcxx MemoryWithOrigins msan
+install_libcxx Thread tsan
+
+popd
