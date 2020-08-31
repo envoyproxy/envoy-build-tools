@@ -85,7 +85,8 @@ case $ARCH in
         ;;
 esac
 
-apt-get install -y aspell
+# additional apt installs
+apt-get install -y aspell shellcheck
 rm -rf /var/lib/apt/lists/*
 
 # Setup tcpdump for non-root.
