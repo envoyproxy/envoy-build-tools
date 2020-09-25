@@ -38,7 +38,7 @@ esac
 
 # Bazel query is the right command so bazel won't fail itself.
 # Keep bazel versions here at most two: current master version, next version
-for BAZEL_VERSION in "3.3.1" "3.4.1"; do
+for BAZEL_VERSION in "3.4.1" "3.5.0"; do
   for RBE_BAZEL_TARGET in ${RBE_BAZEL_TARGET_LIST}; do
     USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} ${RBE_BAZEL_TARGET}
   done
