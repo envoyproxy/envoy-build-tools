@@ -59,7 +59,6 @@ DisableService LanmanWorkstation
 DisableService MSDTC
 DisableService SysMain
 DisableService usosvc
-DisableService WinHttpAutoProxySvc
 DisableService WinRM
 
 # Ensures paths rooted at /c/ can be found by programs running via msys2 shell
