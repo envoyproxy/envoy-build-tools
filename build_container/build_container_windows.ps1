@@ -146,17 +146,12 @@ RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools
 AddToPath C:\tools\msys64\usr\bin
 RunAndCheckError "bash.exe" @("-c", "pacman-key --init")
 RunAndCheckError "bash.exe" @("-c", "pacman-key --populate msys2")
-# Force update of package db
-RunAndCheckError "pacman.exe" @("-Syy", "--noconfirm")
-# TODO(sunjayBhatia, wrowe): pacman core package update causes building with latest
-# Docker to hang between completion of this script and before discarding intermediate
-# build container (that is reported as exited). Skipping the existing package updates
-# for now until we have a resolution.
-# Docker version running in AZP at last check: 19.03.5
-# Update core packages (msys2, pacman, bash, etc.)
-# RunAndCheckError "pacman.exe" @("-Suu", "--noconfirm")
-# Update remaining packages (and package db refresh in case previous step requires it)
-# RunAndCheckError "pacman.exe" @("-Syu", "--noconfirm")
+# Force update of package db and packages, run until nothing to do
+$output = ""
+while (!($output -match "there is nothing to do")) {
+    $output=(RunAndCheckError "pacman.exe" @("-Syuu", "--noconfirm"))
+    echo $output
+}
 RunAndCheckError "pacman.exe" @("-S", "--noconfirm", "--needed", "git", "subversion", "diffutils", "patch", "unzip", "zip")
 RunAndCheckError "pacman.exe" @("-Scc", "--noconfirm")
 
