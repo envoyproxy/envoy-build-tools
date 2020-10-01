@@ -45,6 +45,22 @@ function RunAndCheckError
     echo "done."
 }
 
+function DisableService
+{
+    param([string] $serviceName)
+
+    echo "Disabling service '$serviceName'"
+    Set-Service -Name $serviceName -StartupType Disabled
+    Stop-Service -Force -Name $serviceName
+}
+
+DisableService DiagTrack
+DisableService LanmanWorkstation
+DisableService MSDTC
+DisableService SysMain
+DisableService usosvc
+DisableService WinRM
+
 # Ensures paths rooted at /c/ can be found by programs running via msys2 shell
 RunAndCheckError "cmd.exe" @("/s", "/c", "mklink /D C:\c C:\")
 
