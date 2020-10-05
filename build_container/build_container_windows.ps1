@@ -155,8 +155,8 @@ RunAndCheckError "$env:TEMP\7z-installer.exe" @("/S", "/D=$quo$env:TEMP\7z$quo")
 
 # msys2 with additional required packages
 DownloadAndCheck $env:TEMP\msys2.tar.xz `
-                 http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20200720.tar.xz `
-                 24f0a7a3f499d9309bb55bcde5d34a08e752922c3bee9de3a33d2c40896a1496
+                 https://github.com/msys2/msys2-installer/releases/download/2020-09-03/msys2-base-x86_64-20200903.tar.xz `
+                 9d5700a2a8148837bd3869f4940f53d2e46ebfa4148de35c21ca49bf2c239f27
 RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar.xz", "-o$env:TEMP\msys2.tar", "-y")
 RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
 AddToPath C:\tools\msys64\usr\bin
