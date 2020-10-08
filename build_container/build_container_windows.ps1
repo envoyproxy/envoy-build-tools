@@ -146,6 +146,14 @@ RunAndCheckError "python.exe" @("-m", "pip", "install", "--upgrade", "pip")
 # Install wheel so rules_python rules will run
 RunAndCheckError "pip.exe" @("install", "wheel")
 
+# OpenSSL (installed to override openssl from msys2 which suffers from fork-emulation/DLL load issues)
+DownloadAndCheck $env:TEMP\openssl-installer.exe `
+                 https://slproweb.com/download/Win64OpenSSL_Light-1_1_1h.exe `
+                 7337d933f5a79d52596745d0b6b7734a4d1e5e0906ac49a6f99188f7110173a3
+# Arguments taken from: https://chocolatey.org/packages/openssl#files
+RunAndCheckError "$env:TEMP\openssl-installer.exe" @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/SP-") $true
+AddToPath $env:ProgramFiles\OpenSSL-Win64\bin
+
 # 7z only to unpack msys2
 DownloadAndCheck $env:TEMP\7z-installer.exe `
                  https://www.7-zip.org/a/7z1900-x64.exe `
