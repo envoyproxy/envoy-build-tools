@@ -22,6 +22,14 @@ function install_gn(){
     download_and_check /usr/local/bin/gn https://github.com/envoyproxy/envoy-build-tools/releases/download/build-tools/gn-arm64 \
       37f2960d488251760c56683dcf2cc4dfb2c2c13af476f86475eee206fafe21e2
     chmod +x /usr/local/bin/gn
+  elif [[ "$(uname -m)" == "mips64el" || "$(uname -m)" == "mips64le" || "$(uname -m)" == "mips64" ]]; then
+     git clone https://gn.googlesource.com/gn
+     cd gn
+     python build/gen.py
+     ninja -C out
+     cp out/gn /usr/local/bin/gn
+     chmod +x /usr/local/bin/gn
+     cd ..
   fi
 }
 
@@ -53,13 +61,16 @@ if [[ "$(uname -m)" == "aarch64" ]]; then
   chmod +x /usr/local/bin/bazel
 fi
 
-LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-${LLVM_DISTRO}"
-LLVM_DOWNLOAD_PREFIX=${LLVM_DOWNLOAD_PREFIX:-https://github.com/llvm/llvm-project/releases/download/llvmorg-}
-download_and_check "${LLVM_RELEASE}.tar.xz" "${LLVM_DOWNLOAD_PREFIX}${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz" "${LLVM_SHA256SUM}"
-tar Jxf "${LLVM_RELEASE}.tar.xz"
-mv "./${LLVM_RELEASE}" /opt/llvm
-chown -R root:root /opt/llvm
-rm "./${LLVM_RELEASE}.tar.xz"
+
+if [[ "$(uname -m)" != "mips64el" && "$(uname -m)" != "mips64le" ]]; then
+  LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-${LLVM_DISTRO}"
+  LLVM_DOWNLOAD_PREFIX=${LLVM_DOWNLOAD_PREFIX:-https://github.com/llvm/llvm-project/releases/download/llvmorg-}
+  download_and_check "${LLVM_RELEASE}.tar.xz" "${LLVM_DOWNLOAD_PREFIX}${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz" "${LLVM_SHA256SUM}"
+  tar Jxf "${LLVM_RELEASE}.tar.xz"
+  mv "./${LLVM_RELEASE}" /opt/llvm
+  chown -R root:root /opt/llvm
+  rm "./${LLVM_RELEASE}.tar.xz"
+fi
 echo "/opt/llvm/lib" > /etc/ld.so.conf.d/llvm.conf
 ldconfig
 
