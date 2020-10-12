@@ -40,5 +40,5 @@ platform(
         "@bazel_tools//platforms:x86_64",
         "@bazel_tools//tools/cpp:clang",
     ],
-    exec_properties = {"container-image": "docker://gcr.io/envoy-ci/envoy-build@sha256:1fe9405de6eccd44369ea393b507a80bd48d7782463463de1d2c02c751f4a66b", "OSFamily": "Linux", "dockerAddCapabilities": "SYS_PTRACE,NET_RAW,NET_ADMIN", "dockerNetwork": "standard"},
+    exec_properties = {"container-image": "docker://gcr.io/envoy-ci/envoy-build@sha256:566c2488fb30d7a8bbe8f96a238c924362d807a03b8e58b9db0970ce30b6e9a1", "OSFamily": "Linux", "dockerAddCapabilities": "SYS_PTRACE,NET_RAW,NET_ADMIN", "dockerNetwork": "standard"},
 )
