@@ -1,6 +1,5 @@
-# TODO: determine how we want to deal with auto-assignment
-# By default, @envoyproxy/maintainers own everything.
-# *       @envoyproxy/maintainers
+# By default, @envoyproxy/build-tools-maintainers own everything.
+*       @envoyproxy/build-tools-maintainers
 
 # Windows build container config
 /build_container/*windows* @envoyproxy/windows-dev
