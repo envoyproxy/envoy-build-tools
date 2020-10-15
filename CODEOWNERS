@@ -1,5 +1,5 @@
 # By default, @envoyproxy/build-tools-maintainers own everything.
-*       @envoyproxy/build-tools-maintainers @envoyproxy/dependency-shepherds
+* @envoyproxy/build-tools-maintainers @envoyproxy/dependency-shepherds
 
 # Windows build container config
 /build_container/*windows* @envoyproxy/windows-dev
