@@ -20,10 +20,10 @@ function AddToPath
     param([string] $directory)
 
     $oldPath = (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).Path
-    $newPath = "$oldPath;$directory"
+    $newPath = "$directory;$oldPath"
     Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $newPath
     # Add to local path so subsequent commands have access to the executables they need
-    $env:PATH += ";$directory"
+    $env:PATH = "$directory;$env:PATH"
     echo "Added $directory to PATH"
 }
 
@@ -98,7 +98,10 @@ echo @"
 }
 "@ > $env:TEMP\vs_buildtools_config
 RunAndCheckError "cmd.exe" @("/s", "/c", "$env:TEMP\vs_buildtools.exe --addProductLang en-US --quiet --wait --norestart --nocache --config $env:TEMP\vs_buildtools_config")
-AddToPath (Resolve-Path "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\*\bin\Hostx64\x64").Path
+$msvcBasePath = "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC"
+$msvcFullPath = Join-Path -Path $msvcBasePath -ChildPath "Tools\MSVC\*\bin\Hostx64\x64" -Resolve
+AddToPath $msvcFullPath
+[System.Environment]::SetEnvironmentVariable('BAZEL_VC', $msvcBasePath)
 
 # CMake to ensure a 64-bit build of the tool (VS BuildTools ships a 32-bit build)
 DownloadAndCheck $env:TEMP\cmake.msi `
@@ -160,8 +163,8 @@ DownloadAndCheck $env:TEMP\msys2.tar.xz `
 RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar.xz", "-o$env:TEMP\msys2.tar", "-y")
 RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
 AddToPath C:\tools\msys64\usr\bin
-RunAndCheckError "bash.exe" @("-c", "pacman-key --init")
-RunAndCheckError "bash.exe" @("-c", "pacman-key --populate msys2")
+RunAndCheckError "C:\tools\msys64\usr\bin\bash.exe" @("-c", "pacman-key --init")
+RunAndCheckError "C:\tools\msys64\usr\bin\bash.exe" @("-c", "pacman-key --populate msys2")
 # Force update of package db
 RunAndCheckError "pacman.exe" @("-Syy", "--noconfirm")
 # TODO(sunjayBhatia, wrowe): pacman core package update causes building with latest
