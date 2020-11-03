@@ -81,7 +81,7 @@ PACKAGES=(
     zip)
 
 # todo: remove this once kitware repo is fixed
-if [ "$ARCH" == "aarch64" ]; then
+if [[ "$ARCH" == "aarch64" ]]; then
     PACKAGES+=("cmake-data=3.10.2-1ubuntu2.18.04.1")
 else
     PACKAGES+=("cmake-data")
