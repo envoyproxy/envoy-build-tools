@@ -127,7 +127,7 @@ case $ARCH in
 esac
 
 # additional apt installs
-apt-get install -y aspell
+apt-get install -y aspell expect
 rm -rf /var/lib/apt/lists/*
 
 # upstream install of shellcheck (taken from https://askubuntu.com/a/1228181)
