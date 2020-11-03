@@ -44,9 +44,50 @@ apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
 
 apt-get update -y
 
-apt-get install -y --no-install-recommends docker-ce-cli wget make cmake git python python-pip python-setuptools python3 python3-pip \
-  python3-setuptools python3-yaml unzip bc libtool automake zip time gdb strace tshark tcpdump patch xz-utils rsync ssh-client \
-  google-cloud-sdk libncurses-dev doxygen graphviz python3.8 ninja-build bzip2 sudo
+PACKAGES=(
+    automake
+    bc
+    bzip2
+    cmake
+    docker-ce-cli
+    doxygen
+    gdb
+    git
+    google-cloud-sdk
+    graphviz
+    libncurses-dev
+    libtool
+    make
+    ninja-build
+    patch
+    python
+    python-pip
+    python-setuptools
+    python3
+    python3-pip
+    python3-setuptools
+    python3-yaml
+    python3.8
+    rsync
+    ssh-client
+    strace
+    sudo
+    tcpdump
+    time
+    tshark
+    unzip
+    wget
+    xz-utils
+    zip)
+
+# todo: remove this once kitware repo is fixed
+if [ "$ARCH" == "aarch64" ]; then
+    PACKAGES+=("cmake-data=3.10.2-1ubuntu2.18.04.1")
+else
+    PACKAGES+=("cmake-data")
+fi
+
+apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 
 # Set LLVM version for each cpu architecture.
 LLVM_VERSION=10.0.0
