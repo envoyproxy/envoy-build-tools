@@ -19,11 +19,11 @@ function AddToPath
 {
     param([string] $directory)
 
-    $oldPath = (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).Path
+    $oldPath = [Environment]::GetEnvironmentVariable('Path', [EnvironmentVariableTarget]::Machine)
     $newPath = "$directory;$oldPath"
-    Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $newPath
     # Add to local path so subsequent commands have access to the executables they need
     $env:PATH = "$directory;$env:PATH"
+    [System.Environment]::SetEnvironmentVariable('Path', $newPath, [System.EnvironmentVariableTarget]::Machine)
     echo "Added $directory to PATH"
 }
 
