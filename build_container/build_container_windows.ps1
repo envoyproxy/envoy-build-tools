@@ -136,11 +136,11 @@ DownloadAndCheck $env:TEMP\python3-installer.exe `
                  fd2e2c6612d43bb6b213b72fc53f07d73d99059fa72c96e44bde12e7815073ae
 # python installer needs to be run as an installer with Start-Process
 RunAndCheckError "$env:TEMP\python3-installer.exe" @("/quiet", "InstallAllUsers=1", "Include_launcher=0", "InstallLauncherAllUsers=0") $true
-AddToPath $env:ProgramFiles\Python38
-AddToPath $env:ProgramFiles\Python38\Scripts
+AddToPath $env:ProgramFiles\Python39
+AddToPath $env:ProgramFiles\Python39\Scripts
 # Add symlinks for canonical executables expected in a Python environment
-RunAndCheckError "cmd.exe" @("/c", "mklink", "$env:ProgramFiles\Python38\python3.exe", "$env:ProgramFiles\Python38\python.exe")
-RunAndCheckError "cmd.exe" @("/c", "mklink", "$env:ProgramFiles\Python38\python3.8.exe", "$env:ProgramFiles\Python38\python.exe")
+RunAndCheckError "cmd.exe" @("/c", "mklink", "$env:ProgramFiles\Python39\python3.exe", "$env:ProgramFiles\Python39\python.exe")
+RunAndCheckError "cmd.exe" @("/c", "mklink", "$env:ProgramFiles\Python39\python3.9.exe", "$env:ProgramFiles\Python39\python.exe")
 # Upgrade pip
 RunAndCheckError "python.exe" @("-m", "pip", "install", "--upgrade", "pip")
 # Install wheel so rules_python rules will run
