@@ -39,17 +39,17 @@ if [[ "$(uname -m)" == "x86_64" ]]; then
   chmod +x /usr/local/bin/buildozer
 
   # bazelisk
-  VERSION=1.6.0
+  VERSION=1.7.4
   download_and_check /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v${VERSION}/bazelisk-linux-amd64 \
-    616f65bcdcfd134a19d5d86c591c35098d7732be26145bf06f02ec9e3e52700c
+    ab258203db518a54cbd5afa80864d5a3bb366058b95e7a7df4134b0b7765a378
   chmod +x /usr/local/bin/bazel
 fi
 
 if [[ "$(uname -m)" == "aarch64" ]]; then
   # bazelisk
-  VERSION=1.6.0
+  VERSION=1.7.4
   download_and_check /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v${VERSION}/bazelisk-linux-arm64 \
-    4a74d233008ec4a59d07fd8ba67cb4acbf7331acb0458aead16f8a4eb1995f9e
+    aea0ff1036bd4c3703c5c10d07a059d885f2f6ad2f36c2175fc45a1f774ee341
   chmod +x /usr/local/bin/bazel
 fi
 
