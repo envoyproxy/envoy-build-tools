@@ -75,15 +75,15 @@ mkdir -Force C:\tools
 # Bazelisk
 mkdir -Force C:\tools\bazel
 DownloadAndCheck C:\tools\bazel\bazel.exe `
-                 https://github.com/bazelbuild/bazelisk/releases/download/v1.5.0/bazelisk-windows-amd64.exe `
-                 67149e87d51eb2b34d8b22ee0aa4ae63550919d3f2792f863eaabf9e78826a60
+                 https://github.com/bazelbuild/bazelisk/releases/download/v1.7.4/bazelisk-windows-amd64.exe `
+                 ea612bd2e16a793eb9a3d0d5591f08d0a4ff2f4e94540a51a4653f4368b3d019
 AddToPath C:\tools\bazel
 
 # VS 2019 Build Tools
-# Pinned to version 16.7 downloaded on 8/11/2020 via https://aka.ms/vs/16/release/vs_buildtools.exe
+# Pinned to version 16.8.1 downloaded on 11/13/2020 via https://aka.ms/vs/16/release/vs_buildtools.exe
 DownloadAndCheck $env:TEMP\vs_buildtools.exe `
-                 https://download.visualstudio.microsoft.com/download/pr/e3850c73-59c6-4c05-9db6-a47a74b67daf/dcb113a854b2cb2141755b6a35c4b9aac6f109081bee45649ec2fcc594b0d7a6/vs_BuildTools.exe `
-                 dcb113a854b2cb2141755b6a35c4b9aac6f109081bee45649ec2fcc594b0d7a6
+                 https://download.visualstudio.microsoft.com/download/pr/2f4a234d-6e7c-4049-8248-6d9ac0d05c96/ea70cf3199618ad874a552f45262c1b5b06f14a09fcaa0b459746aea0a9ac761/vs_BuildTools.exe `
+                 ea70cf3199618ad874a552f45262c1b5b06f14a09fcaa0b459746aea0a9ac761
 # See: https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019#c-build-tools
 # The "Microsoft.VisualStudio.Workload.MSBuildTools" and it's components are added
 # by the installer and cannot be supressed.
@@ -102,16 +102,16 @@ AddToPath (Resolve-Path "C:\Program Files (x86)\Microsoft Visual Studio\2019\Bui
 
 # CMake to ensure a 64-bit build of the tool (VS BuildTools ships a 32-bit build)
 DownloadAndCheck $env:TEMP\cmake.msi `
-                 https://github.com/Kitware/CMake/releases/download/v3.18.0/cmake-3.18.0-win64-x64.msi `
-                 1597eef91b39fe4b34bab506158e34aa3a89490c519c97ac75a7c5d45885e345
+                 https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4-win64-x64.msi `
+                 7e0cf19d4a1ea31de78487306c0126ec6326ab509d95e56dd4d604e9c0b34317
 RunAndCheckError "msiexec.exe" @("/i", "$env:TEMP\cmake.msi", "/quiet", "/norestart") $true
 AddToPath $env:ProgramFiles\CMake\bin
 
 # Ninja to ensure a 64-bit build of the tool (VS BuildTools ships a 32-bit build)
 mkdir -Force C:\tools\ninja
 DownloadAndCheck $env:TEMP\ninja.zip `
-                 https://github.com/ninja-build/ninja/releases/download/v1.10.0/ninja-win.zip `
-                 919fd158c16bf135e8a850bb4046ec1ce28a7439ee08b977cd0b7f6b3463d178
+                 https://github.com/ninja-build/ninja/releases/download/v1.10.1/ninja-win.zip `
+                 5d1211ea003ec9760ad7f5d313ebf0b659d4ffafa221187d2b4444bc03714a33
 Expand-Archive -Path $env:TEMP\ninja.zip -DestinationPath C:\tools\ninja
 AddToPath C:\tools\ninja
 
@@ -123,24 +123,24 @@ RunAndCheckError $env:TEMP\LLVM-win64.exe @("/S") $true
 AddToPath $env:ProgramFiles\LLVM\bin
 
 # NASM (preferred by some OSS projects over MS ml.exe, closer to gnu/intel syntax)
-$nasmVersion = "2.15.03"
+$nasmVersion = "2.15.05"
 DownloadAndCheck $env:TEMP\nasm-win64.zip `
                  https://www.nasm.us/pub/nasm/releasebuilds/$nasmVersion/win64/nasm-$nasmVersion-win64.zip `
-                 e598d1a9c98345f8436750f42d1f7c5d75ba739919eef37cd9ae8406e6a38802
+                 f5c93c146f52b4f1664fa3ce6579f961a910e869ab0dae431bd871bdd2584ef2
 Expand-Archive -Path $env:TEMP\nasm-win64.zip -DestinationPath C:\tools\
 AddToPath C:\tools\nasm-$nasmVersion
 
 # Python3 (do not install via msys2 or the MS store's flavors, this version follows Win32 semantics)
 DownloadAndCheck $env:TEMP\python3-installer.exe `
-                 https://www.python.org/ftp/python/3.8.5/python-3.8.5-amd64.exe `
-                 cd427c7b17337d7c13761ca20877d2d8be661bd30415ddc17072a31a65a91b64
+                 https://www.python.org/ftp/python/3.9.0/python-3.9.0-amd64.exe `
+                 fd2e2c6612d43bb6b213b72fc53f07d73d99059fa72c96e44bde12e7815073ae
 # python installer needs to be run as an installer with Start-Process
 RunAndCheckError "$env:TEMP\python3-installer.exe" @("/quiet", "InstallAllUsers=1", "Include_launcher=0", "InstallLauncherAllUsers=0") $true
-AddToPath $env:ProgramFiles\Python38
-AddToPath $env:ProgramFiles\Python38\Scripts
+AddToPath $env:ProgramFiles\Python39
+AddToPath $env:ProgramFiles\Python39\Scripts
 # Add symlinks for canonical executables expected in a Python environment
-RunAndCheckError "cmd.exe" @("/c", "mklink", "$env:ProgramFiles\Python38\python3.exe", "$env:ProgramFiles\Python38\python.exe")
-RunAndCheckError "cmd.exe" @("/c", "mklink", "$env:ProgramFiles\Python38\python3.8.exe", "$env:ProgramFiles\Python38\python.exe")
+RunAndCheckError "cmd.exe" @("/c", "mklink", "$env:ProgramFiles\Python39\python3.exe", "$env:ProgramFiles\Python39\python.exe")
+RunAndCheckError "cmd.exe" @("/c", "mklink", "$env:ProgramFiles\Python39\python3.9.exe", "$env:ProgramFiles\Python39\python.exe")
 # Upgrade pip
 RunAndCheckError "python.exe" @("-m", "pip", "install", "--upgrade", "pip")
 # Install wheel so rules_python rules will run
@@ -155,8 +155,8 @@ RunAndCheckError "$env:TEMP\7z-installer.exe" @("/S", "/D=$quo$env:TEMP\7z$quo")
 
 # msys2 with additional required packages
 DownloadAndCheck $env:TEMP\msys2.tar.xz `
-                 https://github.com/msys2/msys2-installer/releases/download/2020-09-03/msys2-base-x86_64-20200903.tar.xz `
-                 9d5700a2a8148837bd3869f4940f53d2e46ebfa4148de35c21ca49bf2c239f27
+                 https://github.com/msys2/msys2-installer/releases/download/2020-11-09/msys2-base-x86_64-20201109.tar.xz `
+                 ca10a72aa3df219fabeff117aa4b00c1ec700ea93c4febf4cfc03083f4b2cacb
 RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar.xz", "-o$env:TEMP\msys2.tar", "-y")
 RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
 AddToPath C:\tools\msys64\usr\bin
