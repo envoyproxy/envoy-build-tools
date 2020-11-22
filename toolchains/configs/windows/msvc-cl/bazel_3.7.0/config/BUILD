@@ -21,24 +21,22 @@ package(default_visibility = ["//visibility:public"])
 toolchain(
     name = "cc-toolchain",
     exec_compatible_with = [
-        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:windows",
         "@bazel_tools//platforms:x86_64",
-        "@bazel_tools//tools/cpp:clang",
     ],
     target_compatible_with = [
-        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:windows",
         "@bazel_tools//platforms:x86_64",
     ],
-    toolchain = "//toolchains/configs/linux/clang_libcxx/bazel_3.4.1/cc:cc-compiler-k8",
+    toolchain = "//toolchains/configs/windows/msvc-cl/bazel_3.7.0/cc:cc-compiler-x64_windows",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
 platform(
     name = "platform",
     constraint_values = [
-        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:windows",
         "@bazel_tools//platforms:x86_64",
-        "@bazel_tools//tools/cpp:clang",
     ],
-    exec_properties = {"container-image": "docker://gcr.io/envoy-ci/envoy-build@sha256:770d956ba334c0e7700342c7e003bcc55f6ed68bf38a573b3f33a4ec95dbfbf6", "OSFamily": "Linux", "dockerAddCapabilities": "SYS_PTRACE,NET_RAW,NET_ADMIN", "dockerNetwork": "standard"},
+    exec_properties = {"container-image": "docker://gcr.io/envoy-ci/envoy-build-windows@sha256:893745f17f37bcb4e2bf032355cd2b35eff190304e4b3c4b5a250e06328295a3", "OSFamily": "Windows"},
 )
