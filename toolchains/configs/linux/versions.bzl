@@ -5,9 +5,9 @@ toolchain_config_spec0 = struct(config_repos = [], create_cc_configs = True, cre
 toolchain_config_spec1 = struct(config_repos = [], create_cc_configs = True, create_java_configs = False, env = {"BAZEL_COMPILER": "clang", "BAZEL_LINKLIBS": "-l%:libc++.a:-l%:libc++abi.a", "BAZEL_LINKOPTS": "-lm:-pthread:-fuse-ld=lld", "BAZEL_USE_LLVM_NATIVE_COVERAGE": "1", "GCOV": "llvm-profdata", "CC": "clang", "CXX": "clang++", "PATH": "/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/llvm/bin", "BAZEL_CXXOPTS": "-stdlib=libc++", "CXXFLAGS": "-stdlib=libc++"}, java_home = None, name = "clang_libcxx")
 toolchain_config_spec2 = struct(config_repos = [], create_cc_configs = True, create_java_configs = False, env = {"BAZEL_COMPILER": "gcc", "BAZEL_LINKLIBS": "-l%:libstdc++.a", "BAZEL_LINKOPTS": "-lm", "CC": "gcc", "CXX": "g++", "PATH": "/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/llvm/bin"}, java_home = None, name = "gcc")
 _TOOLCHAIN_CONFIG_SPECS = [toolchain_config_spec0,toolchain_config_spec1,toolchain_config_spec2]
-_BAZEL_TO_CONFIG_SPEC_NAMES = {"3.4.1": ["clang", "clang_libcxx", "gcc"], "3.6.0": ["clang", "clang_libcxx", "gcc"]}
-LATEST = "sha256:566c2488fb30d7a8bbe8f96a238c924362d807a03b8e58b9db0970ce30b6e9a1"
-CONTAINER_TO_CONFIG_SPEC_NAMES = {"sha256:566c2488fb30d7a8bbe8f96a238c924362d807a03b8e58b9db0970ce30b6e9a1": ["clang", "clang_libcxx", "gcc"]}
+_BAZEL_TO_CONFIG_SPEC_NAMES = {"3.6.0": ["clang", "clang_libcxx", "gcc"], "3.7.0": ["clang", "clang_libcxx", "gcc"]}
+LATEST = "sha256:29bc19dbc012fb9a7f45a41372de59ae6397381f94c14f77fd6d46f5d9c38502"
+CONTAINER_TO_CONFIG_SPEC_NAMES = {"sha256:29bc19dbc012fb9a7f45a41372de59ae6397381f94c14f77fd6d46f5d9c38502": ["clang", "clang_libcxx", "gcc"]}
 _DEFAULT_TOOLCHAIN_CONFIG_SPEC = toolchain_config_spec0
 TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct(
         bazel_to_config_spec_names_map = _BAZEL_TO_CONFIG_SPEC_NAMES,
