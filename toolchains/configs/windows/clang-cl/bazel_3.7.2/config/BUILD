@@ -28,7 +28,7 @@ toolchain(
         "@bazel_tools//platforms:windows",
         "@bazel_tools//platforms:x86_64",
     ],
-    toolchain = "//toolchains/configs/windows/clang-cl/bazel_3.7.0/cc:cc-compiler-x64_windows",
+    toolchain = "//toolchains/configs/windows/clang-cl/bazel_3.7.2/cc:cc-compiler-x64_windows",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
