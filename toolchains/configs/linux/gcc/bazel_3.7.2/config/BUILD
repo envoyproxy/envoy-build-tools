@@ -21,22 +21,24 @@ package(default_visibility = ["//visibility:public"])
 toolchain(
     name = "cc-toolchain",
     exec_compatible_with = [
-        "@bazel_tools//platforms:windows",
+        "@bazel_tools//platforms:linux",
         "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//tools/cpp:clang",
     ],
     target_compatible_with = [
-        "@bazel_tools//platforms:windows",
+        "@bazel_tools//platforms:linux",
         "@bazel_tools//platforms:x86_64",
     ],
-    toolchain = "//toolchains/configs/windows/msvc-cl/bazel_3.7.0/cc:cc-compiler-x64_windows",
+    toolchain = "//toolchains/configs/linux/gcc/bazel_3.7.2/cc:cc-compiler-k8",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
 platform(
     name = "platform",
     constraint_values = [
-        "@bazel_tools//platforms:windows",
+        "@bazel_tools//platforms:linux",
         "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//tools/cpp:clang",
     ],
-    exec_properties = {"container-image": "docker://gcr.io/envoy-ci/envoy-build-windows@sha256:664105e40acd48d9c9adec2e89d0ed30b52d790f2f712b3fd836efe61606ea56", "OSFamily": "Windows"},
+    exec_properties = {"container-image": "docker://gcr.io/envoy-ci/envoy-build@sha256:bf9c4343665d6433b64a8463e216a60cad6cceba57ebf16f9c213b61d682ef98", "OSFamily": "Linux", "dockerAddCapabilities": "SYS_PTRACE,NET_RAW,NET_ADMIN", "dockerNetwork": "standard"},
 )
