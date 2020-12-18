@@ -163,6 +163,8 @@ DownloadAndCheck $env:TEMP\msys2.tar.xz `
 RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar.xz", "-o$env:TEMP\msys2.tar", "-y")
 RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
 AddToPath C:\tools\msys64\usr\bin
+# To ensure msys2 link.exe (GNU link) does not conflict with link.exe from VC Build Tools
+mv -Force C:\tools\msys64\usr\bin\link.exe C:\tools\msys64\usr\bin\gnu-link.exe
 RunAndCheckError "C:\tools\msys64\usr\bin\bash.exe" @("-c", "pacman-key --init")
 RunAndCheckError "C:\tools\msys64\usr\bin\bash.exe" @("-c", "pacman-key --populate msys2")
 # Force update of package db
