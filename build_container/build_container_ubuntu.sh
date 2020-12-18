@@ -90,19 +90,19 @@ fi
 apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 
 # Set LLVM version for each cpu architecture.
-LLVM_VERSION=11.0.0
+LLVM_VERSION=10.0.0
 case $ARCH in
     'ppc64le' )
         LLVM_DISTRO=powerpc64le-linux-ubuntu-16.04
-        LLVM_SHA256SUM=82a55d0f659b76189c7c03d10b6db5d5a52ebc9a2071857e686668389581e6eb
+        LLVM_SHA256SUM=2d6298720d6aae7fcada4e909f0949d63e94fd0370d20b8882cdd91ceae7511c
         ;;
     'x86_64' )
-        LLVM_DISTRO=x86_64-linux-gnu-ubuntu-16.04
-        LLVM_SHA256SUM=abfe77fa4c2ceda16455fac9dba58962af9173c5aa85d5bb8ca4f5165ef87a19
+        LLVM_DISTRO=x86_64-linux-gnu-ubuntu-18.04
+        LLVM_SHA256SUM=b25f592a0c00686f03e3b7db68ca6dc87418f681f4ead4df4745a01d9be63843
         ;;
     'aarch64' )
         LLVM_DISTRO=aarch64-linux-gnu
-        LLVM_SHA256SUM=9ddc8d3fb445f2223db1bb5c54c0203257099240ba377df72e27db9ae31c0f86
+        LLVM_SHA256SUM=c2072390dc6c8b4cc67737f487ef384148253a6a97b38030e012c4d7214b7295
         ;;
 esac
 
