@@ -148,6 +148,7 @@ RunAndCheckError "cmd.exe" @("/c", "mklink", "$env:ProgramFiles\Python39\python3
 RunAndCheckError "python.exe" @("-m", "pip", "install", "--upgrade", "pip")
 # Install wheel so rules_python rules will run
 RunAndCheckError "pip.exe" @("install", "wheel")
+RunAndCheckError "pip.exe" @("install", "virtualenv")
 
 # 7z only to unpack msys2
 DownloadAndCheck $env:TEMP\7z-installer.exe `
