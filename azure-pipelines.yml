@@ -51,6 +51,7 @@ jobs:
       osFamily: "linux"
 
 - job: build_container_windows
+  timeoutInMinutes: 90
   strategy:
     matrix:
       windows2019:
