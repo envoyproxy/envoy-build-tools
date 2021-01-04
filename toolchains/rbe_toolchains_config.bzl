@@ -5,10 +5,10 @@ load("@envoy_build_tools//toolchains:configs/linux/versions.bzl", _generated_too
 load("@envoy_build_tools//toolchains:configs/windows/versions.bzl", _generated_toolchain_config_suite_autogen_spec_windows = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC")
 
 _ENVOY_BUILD_IMAGE_REGISTRY = "gcr.io"
-_ENVOY_BUILD_IMAGE_TAG = "9400637f4aa0232465407447bfda0d3da13549fb"
+_ENVOY_BUILD_IMAGE_TAG = "11efa5680d987fff33fde4af3cc5ece105015d04"
 
 _ENVOY_BUILD_IMAGE_REPOSITORY_LINUX = "envoy-ci/envoy-build"
-_ENVOY_BUILD_IMAGE_DIGEST_LINUX = "sha256:68b0137eb59185d9204b66c841b3101b494327c5eb2d81d21df864e258b5670f"
+_ENVOY_BUILD_IMAGE_DIGEST_LINUX = "sha256:0e215316ef89c556644e29f3336b929cd655e0f27c46b8686523d118a03abe42"
 _CONFIGS_OUTPUT_BASE_LINUX = "toolchains/configs/linux"
 
 _ENVOY_BUILD_IMAGE_REPOSITORY_WINDOWS = "envoy-ci/envoy-build-windows"
