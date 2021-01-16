@@ -14,7 +14,7 @@ fi
 
 # If we are committing changes, pull before modifying to ensure no conflicts
 if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
-  git pull origin refs/heads/master --ff-only
+  git pull origin refs/heads/main --ff-only
 fi
 
 UCASE_OS_FAMILY=`echo ${OS_FAMILY} | tr "[:lower:]" "[:upper:]"`
@@ -37,7 +37,7 @@ case ${OS_FAMILY} in
 esac
 
 # Bazel query is the right command so bazel won't fail itself.
-# Keep bazel versions here at most two: current master version, next version
+# Keep bazel versions here at most two: current main version, next version
 for BAZEL_VERSION in "3.7.2"; do
   for RBE_BAZEL_TARGET in ${RBE_BAZEL_TARGET_LIST}; do
     USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} ${RBE_BAZEL_TARGET}

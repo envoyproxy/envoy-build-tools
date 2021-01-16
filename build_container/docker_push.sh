@@ -17,7 +17,7 @@ fi
 
 CONTAINER_TAG=${CONTAINER_SHA} "./docker_build_${OS_FAMILY}.sh"
 
-if [[ "${SOURCE_BRANCH}" == "refs/heads/master" ]]; then
+if [[ "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
     docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
 
     MANIFESTS=""
