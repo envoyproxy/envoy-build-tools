@@ -5,14 +5,14 @@ load("@envoy_build_tools//toolchains:configs/linux/versions.bzl", _generated_too
 load("@envoy_build_tools//toolchains:configs/windows/versions.bzl", _generated_toolchain_config_suite_autogen_spec_windows = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC")
 
 _ENVOY_BUILD_IMAGE_REGISTRY = "gcr.io"
-_ENVOY_BUILD_IMAGE_TAG = "9400637f4aa0232465407447bfda0d3da13549fb"
+_ENVOY_BUILD_IMAGE_TAG = "c8fa4235714003ba0896287ee2f91cae06e0e407"
 
 _ENVOY_BUILD_IMAGE_REPOSITORY_LINUX = "envoy-ci/envoy-build"
-_ENVOY_BUILD_IMAGE_DIGEST_LINUX = "sha256:68b0137eb59185d9204b66c841b3101b494327c5eb2d81d21df864e258b5670f"
+_ENVOY_BUILD_IMAGE_DIGEST_LINUX = "sha256:a3c2f2f7f8aa541c5a38dd0d495388ff6c01e2535266594ddd056b8540d051ae"
 _CONFIGS_OUTPUT_BASE_LINUX = "toolchains/configs/linux"
 
 _ENVOY_BUILD_IMAGE_REPOSITORY_WINDOWS = "envoy-ci/envoy-build-windows"
-_ENVOY_BUILD_IMAGE_DIGEST_WINDOWS = "sha256:a1efcc9fcd25df70658d4dae5d5e7ed9f4ecf3dc93a194772870335556103c82"
+_ENVOY_BUILD_IMAGE_DIGEST_WINDOWS = "sha256:40a330c2bf3eef7bbc0e4958f888532b15ae30758d85bd7bd1009f47403e18dd"
 _CONFIGS_OUTPUT_BASE_WINDOWS = "toolchains/configs/windows"
 
 _CLANG_ENV = {
