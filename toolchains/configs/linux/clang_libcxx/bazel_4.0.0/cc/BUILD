@@ -88,6 +88,7 @@ cc_toolchain_config(
     "/opt/llvm/include/c++/v1"],
     tool_paths = {"ar": "/usr/bin/ar",
         "ld": "/usr/bin/ld",
+        "llvm-cov": "/opt/llvm/bin/llvm-cov",
         "cpp": "/usr/bin/cpp",
         "gcc": "/opt/llvm/bin/clang",
         "dwp": "/usr/bin/dwp",
