@@ -139,6 +139,15 @@ sudo cp shellcheck-v0.7.0/shellcheck /usr/local/bin
 rm -rf shellcheck-v0.7.0/ sc.checksum
 popd || exit 1
 
+# install clutter
+pushd /tmp || exit 1
+echo "9d5e80ae8da4b7bcbdb35356474a01079f0afa131dba04f9dbc95f27a26dbac6 /tmp/clutter" > clutter.checksum
+wget -qO- https://github.com/cluttercode/clutter/releases/download/0.2.1/clutter_0.2.1_Linux_x86_64.tar.gz | tar -xzf -
+sha256sum -c clutter.checksum
+sudo cp clutter /usr/local/bin
+rm -rf clutter clutter.checksum
+popd || exit 1
+
 # Setup tcpdump for non-root.
 groupadd -r pcap
 chgrp pcap /usr/sbin/tcpdump
