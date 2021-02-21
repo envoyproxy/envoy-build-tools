@@ -7,7 +7,10 @@ ARCH="$(uname -m)"
 # Setup basic requirements and install them.
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y --no-install-recommends software-properties-common apt-transport-https curl gpg-agent
+apt-get install -y --no-install-recommends locales software-properties-common apt-transport-https curl gpg-agent
+
+# set locale
+localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 
 # gcc-9
 add-apt-repository -y ppa:ubuntu-toolchain-r/test

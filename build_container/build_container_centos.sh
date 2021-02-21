@@ -11,6 +11,10 @@ yum install -y devtoolset-9-gcc devtoolset-9-gcc-c++ devtoolset-9-binutils java-
     rh-git218 wget unzip which make cmake3 patch ninja-build devtoolset-9-libatomic-devel openssl python27 \
     libtool autoconf tcpdump graphviz doxygen sudo
 
+# set locale
+localedef -c -f UTF-8 -i en_US en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
 ln -s /usr/bin/cmake3 /usr/bin/cmake
 
 # For LLVM to pick right libstdc++
@@ -41,7 +45,7 @@ chmod 750 /usr/sbin/tcpdump
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 
 # The build_container_common.sh will be skipped when building centOS
-# image on Arm64 platform since some building issues are still unsolved. 
+# image on Arm64 platform since some building issues are still unsolved.
 # It will be fixed until those issues solved on Arm64 platform.
 if [[ $(uname -m) == "aarch64" ]] && grep -q -e rhel /etc/*-release ; then
   echo "Now, the CentOS image can not be built on arm64 platform!"
