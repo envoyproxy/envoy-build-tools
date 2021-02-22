@@ -43,3 +43,6 @@ do
     echo "Build the $arch image"
     build_image $arch
 done
+
+echo "Test linux container: ${IMAGE_NAME}:${CONTAINER_NAME}"
+docker run --rm -v "$(pwd)/docker_test_linux.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" /test.sh

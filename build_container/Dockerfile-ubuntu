@@ -19,5 +19,7 @@ COPY ./build_container_ubuntu.sh /
 
 RUN ./build_container_ubuntu.sh
 
+ENV LANG en_US.utf8
+
 # Remove qemu program
 RUN rm -f /usr/bin/qemu-${QEMUARCH}-static
