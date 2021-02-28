@@ -17,35 +17,40 @@ if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
   git pull origin refs/heads/main --ff-only
 fi
 
-UCASE_OS_FAMILY=`echo ${OS_FAMILY} | tr "[:lower:]" "[:upper:]"`
-DOCKER_REPODIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${DOCKER_IMAGE} | grep -oE 'sha256:[0-9a-f]{64}')
-
-sed -i -E "s#(_ENVOY_BUILD_IMAGE_DIGEST_${UCASE_OS_FAMILY} =) \"sha256:[0-9a-f]{64}\"#\1 \"${DOCKER_REPODIGEST}\"#" toolchains/rbe_toolchains_config.bzl
-sed -i -E "s#(_ENVOY_BUILD_IMAGE_TAG =) \"[0-9a-f]{40}\"#\1 \"${CONTAINER_TAG}\"#" toolchains/rbe_toolchains_config.bzl
-
 rm -rf "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
 mkdir -p "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
 cp -vf "${RBE_AUTOCONF_ROOT}/toolchains/empty.bzl" "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}/versions.bzl"
 
 case ${OS_FAMILY} in
   linux)
-    RBE_BAZEL_TARGET_LIST="@rbe_ubuntu_clang_gen//... @rbe_ubuntu_clang_libcxx_gen//... @rbe_ubuntu_gcc_gen//..."
+    TOOLCHAIN_LIST="clang clang_libcxx gcc"
+    BAZELRC_TEMPLATE=${RBE_AUTOCONF_ROOT}/toolchains/linux.latest.bazelrc
     ;;
   windows)
-    RBE_BAZEL_TARGET_LIST="@rbe_windows_msvc_cl_gen//... @rbe_windows_clang_cl_gen//..."
+    TOOLCHAIN_LIST="@rbe_windows_msvc_cl_gen//... @rbe_windows_clang_cl_gen//..."
     ;;
 esac
 
-# Bazel query is the right command so bazel won't fail itself.
+BAZELRC_DEST=${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}/.latest.bazelrc
+
+# Fetch external dependencies
+bazel fetch :all
+
+# Build utility for generating RBE config
+RBE_CONFIG_GEN_DIR=$(bazel info output_base)/external/bazel_toolchains/cmd/rbe_configs_gen
+(cd "${RBE_CONFIG_GEN_DIR}" && go build)
+
 # Keep bazel versions here at most two: current main version, next version
 for BAZEL_VERSION in "3.7.2" "4.0.0"; do
-  for RBE_BAZEL_TARGET in ${RBE_BAZEL_TARGET_LIST}; do
-    USE_BAZEL_VERSION="${BAZEL_VERSION}" bazel query ${BAZEL_QUERY_OPTIONS} ${RBE_BAZEL_TARGET}
+  for TOOLCHAIN in ${TOOLCHAIN_LIST}; do
+    "${RBE_CONFIG_GEN_DIR}/rbe_configs_gen" -exec_os ${OS_FAMILY} -generate_java_configs=false -generate_cpp_configs -output_src_root "${RBE_AUTOCONF_ROOT}" -output_config_path toolchains/configs/${OS_FAMILY}/${TOOLCHAIN}/bazel_${BAZEL_VERSION} -target_os ${OS_FAMILY} -bazel_version ${BAZEL_VERSION} -toolchain_container ${DOCKER_IMAGE} -cpp_env_json "${RBE_AUTOCONF_ROOT}/toolchains/${TOOLCHAIN}.env.json"
   done
 done
 
+cp "${BAZELRC_TEMPLATE}" "${BAZELRC_DEST}"
+sed -i -E "s#BAZEL_VERSION#${BAZEL_VERSION}#g" "${BAZELRC_DEST}"
+
 git add "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
-git add "${RBE_AUTOCONF_ROOT}/toolchains/rbe_toolchains_config.bzl"
 
 if [[ -z "$(git diff HEAD --name-only)" ]]; then
   echo "No toolchain changes."

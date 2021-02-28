@@ -4,9 +4,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "bazel_toolchains",
-    sha256 = "4fb3ceea08101ec41208e3df9e56ec72b69f3d11c56629d6477c0ff88d711cf7",
-    strip_prefix = "bazel-toolchains-3.6.0",
-    urls = ["https://github.com/bazelbuild/bazel-toolchains/releases/download/3.6.0/bazel-toolchains-3.6.0.tar.gz"],
+    sha256 = "1adf7a8e9901287c644dcf9ca08dd8d67a69df94bedbd57a841490a84dc1e9ed",
+    strip_prefix = "bazel-toolchains-5.0.0",
+    urls = ["https://github.com/bazelbuild/bazel-toolchains/archive/v5.0.0.tar.gz"],
 )
 
 load(
@@ -16,6 +16,6 @@ load(
 
 bazel_toolchains_repositories()
 
-load("//toolchains:rbe_toolchains_config.bzl", "rbe_toolchains_config")
+#load("//toolchains:rbe_toolchains_config.bzl", "rbe_toolchains_config")
 
-rbe_toolchains_config(generator = True)
+#rbe_toolchains_config(generator = True)
