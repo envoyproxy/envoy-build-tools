@@ -19,7 +19,6 @@ fi
 
 rm -rf "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
 mkdir -p "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
-cp -vf "${RBE_AUTOCONF_ROOT}/toolchains/empty.bzl" "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}/versions.bzl"
 
 case ${OS_FAMILY} in
   linux)
@@ -49,6 +48,8 @@ done
 
 cp "${BAZELRC_TEMPLATE}" "${BAZELRC_DEST}"
 sed -i -E "s#BAZEL_VERSION#${BAZEL_VERSION}#g" "${BAZELRC_DEST}"
+
+chmod -R 755 "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
 
 git add "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
 
