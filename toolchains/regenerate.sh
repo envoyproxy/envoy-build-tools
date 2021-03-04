@@ -26,7 +26,8 @@ case ${OS_FAMILY} in
     BAZELRC_TEMPLATE=${RBE_AUTOCONF_ROOT}/toolchains/linux.latest.bazelrc
     ;;
   windows)
-    TOOLCHAIN_LIST="@rbe_windows_msvc_cl_gen//... @rbe_windows_clang_cl_gen//..."
+    TOOLCHAIN_LIST="msvc-cl clang-cl"
+    BAZELRC_TEMPLATE=${RBE_AUTOCONF_ROOT}/toolchains/windows.latest.bazelrc
     ;;
 esac
 
