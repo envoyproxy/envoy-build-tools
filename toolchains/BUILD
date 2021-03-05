@@ -28,3 +28,13 @@ platform(
     ),
     parents = ["//toolchains/configs/linux/gcc/bazel_3.7.2/config:platform"],
 )
+
+platform(
+    name = "rbe_windows_clang_cl_platform",
+    parents = ["//toolchains/configs/windows/clang-cl/bazel_3.7.2/config:platform"],
+)
+
+platform(
+    name = "rbe_windows_msvc_cl_platform",
+    parents = ["//toolchains/configs/windows/msvc-cl/bazel_3.7.2/config:platform"],
+)
