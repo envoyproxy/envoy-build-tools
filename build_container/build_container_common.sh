@@ -9,6 +9,19 @@ function download_and_check () {
   echo "${sha256}  ${to}" | sha256sum --check
 }
 
+function install_go () {
+  local arch=$1
+  local ver=$2
+  local sha256=$3
+
+  wget -O go.tar.gz https://golang.org/dl/go${ver}.linux-${arch}.tar.gz
+  echo "${sha256}  go.tar.gz" | sha256sum --check
+  tar xzf go.tar.gz
+  mv go /usr/local/bin/go${ver}
+  ln -s /usr/local/bin/go${ver}/bin/go /usr/local/bin
+  rm go.tar.gz
+}
+
 function install_gn(){
   # Install gn tools which will be used for building wee8
   if [[ "$(uname -m)" == "x86_64" ]]; then
@@ -43,6 +56,9 @@ if [[ "$(uname -m)" == "x86_64" ]]; then
   download_and_check /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v${VERSION}/bazelisk-linux-amd64 \
     ab258203db518a54cbd5afa80864d5a3bb366058b95e7a7df4134b0b7765a378
   chmod +x /usr/local/bin/bazel
+
+  # go
+  install_go amd64 1.16 013a489ebb3e24ef3d915abe5b94c3286c070dfe0818d5bca8108f1d6e8440d2
 fi
 
 if [[ "$(uname -m)" == "aarch64" ]]; then
@@ -51,6 +67,9 @@ if [[ "$(uname -m)" == "aarch64" ]]; then
   download_and_check /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v${VERSION}/bazelisk-linux-arm64 \
     aea0ff1036bd4c3703c5c10d07a059d885f2f6ad2f36c2175fc45a1f774ee341
   chmod +x /usr/local/bin/bazel
+
+  # go
+  install_go arm64 1.16 3770f7eb22d05e25fbee8fb53c2a4e897da043eb83c69b9a14f8d98562cd8098
 fi
 
 LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-${LLVM_DISTRO}"
