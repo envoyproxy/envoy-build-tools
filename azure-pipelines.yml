@@ -42,6 +42,13 @@ jobs:
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
+  - bash: |
+      curl -sSL -o $TEMP/go.tar.gz https://golang.org/dl/go1.16.linux-amd64.tar.gz
+      cd $TEMP
+      tar xzf go.tar.gz
+      sudo mv go /usr/local/bin/go.1.16
+      sudo ln -s /usr/local/bin/go.1.16/bin/go /usr/local/bin/go
+    displayName: Install go 1.16
   - template: .azure-pipelines/generate_toolchains.yml
     parameters:
       bazeliskInstallCommandPrefix: "sudo"
