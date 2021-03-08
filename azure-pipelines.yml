@@ -100,8 +100,8 @@ jobs:
   - bash: |
       curl -fsSL --output "$TEMP/go.zip" "$GO_ARCHIVE_URL"
       echo "$GO_ARCHIVE_CHECKSUM $TEMP/go.zip" | sha256sum --check
-      unzip "$TEMP/go.zip" -d "$PROGRAMFILES"
-      echo "##vso[task.prependpath]$PROGRAMFILES/go/bin"
+      unzip "$TEMP/go.zip" -d "/usr/bin/go.1.16"
+      ln -s /usr/bin/go.1.16/bin/go /usr/bin/go
     env:
       GO_ARCHIVE_URL: https://golang.org/dl/go1.16.windows-amd64.zip
       GO_ARCHIVE_CHECKSUM: 5cc88fa506b3d5c453c54c3ea218fc8dd05d7362ae1de15bb67986b72089ce93
