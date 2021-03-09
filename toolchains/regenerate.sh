@@ -36,9 +36,11 @@ BAZELRC_DEST=${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}/.latest.bazelr
 # Fetch external dependencies
 bazel fetch :all
 
+[[ -z "${GO_PATH}" ]] && GO_PATH=go
+
 # Build utility for generating RBE config
 RBE_CONFIG_GEN_DIR=$(bazel info output_base)/external/bazel_toolchains/cmd/rbe_configs_gen
-(cd "${RBE_CONFIG_GEN_DIR}" && go build)
+(cd "${RBE_CONFIG_GEN_DIR}" && "${GO_PATH}" build)
 
 # Keep bazel versions here at most two: current main version, next version
 for BAZEL_VERSION in "3.7.2" "4.0.0"; do
