@@ -58,7 +58,7 @@ jobs:
       bazeliskReleaseFilename: bazelisk-linux-amd64
       gcrImageName: "envoy-build"
       osFamily: "linux"
-      goPath: "/tmp/go/bim/go"
+      goPath: "/tmp/go/bin/go"
 
 - job: build_container_windows
   timeoutInMinutes: 90
