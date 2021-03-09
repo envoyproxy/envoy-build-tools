@@ -148,6 +148,9 @@ chgrp pcap /usr/sbin/tcpdump
 chmod 750 /usr/sbin/tcpdump
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 
+# make python3.8 the default python3 interpreter
+update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
+
 # virtualenv
 pip3 install -U virtualenv
 
