@@ -111,4 +111,4 @@ jobs:
       bazeliskReleaseFilename: bazelisk-windows-amd64.exe
       gcrImageName: "envoy-build-windows"
       osFamily: "windows"
-      goPath: "/usr/bin/go.1.16/bin/go"
+      goPath: "/usr/bin/go.1.16/go/bin/go"
