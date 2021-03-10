@@ -97,12 +97,11 @@ jobs:
     vmImage: 'windows-latest'
   steps:
   - bash: |
-      curl -fsSL --output "$TEMP/go.zip" "$GO_ARCHIVE_URL"
-      echo "$GO_ARCHIVE_CHECKSUM $TEMP/go.zip" | sha256sum --check
-      unzip "$TEMP/go.zip" -d "/usr/bin/go.1.16"
+      go get golang.org/dl/go$GO_VERSION
+      go1.16 download
+      go1.16 version
     env:
-      GO_ARCHIVE_URL: https://golang.org/dl/go1.16.windows-amd64.zip
-      GO_ARCHIVE_CHECKSUM: 5cc88fa506b3d5c453c54c3ea218fc8dd05d7362ae1de15bb67986b72089ce93
+      GO_VERSION: 1.16
     displayName: Install go 1.16
   - template: .azure-pipelines/generate_toolchains.yml
     parameters:
@@ -111,4 +110,4 @@ jobs:
       bazeliskReleaseFilename: bazelisk-windows-amd64.exe
       gcrImageName: "envoy-build-windows"
       osFamily: "windows"
-      goPath: "/usr/bin/go.1.16/go/bin/go"
+      goPath: "go1.16"
