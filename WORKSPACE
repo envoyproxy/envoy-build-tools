@@ -15,7 +15,3 @@ load(
 )
 
 bazel_toolchains_repositories()
-
-#load("//toolchains:rbe_toolchains_config.bzl", "rbe_toolchains_config")
-
-#rbe_toolchains_config(generator = True)

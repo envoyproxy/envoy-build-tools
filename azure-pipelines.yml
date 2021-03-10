@@ -58,7 +58,7 @@ jobs:
       bazeliskReleaseFilename: bazelisk-linux-amd64
       gcrImageName: "envoy-build"
       osFamily: "linux"
-      goPath: "/tmp/go/bin/go"
+      goCompiler: "/tmp/go/bin/go"
 
 - job: build_container_windows
   timeoutInMinutes: 90
@@ -96,13 +96,6 @@ jobs:
   pool:
     vmImage: 'windows-latest'
   steps:
-  - bash: |
-      go get golang.org/dl/go$GO_VERSION
-      go1.16 download
-      go1.16 version
-    env:
-      GO_VERSION: 1.16
-    displayName: Install go 1.16
   - template: .azure-pipelines/generate_toolchains.yml
     parameters:
       bazeliskInstallCommandPrefix: ""
@@ -110,4 +103,3 @@ jobs:
       bazeliskReleaseFilename: bazelisk-windows-amd64.exe
       gcrImageName: "envoy-build-windows"
       osFamily: "windows"
-      goPath: "go1.16"
