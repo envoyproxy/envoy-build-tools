@@ -42,15 +42,9 @@ jobs:
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
-  - bash: |
-      curl -fsSL --output "/tmp/go.tar.gz" "$GO_ARCHIVE_URL"
-      echo "$GO_ARCHIVE_CHECKSUM /tmp/go.tar.gz" | sha256sum --check
-      cd /tmp
-      tar xzf go.tar.gz
-    env:
-      GO_ARCHIVE_URL: https://golang.org/dl/go1.16.linux-amd64.tar.gz
-      GO_ARCHIVE_CHECKSUM: 013a489ebb3e24ef3d915abe5b94c3286c070dfe0818d5bca8108f1d6e8440d2
-    displayName: Install go 1.16
+  - task: GoTool@0
+    inputs:
+      version: '1.16'
   - template: .azure-pipelines/generate_toolchains.yml
     parameters:
       bazeliskInstallCommandPrefix: "sudo"
