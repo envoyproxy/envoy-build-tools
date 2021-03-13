@@ -19,10 +19,6 @@ parameters:
   displayName: "GCR Image Name"
   type: string
   default: "envoy-build"
-- name: goCompiler
-  displayName: "Path to Go compiler"
-  type: string
-  default: ""
 
 steps:
 - bash: |
@@ -46,5 +42,4 @@ steps:
     GCR_IMAGE_NAME: ${{  parameters.gcrImageName }}
     OS_FAMILY: ${{  parameters.osFamily  }}
     SOURCE_BRANCH: $(Build.SourceBranch)
-    GO_COMPILER: ${{  parameters.goCompiler  }}
   displayName: Generate toolchains

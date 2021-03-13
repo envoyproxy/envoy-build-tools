@@ -36,13 +36,11 @@ BAZELRC_DEST=${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}/.latest.bazelr
 # Fetch external dependencies
 bazel fetch :all
 
-if [[ -z "${GO_COMPILER}" ]]; then
-  if [[ -z "${GOROOT_1_16_X64}" ]]; then
-    GO_COMPILER=go
-  else
-    GO_COMPILER="${GOROOT_1_16_X64}/bin/go"
-    GOROOT=${GOROOT_1_16_X64}
-  fi
+if [[ -z "${GOROOT_1_16_X64}" ]]; then
+  GO_COMPILER=go
+else
+  GO_COMPILER="${GOROOT_1_16_X64}/bin/go"
+  GOROOT=${GOROOT_1_16_X64}
 fi
 
 # Build utility for generating RBE config
