@@ -42,9 +42,6 @@ jobs:
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
-  - task: GoTool@0
-    inputs:
-      version: '1.16'
   - template: .azure-pipelines/generate_toolchains.yml
     parameters:
       bazeliskInstallCommandPrefix: "sudo"

@@ -35,6 +35,9 @@ steps:
     sshPassphrase: "$(SshKeyPassphrase)"
     sshKeySecureFile: id_rsa_envoy_ci
   condition: ne(variables['Build.Reason'], 'PullRequest')
+- task: GoTool@0
+  inputs:
+    version: '1.16'
 - bash: |
     toolchains/regenerate.sh
   env:
