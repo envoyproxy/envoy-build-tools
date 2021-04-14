@@ -75,24 +75,24 @@ mkdir -Force C:\tools
 # Bazelisk
 mkdir -Force C:\tools\bazel
 DownloadAndCheck C:\tools\bazel\bazel.exe `
-                 https://github.com/bazelbuild/bazelisk/releases/download/v1.7.4/bazelisk-windows-amd64.exe `
-                 ea612bd2e16a793eb9a3d0d5591f08d0a4ff2f4e94540a51a4653f4368b3d019
+                 https://github.com/bazelbuild/bazelisk/releases/download/v1.7.5/bazelisk-windows-amd64.exe `
+                 3370b9064a5bee879b675a77359ca14b3d2c5fa06364ae16b9ab2ff1773c9d0f
 AddToPath C:\tools\bazel
 
 # VS 2019 Build Tools
-# Pinned to version 16.8.1 downloaded on 11/13/2020 via https://aka.ms/vs/16/release/vs_buildtools.exe
+# Pinned to version 16.9.4 downloaded on 4/14/2021 via https://aka.ms/vs/16/release/vs_buildtools.exe
 DownloadAndCheck $env:TEMP\vs_buildtools.exe `
-                 https://download.visualstudio.microsoft.com/download/pr/2f4a234d-6e7c-4049-8248-6d9ac0d05c96/ea70cf3199618ad874a552f45262c1b5b06f14a09fcaa0b459746aea0a9ac761/vs_BuildTools.exe `
-                 ea70cf3199618ad874a552f45262c1b5b06f14a09fcaa0b459746aea0a9ac761
+                 https://download.visualstudio.microsoft.com/download/pr/3105fcfe-e771-41d6-9a1c-fc971e7d03a7/67584dbce4956291c76a5deabbadc15c9ad6a50d6a5f4458765b6bd3a924aead/vs_BuildTools.exe `
+                 67584dbce4956291c76a5deabbadc15c9ad6a50d6a5f4458765b6bd3a924aead
 # See: https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019#c-build-tools
-# The "Microsoft.VisualStudio.Workload.MSBuildTools" and it's components are added
-# by the installer and cannot be supressed.
+# Other dependent/required components including the "Microsoft.VisualStudio.Workload.MSBuildTools"
+# are added by the installer, do not need to be listed below, and cannot be supressed.
 echo @"
 {
   "version": "1.0",
   "components": [
     "Microsoft.VisualStudio.Workload.VCTools",
-    "Microsoft.VisualStudio.Component.Windows10SDK.18362",
+    "Microsoft.VisualStudio.Component.Windows10SDK.19041",
     "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
   ]
 }
@@ -103,25 +103,33 @@ $msvcFullPath = Join-Path -Path $msvcBasePath -ChildPath "Tools\MSVC\*\bin\Hostx
 AddToPath $msvcFullPath
 [System.Environment]::SetEnvironmentVariable('BAZEL_VC', $msvcBasePath)
 
+# MS SDK - Debug Tools
+# Pinned to SDK version 2004 release 12/16/2020 link from https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk/
+DownloadAndCheck $env:TEMP\winsdksetup.exe `
+                 https://download.microsoft.com/download/4/d/2/4d2b7011-606a-467e-99b4-99550bf24ffc/windowssdk/winsdksetup.exe `
+		 42d2774274d1135fc598c180c2acbf2321eb4192f59e511e6ac7772870bf6de1
+RunAndCheckError "cmd.exe" @("/s", "/c", "$env:TEMP\winsdksetup.exe /features OptionId.WindowsDesktopDebuggers /quiet /norestart")
+AddToPath "C:\Program Files (x86)\Windows Kits\10\Debuggers\x64"
+
 # CMake to ensure a 64-bit build of the tool (VS BuildTools ships a 32-bit build)
 DownloadAndCheck $env:TEMP\cmake.msi `
-                 https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4-win64-x64.msi `
-                 7e0cf19d4a1ea31de78487306c0126ec6326ab509d95e56dd4d604e9c0b34317
+                 https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.20.1-windows-x86_64.msi `
+                 a2eb2811aada9f4830281aa407231b9295dcac4b18bdbefc35d9dd71775110e8
 RunAndCheckError "msiexec.exe" @("/i", "$env:TEMP\cmake.msi", "/quiet", "/norestart") $true
 AddToPath $env:ProgramFiles\CMake\bin
 
 # Ninja to ensure a 64-bit build of the tool (VS BuildTools ships a 32-bit build)
 mkdir -Force C:\tools\ninja
 DownloadAndCheck $env:TEMP\ninja.zip `
-                 https://github.com/ninja-build/ninja/releases/download/v1.10.1/ninja-win.zip `
-                 5d1211ea003ec9760ad7f5d313ebf0b659d4ffafa221187d2b4444bc03714a33
+                 https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip `
+                 bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f
 Expand-Archive -Path $env:TEMP\ninja.zip -DestinationPath C:\tools\ninja
 AddToPath C:\tools\ninja
 
 # LLVM to ensure a 64-bit build of the tool (VS BuildTools ships a 32-bit build)
 DownloadAndCheck $env:TEMP\LLVM-win64.exe `
-                 https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.1/LLVM-11.0.1-win64.exe `
-                 d17bd0e556115c30ff45e30a3f9a623af89ad6a345a5df3ac47aa8b9eabab9a7
+                 https://github.com/llvm/llvm-project/releases/download/llvmorg-11.1.0/LLVM-11.1.0-win64.exe `
+                 b5770bbfac712d273938cd155e232afaa85c2e8d865c7ca504a104a838568516
 RunAndCheckError $env:TEMP\LLVM-win64.exe @("/S") $true
 AddToPath $env:ProgramFiles\LLVM\bin
 
@@ -135,8 +143,8 @@ AddToPath C:\tools\nasm-$nasmVersion
 
 # Python3 (do not install via msys2 or the MS store's flavors, this version follows Win32 semantics)
 DownloadAndCheck $env:TEMP\python3-installer.exe `
-                 https://www.python.org/ftp/python/3.9.0/python-3.9.0-amd64.exe `
-                 fd2e2c6612d43bb6b213b72fc53f07d73d99059fa72c96e44bde12e7815073ae
+                 https://www.python.org/ftp/python/3.9.4/python-3.9.4-amd64.exe `
+                 58e6bb9d08fd250c1defb7a7a7247993b4ea349518ba877abb6364de85029e04
 # python installer needs to be run as an installer with Start-Process
 RunAndCheckError "$env:TEMP\python3-installer.exe" @("/quiet", "InstallAllUsers=1", "Include_launcher=0", "InstallLauncherAllUsers=0") $true
 AddToPath $env:ProgramFiles\Python39
@@ -159,8 +167,8 @@ RunAndCheckError "$env:TEMP\7z-installer.exe" @("/S", "/D=$quo$env:TEMP\7z$quo")
 
 # msys2 with additional required packages
 DownloadAndCheck $env:TEMP\msys2.tar.xz `
-                 https://github.com/msys2/msys2-installer/releases/download/2020-11-09/msys2-base-x86_64-20201109.tar.xz `
-                 ca10a72aa3df219fabeff117aa4b00c1ec700ea93c4febf4cfc03083f4b2cacb
+                 https://github.com/msys2/msys2-installer/releases/download/2021-02-28/msys2-base-x86_64-20210228.tar.xz `
+                 3f2ceb097a081789d9d497e0d3df8d99c16a1591b9984b0469440cd5bfa65092
 RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar.xz", "-o$env:TEMP\msys2.tar", "-y")
 RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
 AddToPath C:\tools\msys64\usr\bin
