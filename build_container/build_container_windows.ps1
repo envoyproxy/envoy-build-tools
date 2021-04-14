@@ -92,7 +92,7 @@ echo @"
   "version": "1.0",
   "components": [
     "Microsoft.VisualStudio.Workload.VCTools",
-    "Microsoft.VisualStudio.Component.Windows10SDK.18362",
+    "Microsoft.VisualStudio.Component.Windows10SDK.19041",
     "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
   ]
 }
