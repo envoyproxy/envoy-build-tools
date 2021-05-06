@@ -58,6 +58,7 @@ PACKAGES=(
     git
     google-cloud-sdk
     graphviz
+    jq
     libncurses-dev
     libtool
     make
