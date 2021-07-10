@@ -5,8 +5,8 @@ toolchain_config_spec0 = struct(config_repos = [], create_cc_configs = True, cre
 toolchain_config_spec1 = struct(config_repos = [], create_cc_configs = True, create_java_configs = False, env = {"USE_CLANG_CL": "1"}, java_home = None, name = "clang-cl")
 _TOOLCHAIN_CONFIG_SPECS = [toolchain_config_spec0,toolchain_config_spec1]
 _BAZEL_TO_CONFIG_SPEC_NAMES = {"3.7.2": ["msvc-cl", "clang-cl"], "4.1.0": ["msvc-cl", "clang-cl"]}
-LATEST = "sha256:10162429d4cff5e30011a64abe1655910d3ce0de19c285c74f599cb8955bd970"
-CONTAINER_TO_CONFIG_SPEC_NAMES = {"sha256:10162429d4cff5e30011a64abe1655910d3ce0de19c285c74f599cb8955bd970": ["msvc-cl", "clang-cl"]}
+LATEST = "sha256:c3f952aba6515e382035e5e62941f50d340cfb16981ae4ebd2cc6ba001192565"
+CONTAINER_TO_CONFIG_SPEC_NAMES = {"sha256:c3f952aba6515e382035e5e62941f50d340cfb16981ae4ebd2cc6ba001192565": ["msvc-cl", "clang-cl"]}
 _DEFAULT_TOOLCHAIN_CONFIG_SPEC = toolchain_config_spec0
 TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct(
         bazel_to_config_spec_names_map = _BAZEL_TO_CONFIG_SPEC_NAMES,
