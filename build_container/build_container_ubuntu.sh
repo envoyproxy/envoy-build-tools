@@ -52,6 +52,7 @@ PACKAGES=(
     bc
     bzip2
     cmake
+    devscripts
     docker-ce-cli
     doxygen
     gdb
@@ -71,6 +72,7 @@ PACKAGES=(
     python3-pip
     python3-setuptools
     python3.8
+    rpm
     rsync
     ssh-client
     strace
