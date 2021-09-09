@@ -58,6 +58,7 @@ PACKAGES=(
     doxygen
     gdb
     git
+    gnupg2
     google-cloud-sdk
     graphviz
     jq
