@@ -40,7 +40,7 @@ platform(
         "@bazel_tools//platforms:x86_64",
     ],
     exec_properties = {
-        "container-image": "docker://gcr.io/envoy-ci/envoy-build-windows@sha256:5b6034f027132396d7611b566bd8e4f4512c1adb66b8d846cb038d96d84d3eb9",
+        "container-image": "docker://gcr.io/envoy-ci/envoy-build-windows@sha256:a69d9d9707edcd2460b8723737e341649898cf84a13265f3869219345f9d1d49",
         "OSFamily": "Windows",
     },
 )
