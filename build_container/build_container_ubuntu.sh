@@ -73,6 +73,7 @@ PACKAGES=(
     python3
     python3-pip
     python3-setuptools
+    python3-yaml
     python3.8
     python3.8-dev
     rpm
