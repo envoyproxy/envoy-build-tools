@@ -52,11 +52,13 @@ PACKAGES=(
     bc
     bzip2
     cmake
+    cmake-data
     devscripts
     docker-ce-cli
     doxygen
     gdb
     git
+    gnupg2
     google-cloud-sdk
     graphviz
     jq
@@ -71,7 +73,9 @@ PACKAGES=(
     python3
     python3-pip
     python3-setuptools
+    python3-yaml
     python3.8
+    python3.8-dev
     rpm
     rsync
     ssh-client
@@ -84,13 +88,6 @@ PACKAGES=(
     wget
     xz-utils
     zip)
-
-# todo: remove this once kitware repo is fixed
-if [[ "$ARCH" == "aarch64" ]]; then
-    PACKAGES+=("cmake-data=3.10.2-1ubuntu2.18.04.1")
-else
-    PACKAGES+=("cmake-data")
-fi
 
 apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 
