@@ -2,6 +2,8 @@
 
 set -e
 
+BAZEL_VERSION=4.1.0
+
 export RBE_AUTOCONF_ROOT=$(bazel info workspace)
 
 CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "${RBE_AUTOCONF_ROOT}/build_container")
@@ -23,11 +25,11 @@ mkdir -p "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
 case ${OS_FAMILY} in
   linux)
     TOOLCHAIN_LIST="clang clang_libcxx gcc"
-    BAZELRC_TEMPLATE=${RBE_AUTOCONF_ROOT}/toolchains/linux.latest.bazelrc
+    BAZELRC_LATEST=${RBE_AUTOCONF_ROOT}/toolchains/linux.latest.bazelrc
     ;;
   windows)
     TOOLCHAIN_LIST="msvc-cl clang-cl"
-    BAZELRC_TEMPLATE=${RBE_AUTOCONF_ROOT}/toolchains/windows.latest.bazelrc
+    BAZELRC_LATEST=${RBE_AUTOCONF_ROOT}/toolchains/windows.latest.bazelrc
     ;;
 esac
 
@@ -40,15 +42,11 @@ bazel fetch :all
 RBE_CONFIG_GEN_DIR=$(bazel info output_base)/external/bazel_toolchains/cmd/rbe_configs_gen
 (cd "${RBE_CONFIG_GEN_DIR}" && go build)
 
-# Keep bazel versions here at most two: current main version, next version
-for BAZEL_VERSION in "3.7.2" "4.1.0"; do
-  for TOOLCHAIN in ${TOOLCHAIN_LIST}; do
-    "${RBE_CONFIG_GEN_DIR}/rbe_configs_gen" -exec_os ${OS_FAMILY} -generate_java_configs=false -generate_cpp_configs -output_src_root "${RBE_AUTOCONF_ROOT}" -output_config_path toolchains/configs/${OS_FAMILY}/${TOOLCHAIN}/bazel_${BAZEL_VERSION} -target_os ${OS_FAMILY} -bazel_version ${BAZEL_VERSION} -toolchain_container ${DOCKER_IMAGE} -cpp_env_json "${RBE_AUTOCONF_ROOT}/toolchains/${TOOLCHAIN}.env.json"
-  done
+for TOOLCHAIN in ${TOOLCHAIN_LIST}; do
+  "${RBE_CONFIG_GEN_DIR}/rbe_configs_gen" -exec_os ${OS_FAMILY} -generate_java_configs=false -generate_cpp_configs -output_src_root "${RBE_AUTOCONF_ROOT}" -output_config_path toolchains/configs/${OS_FAMILY}/${TOOLCHAIN} -target_os ${OS_FAMILY} -bazel_version ${BAZEL_VERSION} -toolchain_container ${DOCKER_IMAGE} -cpp_env_json "${RBE_AUTOCONF_ROOT}/toolchains/${TOOLCHAIN}.env.json"
 done
 
-cp "${BAZELRC_TEMPLATE}" "${BAZELRC_DEST}"
-sed -i -E "s#BAZEL_VERSION#${BAZEL_VERSION}#g" "${BAZELRC_DEST}"
+cp "${BAZELRC_LATEST}" "${BAZELRC_DEST}"
 
 chmod -R 755 "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
 
