@@ -4,15 +4,15 @@
 # Specifically, it includes all toolchain/platform flags
 # This file is used for testing purposes.
 
-build:remote --host_javabase=//toolchains/configs/linux/gcc/java:jdk
-build:remote --javabase=//toolchains/configs/linux/gcc/java:jdk
-build:remote --crosstool_top=//toolchains/configs/linux/gcc/cc:toolchain
-build:remote --extra_toolchains=//toolchains/configs/linux/gcc/config:cc-toolchain
-build:remote --extra_execution_platforms=//toolchains/configs/linux/gcc/config:platform
-build:remote --host_platform=//toolchains/configs/linux/gcc/config:platform
-build:remote --platforms=//toolchains/configs/linux/gcc/config:platform
+build:remote --host_javabase=//toolchains/configs/linux/gcc/bazel_BAZEL_VERSION/java:jdk
+build:remote --javabase=//toolchains/configs/linux/gcc/bazel_BAZEL_VERSION/java:jdk
+build:remote --crosstool_top=//toolchains/configs/linux/gcc/bazel_BAZEL_VERSION/cc:toolchain
+build:remote --extra_toolchains=//toolchains/configs/linux/gcc/bazel_BAZEL_VERSION/config:cc-toolchain
+build:remote --extra_execution_platforms=//toolchains/configs/linux/gcc/bazel_BAZEL_VERSION/config:platform
+build:remote --host_platform=//toolchains/configs/linux/gcc/bazel_BAZEL_VERSION/config:platform
+build:remote --platforms=//toolchains/configs/linux/gcc/bazel_BAZEL_VERSION/config:platform
 
 # Import the default bazelrc file in bazel-toolchains repo.
-# This will only work for tests executed from bazel-toochains
+# This will only work for tests executed from bazel-toolchains
 # repo.
 try-import %workspace%/bazelrc/.bazelrc.notoolchain
