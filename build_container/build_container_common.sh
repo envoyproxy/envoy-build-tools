@@ -56,8 +56,8 @@ fi
 LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-${LLVM_DISTRO}"
 LLVM_DOWNLOAD_PREFIX=${LLVM_DOWNLOAD_PREFIX:-https://github.com/llvm/llvm-project/releases/download/llvmorg-}
 download_and_check "${LLVM_RELEASE}.tar.xz" "${LLVM_DOWNLOAD_PREFIX}${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz" "${LLVM_SHA256SUM}"
-tar Jxf "${LLVM_RELEASE}.tar.xz"
-mv "./${LLVM_RELEASE}" /opt/llvm
+mkdir /opt/llvm
+tar Jxf "${LLVM_RELEASE}.tar.xz" --strip-components=1 -C /opt/llvm
 chown -R root:root /opt/llvm
 rm "./${LLVM_RELEASE}.tar.xz"
 echo "/opt/llvm/lib" > /etc/ld.so.conf.d/llvm.conf
