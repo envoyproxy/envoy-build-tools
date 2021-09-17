@@ -10,5 +10,5 @@ declared action inputs or the action commandline changes.
         "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.19041.0\\um",
         "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.19041.0\\winrt",
         "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.19041.0\\cppwinrt",
-        "C:\\Program Files\\LLVM\\lib\\clang\\11.1.0\\include",
-        "C:\\Program Files\\LLVM\\lib\\clang\\11.1.0\\include"
+        "C:\\Program Files\\LLVM\\lib\\clang\\12.0.1\\include",
+        "C:\\Program Files\\LLVM\\lib\\clang\\12.0.1\\include"
