@@ -44,6 +44,7 @@ RBE_CONFIG_GEN_DIR=$(bazel info output_base)/external/bazel_toolchains/cmd/rbe_c
 
 for TOOLCHAIN in ${TOOLCHAIN_LIST}; do
   "${RBE_CONFIG_GEN_DIR}/rbe_configs_gen" -exec_os ${OS_FAMILY} -generate_java_configs=false -generate_cpp_configs -output_src_root "${RBE_AUTOCONF_ROOT}" -output_config_path toolchains/configs/${OS_FAMILY}/${TOOLCHAIN} -target_os ${OS_FAMILY} -bazel_version ${BAZEL_VERSION} -toolchain_container ${DOCKER_IMAGE} -cpp_env_json "${RBE_AUTOCONF_ROOT}/toolchains/${TOOLCHAIN}.env.json"
+  [[ "${OS_FAMILY}" == "linux" ]] && sed -i 's/"-gsplit-dwarf"/"-gsplit-dwarf", "-g"/' toolchains/configs/${OS_FAMILY}/${TOOLCHAIN}/cc/cc_toolchain_config.bzl
 done
 
 cp "${BAZELRC_LATEST}" "${BAZELRC_DEST}"
