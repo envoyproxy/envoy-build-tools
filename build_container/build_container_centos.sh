@@ -44,6 +44,16 @@ chgrp pcap /usr/sbin/tcpdump
 chmod 750 /usr/sbin/tcpdump
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 
+# The build_container_common.sh will be skipped when building centOS
+# image on Arm64 platform since some building issues are still unsolved.
+# It will be fixed until those issues solved on Arm64 platform.
+if [[ $(uname -m) == "aarch64" ]] && grep -q -e rhel /etc/*-release ; then
+  echo "Now, the CentOS image can not be built on arm64 platform!"
+  exit 0
+fi
+
+source ./build_container_common.sh
+
 # compile proper version of gn, compatible with CentOS's GLIBC version and
 # envoy wasm/v8 dependency
 # can be removed when the dependency will be updated
@@ -60,15 +70,5 @@ ninja -C out
 mv -f out/gn /usr/local/bin/gn
 chmod +x /usr/local/bin/gn
 popd
-
-# The build_container_common.sh will be skipped when building centOS
-# image on Arm64 platform since some building issues are still unsolved.
-# It will be fixed until those issues solved on Arm64 platform.
-if [[ $(uname -m) == "aarch64" ]] && grep -q -e rhel /etc/*-release ; then
-  echo "Now, the CentOS image can not be built on arm64 platform!"
-  exit 0
-fi
-
-source ./build_container_common.sh
 
 yum clean all
