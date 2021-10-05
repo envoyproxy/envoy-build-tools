@@ -8,8 +8,8 @@ if [[ "${ARCH}" == "x86_64" ]]; then
 fi
 yum update -y
 yum install -y devtoolset-9-gcc devtoolset-9-gcc-c++ devtoolset-9-binutils java-1.8.0-openjdk-headless jq rsync \
-    rh-git218 wget unzip which make cmake3 patch ninja-build devtoolset-9-libatomic-devel openssl python27 \
-    libtool autoconf tcpdump graphviz doxygen sudo
+  rh-git218 wget unzip which make cmake3 patch ninja-build devtoolset-9-libatomic-devel openssl python27 \
+  libtool autoconf tcpdump graphviz doxygen sudo glibc-static libstdc++-static
 
 # set locale
 localedef -c -f UTF-8 -i en_US en_US.UTF-8
@@ -43,6 +43,23 @@ groupadd -r pcap
 chgrp pcap /usr/sbin/tcpdump
 chmod 750 /usr/sbin/tcpdump
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
+
+# compile proper version of gn, compatible with CentOS's GLIBC version and
+# envoy wasm/v8 dependency
+# can be removed when the dependency will be updated
+git clone https://gn.googlesource.com/gn
+pushd gn
+# 45aa842fb41d79e149b46fac8ad71728856e15b9 is a hash of the version
+# before https://gn.googlesource.com/gn/+/46b572ce4ceedfe57f4f84051bd7da624c98bf01
+# as this commit expects envoy to rely on newer version of wasm/v8 with the fix
+# from https://github.com/v8/v8/commit/eac21d572e92a82f5656379bc90f8ecf1ff884fc
+# (versions 9.5.164 - 9.6.152)
+git checkout 45aa842fb41d79e149b46fac8ad71728856e15b9
+python build/gen.py
+ninja -C out
+mv -f out/gn /usr/local/bin/gn
+chmod +x /usr/local/bin/gn
+popd
 
 # The build_container_common.sh will be skipped when building centOS
 # image on Arm64 platform since some building issues are still unsolved.
