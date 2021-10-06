@@ -8,8 +8,8 @@ if [[ "${ARCH}" == "x86_64" ]]; then
 fi
 yum update -y
 yum install -y devtoolset-9-gcc devtoolset-9-gcc-c++ devtoolset-9-binutils java-1.8.0-openjdk-headless jq rsync \
-  rh-git218 wget unzip which make cmake3 patch ninja-build devtoolset-9-libatomic-devel openssl python27 \
-  libtool autoconf tcpdump graphviz doxygen sudo glibc-static libstdc++-static
+    rh-git218 wget unzip which make cmake3 patch ninja-build devtoolset-9-libatomic-devel openssl python27 \
+    libtool autoconf tcpdump graphviz doxygen sudo glibc-static libstdc++-static
 
 # set locale
 localedef -c -f UTF-8 -i en_US en_US.UTF-8
