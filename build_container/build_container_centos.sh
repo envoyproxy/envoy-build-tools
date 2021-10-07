@@ -1,6 +1,9 @@
 #!/bin/bash
 
 set -e
+
+export PATH="/opt/rh/rh-git218/root/usr/bin:/opt/rh/devtoolset-7/root/usr/bin:/opt/llvm/bin:/usr/local/sbin:/usr/local/bin:${PATH}"
+
 ARCH="$(uname -m)"
 # Note: rh-git218 is needed to run `git -C` in docs build process.
 if [[ "${ARCH}" == "x86_64" ]]; then
