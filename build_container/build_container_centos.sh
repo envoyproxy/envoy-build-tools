@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /etc/profile.d/profile_centos.sh
+
 set -e
 ARCH="$(uname -m)"
 # Note: rh-git218 is needed to run `git -C` in docs build process.
