@@ -15,9 +15,9 @@ if ! docker pull ${DOCKER_IMAGE}; then
 fi
 
 # If we are committing changes, pull before modifying to ensure no conflicts
-if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
-  git pull origin refs/heads/main --ff-only
-fi
+# if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
+#   git pull origin refs/heads/main --ff-only
+# fi
 
 rm -rf "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
 mkdir -p "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
