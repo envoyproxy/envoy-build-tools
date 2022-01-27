@@ -2,7 +2,7 @@
 
 set -e
 
-BAZEL_VERSION=4.2.1
+BAZEL_VERSION=5.0.0
 
 export RBE_AUTOCONF_ROOT=$(bazel info workspace)
 
