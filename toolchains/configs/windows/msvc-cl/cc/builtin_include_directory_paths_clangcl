@@ -5,9 +5,9 @@ paths change, Bazel will make sure to rerun the action, even though none of
 declared action inputs or the action commandline changes.
 
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.29.30133\\include",
-        "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.19041.0\\ucrt",
-        "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.19041.0\\shared",
-        "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.19041.0\\um",
-        "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.19041.0\\winrt",
-        "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.19041.0\\cppwinrt",
+        "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22000.0\\ucrt",
+        "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22000.0\\shared",
+        "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22000.0\\um",
+        "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22000.0\\winrt",
+        "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22000.0\\cppwinrt",
         "C:\\Program Files\\LLVM\\lib\\clang\\12.0.1\\include"
