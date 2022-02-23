@@ -8,7 +8,7 @@ This is due the changes that were made to `tcp_stats.cc` during the 1.21 release
 - `glibc-headers-2.17-317.el7.x86_64.rpm`
 - `kernel-headers-3.10.0-1160.el7.x86_64.rpm`
 
-```
+```console
 source/extensions/transport_sockets/tcp_stats/tcp_stats.cc:119:18: error: no member named 'tcpi_data_segs_out' in 'tcp_info'; did you mean 'tcpi_segs_out'?
   if ((tcp_info->tcpi_data_segs_out > last_cx_tx_data_segments_) &&
                  ^~~~~~~~~~~~~~~~~~
