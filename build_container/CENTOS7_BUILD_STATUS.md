@@ -1,4 +1,4 @@
-You are strongly encouraged to test the produced Envoy binary on CentOS 7 yourselves to ensure that it satisfies your required functionality and operates as expected.
+You are strongly encouraged to test the produced Envoy binary on CentOS 7 yourself to ensure that it satisfies your required functionality and operates as expected.
 
 ## Version 1.21.x
 Envoy version 1.21 onwards cannot currently be compiled on CentOS 7.
