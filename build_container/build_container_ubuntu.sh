@@ -45,6 +45,9 @@ esac
 curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | apt-key add -
 apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
 
+# Python
+add-apt-repository ppa:deadsnakes/ppa
+
 apt-get update -y
 
 PACKAGES=(
@@ -62,6 +65,7 @@ PACKAGES=(
     google-cloud-sdk
     graphviz
     jq
+    libffi-dev
     libncurses-dev
     libtool
     make
@@ -70,12 +74,9 @@ PACKAGES=(
     python
     python-pip
     python-setuptools
-    python3
-    python3-pip
-    python3-setuptools
-    python3-yaml
-    python3.8
-    python3.8-dev
+    python3.10
+    python3.10-dev
+    python3.10-distutils
     rpm
     rsync
     ssh-client
@@ -147,12 +148,18 @@ chgrp pcap /usr/sbin/tcpdump
 chmod 750 /usr/sbin/tcpdump
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 
-# make python3.8 the default python3 interpreter
-update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
+# Get pip for python3.10
+curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+
+# make python3.10 the default python3 interpreter
+update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 
 # virtualenv
 pip3 install -U virtualenv
 
 source ./build_container_common.sh
+
+# Soft link the gcc compiler (required by python env)
+update-alternatives --install "/usr/bin/${ARCH}-linux-gnu-gcc" "${ARCH}-linux-gnu-gcc" "/usr/bin/${ARCH}-linux-gnu-gcc-9" 1
 
 apt-get clean
