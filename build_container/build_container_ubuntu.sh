@@ -154,8 +154,9 @@ curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
 # make python3.10 the default python3 interpreter
 update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 
-# virtualenv
-pip3 install -U virtualenv
+# pip installs
+# TODO(phlax): use hashed requirements
+pip3 install -U pyyaml virtualenv
 
 source ./build_container_common.sh
 
