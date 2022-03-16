@@ -77,7 +77,7 @@ rm -rf "lcov-${LCOV_VERSION}" "./lcov-${LCOV_VERSION}.tar.gz"
 
 # Install sanitizer instrumented libc++, skipping for architectures other than x86_64 for now.
 if [[ "$(uname -m)" != "x86_64" ]]; then
-  exit 0
+  return 0
 fi
 
 export PATH="/opt/llvm/bin:${PATH}"
