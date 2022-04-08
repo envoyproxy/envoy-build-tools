@@ -27,15 +27,14 @@ function install_gn(){
 
 if [[ "$(uname -m)" == "x86_64" ]]; then
   # buildifier
-  VERSION=2.2.1
-  download_and_check /usr/local/bin/buildifier https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildifier \
-    731a6a9bf8fca8a00a165cd5b3fbac9907a7cf422ec9c2f206b0a76c0a7e3d62
+  VERSION=5.0.1
+  download_and_check /usr/local/bin/buildifier https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildifier-linux-amd64 \
+    3ed7358c7c6a1ca216dc566e9054fd0b97a1482cb0b7e61092be887d42615c5d
   chmod +x /usr/local/bin/buildifier
 
   # buildozer
-  VERSION=2.2.1
-  download_and_check /usr/local/bin/buildozer https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildozer \
-    5aa4f70f5f04599da2bb5b7e6a46af3e323a3a744c11d7802517d956909633ae
+  download_and_check /usr/local/bin/buildozer https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildozer-linux-amd64 \
+    78204dac0ac6a94db499c57c5334b9c0c409d91de9779032c73ad42f2362e901
   chmod +x /usr/local/bin/buildozer
 
   # bazelisk
