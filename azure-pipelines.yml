@@ -60,7 +60,7 @@ jobs:
         GCR_IMAGE_NAME: envoy-build-windows
   dependsOn: []
   pool:
-    vmImage: 'windows-latest'
+    vmImage: 'windows-2019'
   steps:
   - bash: |
       curl -fsSL --output "$TEMP/gcloud-sdk.zip" "$GCLOUD_SDK_ARCHIVE_URL"
