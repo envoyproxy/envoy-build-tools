@@ -60,7 +60,7 @@ jobs:
         GCR_IMAGE_NAME: envoy-build-windows
   dependsOn: []
   pool:
-    vmImage: 'windows-latest'
+    vmImage: 'windows-2019'
   steps:
   - bash: |
       curl -fsSL --output "$TEMP/gcloud-sdk.zip" "$GCLOUD_SDK_ARCHIVE_URL"
@@ -84,7 +84,7 @@ jobs:
 - job: generate_toolchains_windows
   dependsOn: ["build_container_windows", "generate_toolchains_linux"]
   pool:
-    vmImage: 'windows-latest'
+    vmImage: 'windows-2019'
   steps:
   - template: .azure-pipelines/generate_toolchains.yml
     parameters:
