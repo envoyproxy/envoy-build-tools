@@ -15,38 +15,21 @@ if curl -sSLf "https://index.docker.io/v1/repositories/envoyproxy/envoy-build-${
   exit 0
 fi
 
-CONTAINER_TAG=${CONTAINER_SHA} "./docker_build_${OS_FAMILY}.sh"
+CONTAINER_TAG="${CONTAINER_SHA}"
+
+IMAGE_TAGS=()
 
 if [[ "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
     docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
-
-    MANIFESTS=""
-    for arch in ${IMAGE_ARCH}
-    do
-        docker push "envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}-${arch}"
-        MANIFESTS="${MANIFESTS} envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}-${arch}"
-    done
-
-    docker manifest create --amend "envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}" $MANIFESTS
-
-    for arch in ${IMAGE_ARCH}
-    do
-        docker manifest annotate "envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}" \
-            "envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}-${arch}" \
-            --os ${OS_FAMILY} --arch ${arch}
-    done
-
-    docker manifest push "envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}"
+    IMAGE_TAGS+=("envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}")
 
     if [[ "${PUSH_GCR_IMAGE}" == "true" ]]; then
         echo ${GCP_SERVICE_ACCOUNT_KEY} | base64 --decode | gcloud auth activate-service-account --key-file=-
         gcloud auth configure-docker --quiet
-
-        echo "Updating gcr.io/envoy-ci/${GCR_IMAGE_NAME} image"
-        docker tag "envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}-amd64" "gcr.io/envoy-ci/${GCR_IMAGE_NAME}:${CONTAINER_SHA}"
-        docker push "gcr.io/envoy-ci/${GCR_IMAGE_NAME}:${CONTAINER_SHA}"
+        IMAGE_TAGS+=("gcr.io/envoy-ci/${GCR_IMAGE_NAME}:${CONTAINER_SHA}")
     fi
-
-else
-    echo 'Ignoring PR branch for docker push.'
 fi
+
+source "./docker_build_${OS_FAMILY}.sh"
+
+[[ "${#IMAGE_TAGS[@]}" == "0" ]] && echo 'Ignoring PR branch for docker push.'
