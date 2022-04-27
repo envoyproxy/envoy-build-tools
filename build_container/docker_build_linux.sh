@@ -10,7 +10,7 @@ config_env() {
 
   # Remove older build instance
   docker buildx rm envoy-build-tools-builder || :
-  docker buildx create --use --name envoy-build-tools-builder --platform "${BUILD_TOOLS_PLATFORM}"
+  docker buildx create --use --name envoy-build-tools-builder --platform "${BUILD_TOOLS_PLATFORMS}"
 }
 
 [[ -z "${OS_DISTRO}" ]] && OS_DISTRO="ubuntu"
