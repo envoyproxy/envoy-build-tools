@@ -3,46 +3,35 @@
 
 set -e
 
-build_image()
-{
-    ARCH=$1
+# Setting environments for buildx tools
+config_env() {
+  # Install QEMU emulators
+  docker run --rm --privileged tonistiigi/binfmt --install all
 
-    case ${ARCH:-} in
-    'amd64')
-        QEMUARCH='x86_64'
-        ;;
-    'arm64')
-        IMAGEARCH='arm64v8/'
-        QEMUARCH='aarch64'
-        ;;
-    'ppc64le')
-        IMAGEARCH='ppc64le/'
-        QEMUARCH='ppc64le'
-        ;;
-    *)
-        echo 'Cpu architecture is not supportted!'
-        exit 1
-        ;;
-    esac
-
-    BUILD_NAME="${IMAGE_NAME}"
-    echo "build ${BUILD_NAME}:${CONTAINER_TAG}-${ARCH}"
-
-    docker build --build-arg IMAGEARCH=${IMAGEARCH} \
-                   --build-arg QEMUARCH=${QEMUARCH} \
-                   -f "Dockerfile-${OS_DISTRO}" -t "${BUILD_NAME}:${CONTAINER_TAG}-${ARCH}" .
+  # Remove older build instance
+  docker buildx rm envoy-build-tools-builder || :
+  docker buildx create --use --name envoy-build-tools-builder --platform "${BUILD_TOOLS_PLATFORMS}"
 }
-
-docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 [[ -z "${OS_DISTRO}" ]] && OS_DISTRO="ubuntu"
 [[ -z "${IMAGE_NAME}" ]] && IMAGE_NAME="envoyproxy/envoy-build-${OS_DISTRO}"
 
-for arch in ${IMAGE_ARCH}
-do
-    echo "Build the $arch image"
-    build_image $arch
-done
+if [[ -z "${BUILD_TOOLS_PLATFORMS}" ]]; then
+  if [[ "${OS_DISTRO}" == "ubuntu" ]]; then
+    export BUILD_TOOLS_PLATFORMS=linux/arm64,linux/amd64
+  else
+    export BUILD_TOOLS_PLATFORMS=linux/amd64
+  fi
+fi
 
-echo "Test linux container: ${IMAGE_NAME}:${CONTAINER_NAME}"
+config_env
+
+docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
+
+docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" --platform "linux/amd64" --load
+echo "Test linux container: ${IMAGE_NAME}:${CONTAINER_TAG}"
 docker run --rm -v "$(pwd)/docker_test_linux.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" /test.sh
+
+for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
+  docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
+done
