@@ -52,7 +52,8 @@ cc_toolchain_suite(
         "x64_windows|msvc-cl": ":cc-compiler-x64_windows",
         "x64_x86_windows|msvc-cl": ":cc-compiler-x64_x86_windows",
         "x64_arm_windows|msvc-cl": ":cc-compiler-x64_arm_windows",
-        "x64_arm64_windows|msvc-cl": ":cc-compiler-x64_arm64_windows",
+        "x64_arm64_windows|msvc-cl": ":cc-compiler-arm64_windows",
+        "arm64_windows|msvc-cl": ":cc-compiler-arm64_windows",
         "x64_windows|msys-gcc": ":cc-compiler-x64_windows_msys",
         "x64_windows|mingw-gcc": ":cc-compiler-x64_windows_mingw",
         "x64_windows|clang-cl": ":cc-compiler-x64_windows-clang-cl",
@@ -60,7 +61,10 @@ cc_toolchain_suite(
         "x64_windows": ":cc-compiler-x64_windows",
         "x64_x86_windows": ":cc-compiler-x64_x86_windows",
         "x64_arm_windows": ":cc-compiler-x64_arm_windows",
-        "x64_arm64_windows": ":cc-compiler-x64_arm64_windows",
+        "x64_arm64_windows": ":cc-compiler-arm64_windows",
+        "arm64_windows": ":cc-compiler-arm64_windows",
+        "x64_arm64_windows|clang-cl": ":cc-compiler-arm64_windows-clang-cl",
+        "arm64_windows|clang-cl": ":cc-compiler-arm64_windows-clang-cl",
         "armeabi-v7a": ":cc-compiler-armeabi-v7a",
     },
 )
@@ -384,9 +388,9 @@ toolchain(
 )
 
 cc_toolchain(
-    name = "cc-compiler-x64_arm64_windows",
-    toolchain_identifier = "msvc_x64_arm64",
-    toolchain_config = ":msvc_x64_arm64",
+    name = "cc-compiler-arm64_windows",
+    toolchain_identifier = "msvc_arm64",
+    toolchain_config = ":msvc_arm64",
     all_files = ":empty",
     ar_files = ":empty",
     as_files = ":msvc_compiler_files",
@@ -399,7 +403,7 @@ cc_toolchain(
 )
 
 cc_toolchain_config(
-    name = "msvc_x64_arm64",
+    name = "msvc_arm64",
     cpu = "x64_windows",
     compiler = "msvc-cl",
     host_system_name = "local",
@@ -407,7 +411,7 @@ cc_toolchain_config(
     target_libc = "msvcrt",
     abi_version = "local",
     abi_libc_version = "local",
-    toolchain_identifier = "msvc_x64_arm64",
+    toolchain_identifier = "msvc_arm64",
     msvc_env_tmp = "msvc_not_found",
     msvc_env_path = "msvc_not_found",
     msvc_env_include = "msvc_not_found",
@@ -436,16 +440,15 @@ cc_toolchain_config(
 )
 
 toolchain(
-    name = "cc-toolchain-x64_arm64_windows",
+    name = "cc-toolchain-arm64_windows",
     exec_compatible_with = [
-        "@platforms//cpu:x86_64",
         "@platforms//os:windows",
     ],
     target_compatible_with = [
         "@platforms//cpu:arm64",
         "@platforms//os:windows",
     ],
-    toolchain = ":cc-compiler-x64_arm64_windows",
+    toolchain = ":cc-compiler-arm64_windows",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
@@ -480,7 +483,7 @@ cc_toolchain_config(
     msvc_env_include = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.29.30133\\include;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22000.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22000.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22000.0\\um;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22000.0\\winrt;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22000.0\\cppwinrt;C:\\Program Files\\LLVM\\lib\\clang\\14.0.0\\include",
     msvc_env_lib = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.29.30133\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.22000.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.22000.0\\um\\x64;C:\\Program Files\\LLVM\\lib\\clang\\14.0.0\\lib\\windows;C:\\Program Files\\LLVM\\lib\\clang\\14.0.0\\lib\\windows",
     msvc_cl_path = "C:/Program Files/LLVM/bin/clang-cl.exe",
-    msvc_ml_path = "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/ml64.exe",
+    msvc_ml_path = "C:/Program Files/LLVM/bin/clang-cl.exe",
     msvc_link_path = "C:/Program Files/LLVM/bin/lld-link.exe",
     msvc_lib_path = "C:/Program Files/LLVM/bin/llvm-lib.exe",
     cxx_builtin_include_directories = [        "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.29.30133\\include",
@@ -493,7 +496,7 @@ cc_toolchain_config(
         "C:\\Program Files\\LLVM\\lib\\clang\\14.0.0\\include"],
     tool_paths = {
         "ar": "C:/Program Files/LLVM/bin/llvm-lib.exe",
-        "ml": "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/ml64.exe",
+        "ml": "C:/Program Files/LLVM/bin/clang-cl.exe",
         "cpp": "C:/Program Files/LLVM/bin/clang-cl.exe",
         "gcc": "C:/Program Files/LLVM/bin/clang-cl.exe",
         "gcov": "wrapper/bin/msvc_nop.bat",
@@ -521,6 +524,72 @@ toolchain(
         "@platforms//os:windows",
     ],
     toolchain = ":cc-compiler-x64_windows-clang-cl",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+cc_toolchain(
+    name = "cc-compiler-arm64_windows-clang-cl",
+    toolchain_identifier = "clang_cl_arm64",
+    toolchain_config = ":clang_cl_arm64",
+    all_files = ":empty",
+    ar_files = ":empty",
+    as_files = ":clangcl_compiler_files",
+    compiler_files = ":clangcl_compiler_files",
+    dwp_files = ":empty",
+    linker_files = ":empty",
+    objcopy_files = ":empty",
+    strip_files = ":empty",
+    supports_param_files = 1,
+)
+
+cc_toolchain_config(
+    name = "clang_cl_arm64",
+    cpu = "arm64_windows",
+    compiler = "clang-cl",
+    host_system_name = "local",
+    target_system_name = "aarch64-pc-windows-msvc",
+    target_libc = "msvcrt",
+    abi_version = "local",
+    abi_libc_version = "local",
+    toolchain_identifier = "clang_cl_arm64",
+    msvc_env_tmp = "clang_cl_not_found",
+    msvc_env_path = "clang_cl_not_found",
+    msvc_env_include = "clang_cl_not_found",
+    msvc_env_lib = "clang_cl_not_found",
+    msvc_cl_path = "vc_installation_error_arm64.bat",
+    msvc_ml_path = "vc_installation_error_arm64.bat",
+    msvc_link_path = "vc_installation_error_arm64.bat",
+    msvc_lib_path = "vc_installation_error_arm64.bat",
+    cxx_builtin_include_directories = [],
+    tool_paths = {
+        "ar": "vc_installation_error_arm64.bat",
+        "ml": "vc_installation_error_arm64.bat",
+        "cpp": "vc_installation_error_arm64.bat",
+        "gcc": "vc_installation_error_arm64.bat",
+        "gcov": "wrapper/bin/msvc_nop.bat",
+        "ld": "vc_installation_error_arm64.bat",
+        "nm": "wrapper/bin/msvc_nop.bat",
+        "objcopy": "wrapper/bin/msvc_nop.bat",
+        "objdump": "wrapper/bin/msvc_nop.bat",
+        "strip": "wrapper/bin/msvc_nop.bat",
+    },
+    archiver_flags = ["/MACHINE:ARM64"],
+    default_link_flags = ["/MACHINE:ARM64"],
+    dbg_mode_debug_flag = "/DEBUG",
+    fastbuild_mode_debug_flag = "/DEBUG",
+)
+
+toolchain(
+    name = "cc-toolchain-arm64_windows-clang-cl",
+    exec_compatible_with = [
+        "@platforms//os:windows",
+        "@bazel_tools//tools/cpp:clang-cl",
+    ],
+    target_compatible_with = [
+        "@platforms//cpu:arm64",
+        "@platforms//os:windows",
+    ],
+    toolchain = ":cc-compiler-arm64_windows-clang-cl",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 

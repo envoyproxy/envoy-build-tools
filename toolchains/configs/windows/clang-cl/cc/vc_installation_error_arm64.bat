@@ -23,7 +23,7 @@ echo But Bazel can't find the following tools: 1>&2
 echo     cl.exe, link.exe, lib.exe 1>&2
 echo for arm64 target architecture 1>&2
 echo. 1>&2
-echo Please check your installation following https://docs.bazel.build/versions/main/windows.html#using 1>&2
+echo Please check your installation following https://bazel.build/docs/windows#using 1>&2
 echo. 1>&2
 
 exit /b 1
