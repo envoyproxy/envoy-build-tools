@@ -59,7 +59,8 @@ mkdir /opt/llvm
 tar Jxf "${LLVM_RELEASE}.tar.xz" --strip-components=1 -C /opt/llvm
 chown -R root:root /opt/llvm
 rm "./${LLVM_RELEASE}.tar.xz"
-echo "/opt/llvm/lib" > /etc/ld.so.conf.d/llvm.conf
+LLVM_HOST_TARGET="$(/opt/llvm/bin/llvm-config --host-target)"
+echo "/opt/llvm/lib/${LLVM_HOST_TARGET}" > /etc/ld.so.conf.d/llvm.conf
 ldconfig
 
 # Install gn tools.
