@@ -32,4 +32,6 @@ fi
 
 source "./docker_build_${OS_FAMILY}.sh"
 
-[[ "${#IMAGE_TAGS[@]}" == "0" ]] && echo 'Ignoring PR branch for docker push.'
+if [[ "${#IMAGE_TAGS[@]}" == "0" ]]; then
+  echo 'Ignoring PR branch for docker push.'
+fi

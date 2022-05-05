@@ -74,6 +74,7 @@ tar zxf lcov-${LCOV_VERSION}.tar.gz
 make -C lcov-${LCOV_VERSION} install
 rm -rf "lcov-${LCOV_VERSION}" "./lcov-${LCOV_VERSION}.tar.gz"
 
+git config --global --add safe.directory /source
 
 # Install sanitizer instrumented libc++, skipping for architectures other than x86_64 for now.
 if [[ "$(uname -m)" != "x86_64" ]]; then
