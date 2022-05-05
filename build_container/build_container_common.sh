@@ -11,44 +11,47 @@ function download_and_check () {
 
 function install_gn(){
   # Install gn tools which will be used for building wee8
-  if [[ "$(uname -m)" == "x86_64" ]]; then
-    wget -O gntool.zip https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest
-    unzip gntool.zip -d gntool
-    cp gntool/gn /usr/local/bin/gn
-    chmod +x /usr/local/bin/gn
-    rm -rf gntool*
-  elif [[ "$(uname -m)" == "aarch64" ]]; then
-    # install gn tools
-    download_and_check /usr/local/bin/gn https://github.com/envoyproxy/envoy-build-tools/releases/download/build-tools/gn-arm64 \
-      37f2960d488251760c56683dcf2cc4dfb2c2c13af476f86475eee206fafe21e2
-    chmod +x /usr/local/bin/gn
-  fi
+  case "$(uname -m)" in
+  "x86_64")
+    GN_ARCH=amd64
+    ;;
+
+  "aarch64")
+    GN_ARCH=arm64
+    ;;
+  esac
+
+  wget -O gntool.zip "https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-${GN_ARCH}/+/latest"
+  unzip gntool.zip -d gntool
+  cp gntool/gn /usr/local/bin/gn
+  chmod +x /usr/local/bin/gn
+  rm -rf gntool*
 }
 
 if [[ "$(uname -m)" == "x86_64" ]]; then
   # buildifier
-  VERSION=5.0.1
+  VERSION=5.1.0
   download_and_check /usr/local/bin/buildifier https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildifier-linux-amd64 \
-    3ed7358c7c6a1ca216dc566e9054fd0b97a1482cb0b7e61092be887d42615c5d
+    52bf6b102cb4f88464e197caac06d69793fa2b05f5ad50a7e7bf6fbd656648a3
   chmod +x /usr/local/bin/buildifier
 
   # buildozer
   download_and_check /usr/local/bin/buildozer https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildozer-linux-amd64 \
-    78204dac0ac6a94db499c57c5334b9c0c409d91de9779032c73ad42f2362e901
+    7346ce1396dfa9344a5183c8e3e6329f067699d71c4391bd28317391228666bf
   chmod +x /usr/local/bin/buildozer
 
   # bazelisk
-  VERSION=1.10.1
+  VERSION=1.11.0
   download_and_check /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v${VERSION}/bazelisk-linux-amd64 \
-    4cb534c52cdd47a6223d4596d530e7c9c785438ab3b0a49ff347e991c210b2cd
+    231ec5ca8115e94c75a1f4fbada1a062b48822ca04f21f26e4cb1cd8973cd458
   chmod +x /usr/local/bin/bazel
 fi
 
 if [[ "$(uname -m)" == "aarch64" ]]; then
   # bazelisk
-  VERSION=1.10.1
+  VERSION=1.11.0
   download_and_check /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v${VERSION}/bazelisk-linux-arm64 \
-    c1de6860dd4f8d5e2ec270097bd46d6a211b971a0b8b38559784bd051ea950a1
+    f9119deb1eeb6d730ee8b2e1a14d09cb45638f0447df23144229c5b3b3bc2408
   chmod +x /usr/local/bin/bazel
 fi
 
@@ -67,9 +70,9 @@ ldconfig
 install_gn
 
 # Install lcov
-LCOV_VERSION=1.14
+LCOV_VERSION=1.15
 download_and_check lcov-${LCOV_VERSION}.tar.gz https://github.com/linux-test-project/lcov/releases/download/v${LCOV_VERSION}/lcov-${LCOV_VERSION}.tar.gz \
-  14995699187440e0ae4da57fe3a64adc0a3c5cf14feab971f8db38fb7d8f071a
+  c1cda2fa33bec9aa2c2c73c87226cfe97de0831887176b45ee523c5e30f8053a
 tar zxf lcov-${LCOV_VERSION}.tar.gz
 make -C lcov-${LCOV_VERSION} install
 rm -rf "lcov-${LCOV_VERSION}" "./lcov-${LCOV_VERSION}.tar.gz"

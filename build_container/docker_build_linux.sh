@@ -24,14 +24,15 @@ if [[ -z "${BUILD_TOOLS_PLATFORMS}" ]]; then
   fi
 fi
 
-config_env
+ci_log_run config_env
 
-docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
-
-docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" --platform "linux/amd64" --load
-echo "Test linux container: ${IMAGE_NAME}:${CONTAINER_TAG}"
-docker run --rm -v "$(pwd)/docker_test_linux.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" /test.sh
+ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
 
 for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
-  docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
+  ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
 done
+
+# Testing after push to save CI time because this invalidates arm64 cache
+ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" --platform "linux/amd64" --load
+echo "Test linux container: ${IMAGE_NAME}:${CONTAINER_TAG}"
+docker run --rm -v "$(pwd)/docker_test_linux.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" true
