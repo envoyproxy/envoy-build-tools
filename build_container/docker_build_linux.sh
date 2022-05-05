@@ -27,11 +27,12 @@ fi
 config_env
 
 docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
-docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
 
 docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" --platform "linux/amd64" --load
 echo "Test linux container: ${IMAGE_NAME}:${CONTAINER_TAG}"
 docker run --rm -v "$(pwd)/docker_test_linux.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" /test.sh
+
+docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
 
 for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
   docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
