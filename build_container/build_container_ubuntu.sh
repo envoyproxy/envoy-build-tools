@@ -118,15 +118,6 @@ case $ARCH in
           -o /usr/local/bin/bazel
         chmod +x /usr/local/bin/bazel
         ;;
-    'aarch64' )
-        if [ "$(lsb_release -cs)" == 'xenial' ]; then
-          apt install -y openjdk-8-jdk
-          apt install -y ca-certificates-java
-          update-ca-certificates -f
-        else
-          apt install -y openjdk-11-jdk
-        fi
-        ;;
 esac
 
 # additional apt installs
