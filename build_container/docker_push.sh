@@ -19,7 +19,7 @@ CONTAINER_TAG="${CONTAINER_SHA}"
 
 IMAGE_TAGS=()
 
-if [[ "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
+if [[ "${SOURCE_BRANCH}" == "refs/heads/main" || "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
     docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
     IMAGE_TAGS+=("envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}")
 
@@ -32,4 +32,6 @@ fi
 
 source "./docker_build_${OS_FAMILY}.sh"
 
-[[ "${#IMAGE_TAGS[@]}" == "0" ]] && echo 'Ignoring PR branch for docker push.'
+if [[ "${#IMAGE_TAGS[@]}" == "0" ]]; then
+  echo 'Ignoring PR branch for docker push.'
+fi
