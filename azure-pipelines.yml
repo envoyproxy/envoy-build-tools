@@ -17,12 +17,6 @@ jobs:
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
-  - task: DockerInstaller@0
-    displayName: Docker Installer
-    inputs:
-      dockerVersion: 19.03.5
-      releaseType: stable
-
   - bash: .azure-pipelines/cleanup.sh
     displayName: "Removing tools from agent"
 
