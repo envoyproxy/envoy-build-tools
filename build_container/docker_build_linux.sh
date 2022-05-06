@@ -24,17 +24,22 @@ if [[ -z "${BUILD_TOOLS_PLATFORMS}" ]]; then
   fi
 fi
 
-config_env
+BUILDX_OPTIONS=()
+if is_gha; then
+  BUILDX_OPTIONS+=("--cache-to=type=gha,mode=max" "--cache-from=type=gha")
+fi
 
-docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
+ci_log_run config_env
+
+ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
 
 #docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" --platform "linux/amd64" --load
 #echo "Test linux container: ${IMAGE_NAME}:${CONTAINER_TAG}"
 #docker run --rm -v "$(pwd)/docker_test_linux.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" true
 
-docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-2:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
-docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-3:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
+ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-2:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
+ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-3:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
 
 for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
-  docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
+  ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
 done

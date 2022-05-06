@@ -4,6 +4,22 @@
 # CI logs.
 set -e
 
+function is_gha {
+  [[ -n "${GITHUB_ACTIONS}" ]]
+}
+
+function ci_log_run() {
+  if is_gha; then
+    echo "::group::${@}"
+  fi
+
+  "${@}"
+
+  if is_gha; then
+    echo "::endgroup::"
+  fi
+}
+
 # Enable docker experimental
 export DOCKER_CLI_EXPERIMENTAL=enabled
 
