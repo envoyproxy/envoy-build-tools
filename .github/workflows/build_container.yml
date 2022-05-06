@@ -1,0 +1,21 @@
+name: Build Image CI
+
+on:
+  push:
+    branches: [main, "gha/*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build the Ubuntu image
+        run: |
+          ./docker_push.sh
+        working-directory: build_container
+        env:
+          OS_DISTRO: ubuntu
+          OS_FAMILY: linux
