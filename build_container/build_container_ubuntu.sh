@@ -4,8 +4,6 @@ set -e
 
 ARCH="$(uname -m)"
 
-exit 0
-
 # Setup basic requirements and install them.
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
