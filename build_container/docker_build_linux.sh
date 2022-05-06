@@ -30,7 +30,7 @@ docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER
 
 docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" --platform "linux/amd64" --load
 echo "Test linux container: ${IMAGE_NAME}:${CONTAINER_TAG}"
-docker run --rm -v "$(pwd)/docker_test_linux.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" /test.sh
+docker run --rm -v "$(pwd)/docker_test_linux.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" true
 
 docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-2:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
 docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-3:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
