@@ -4,6 +4,22 @@
 # CI logs.
 set -e
 
+function is_azp {
+  [[ -n "${BUILD_REASON}" ]]
+}
+
+function ci_log_run() {
+  if is_azp; then
+    echo "#[group]${@}"
+  fi
+
+  "${@}"
+
+  if is_azp; then
+    echo "#[endgroup]"
+  fi
+}
+
 # Enable docker experimental
 export DOCKER_CLI_EXPERIMENTAL=enabled
 
