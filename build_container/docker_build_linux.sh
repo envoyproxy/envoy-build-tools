@@ -31,14 +31,14 @@ fi
 
 ci_log_run config_env
 
-ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
+ci_log_run docker buildx build "${BUILDX_OPTIONS[@]}" . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
 
-#docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" --platform "linux/amd64" --load
-#echo "Test linux container: ${IMAGE_NAME}:${CONTAINER_TAG}"
-#docker run --rm -v "$(pwd)/docker_test_linux.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" true
+ci_log_run docker buildx build "${BUILDX_OPTIONS[@]}" . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" --platform "linux/amd64" --load
+echo "Test linux container: ${IMAGE_NAME}:${CONTAINER_TAG}"
+ci_log_run docker run --rm -v "$(pwd)/docker_test_linux.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" true
 
-ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-2:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
-ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-3:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
+ci_log_run docker buildx build "${BUILDX_OPTIONS[@]}" . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-2:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
+ci_log_run docker buildx build "${BUILDX_OPTIONS[@]}" . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-3:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
 
 for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
   ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
