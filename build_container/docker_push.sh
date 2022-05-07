@@ -10,13 +10,13 @@ function is_azp {
 
 function ci_log_run() {
   if is_azp; then
-    echo "#[group]${@}"
+    echo "##[group]${@}"
   fi
 
   "${@}"
 
   if is_azp; then
-    echo "#[endgroup]"
+    echo "##[endgroup]"
   fi
 }
 
