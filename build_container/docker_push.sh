@@ -10,7 +10,7 @@ function is_azp {
 
 function ci_log_run() {
   if is_azp; then
-    echo "##[group]${@}"
+    echo "##[group]${*}"
   fi
 
   "${@}"
@@ -35,7 +35,7 @@ CONTAINER_TAG="${CONTAINER_SHA}"
 
 IMAGE_TAGS=()
 
-if [[ "${SOURCE_BRANCH}" == "refs/heads/main" || "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
+if [[ "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
     docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
     IMAGE_TAGS+=("envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}")
 
