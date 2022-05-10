@@ -118,15 +118,6 @@ case $ARCH in
           -o /usr/local/bin/bazel
         chmod +x /usr/local/bin/bazel
         ;;
-    'aarch64' )
-        if [ "$(lsb_release -cs)" == 'xenial' ]; then
-          apt install -y openjdk-8-jdk
-          apt install -y ca-certificates-java
-          update-ca-certificates -f
-        else
-          apt install -y openjdk-11-jdk
-        fi
-        ;;
 esac
 
 # additional apt installs
@@ -135,11 +126,11 @@ rm -rf /var/lib/apt/lists/*
 
 # upstream install of shellcheck (taken from https://askubuntu.com/a/1228181)
 pushd /tmp || exit 1
-echo "c37d4f51e26ec8ab96b03d84af8c050548d7288a47f755ffb57706c6c458e027  /tmp/shellcheck-v0.7.0/shellcheck" > sc.checksum
-wget -qO- https://github.com/koalaman/shellcheck/releases/download/v0.7.0/shellcheck-v0.7.0.linux.x86_64.tar.xz | tar -xJf -
+echo "f4bce23c11c3919c1b20bcb0f206f6b44c44e26f2bc95f8aa708716095fa0651  /tmp/shellcheck-v0.8.0/shellcheck" > sc.checksum
+wget -qO- https://github.com/koalaman/shellcheck/releases/download/v0.8.0/shellcheck-v0.8.0.linux.x86_64.tar.xz | tar -xJf -
 sha256sum -c sc.checksum
-sudo cp shellcheck-v0.7.0/shellcheck /usr/local/bin
-rm -rf shellcheck-v0.7.0/ sc.checksum
+sudo cp shellcheck-v0.8.0/shellcheck /usr/local/bin
+rm -rf shellcheck-v0.8.0/ sc.checksum
 popd || exit 1
 
 # Setup tcpdump for non-root.
