@@ -15,7 +15,7 @@ jobs:
   dependsOn: []
   timeoutInMinutes: 120
   pool:
-    vmImage: 'ubuntu-18.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - bash: .azure-pipelines/cleanup.sh
     displayName: "Removing tools from agent"
@@ -34,7 +34,7 @@ jobs:
 - job: generate_toolchains_linux
   dependsOn: "build_container_linux"
   pool:
-    vmImage: 'ubuntu-18.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - template: .azure-pipelines/generate_toolchains.yml
     parameters:

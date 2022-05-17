@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM ubuntu:focal
 
 # Workaround for: https://issuetracker.google.com/issues/216325949
 ENV CLOUDSDK_PYTHON=python3
