@@ -143,15 +143,15 @@ AddToPath C:\tools\nasm-$nasmVersion
 
 # Python3 (do not install via msys2 or the MS store's flavors, this version follows Win32 semantics)
 DownloadAndCheck $env:TEMP\python3-installer.exe `
-                 https://www.python.org/ftp/python/3.9.9/python-3.9.9-amd64.exe `
-                 137d59e5c0b01a8f1bdcba08344402ae658c81c6bf03b6602bd8b4e951ad0714
+                 https://www.python.org/ftp/python/3.10.4/python-3.10.4-amd64.exe `
+                 a81fc4180f34e5733c3f15526c668ff55de096366f9006d8a44c0336704e50f1
 # python installer needs to be run as an installer with Start-Process
 RunAndCheckError "$env:TEMP\python3-installer.exe" @("/quiet", "InstallAllUsers=1", "Include_launcher=0", "InstallLauncherAllUsers=0") $true
-AddToPath $env:ProgramFiles\Python39
-AddToPath $env:ProgramFiles\Python39\Scripts
+AddToPath $env:ProgramFiles\Python310
+AddToPath $env:ProgramFiles\Python310\Scripts
 # Add symlinks for canonical executables expected in a Python environment
-RunAndCheckError "cmd.exe" @("/c", "mklink", "$env:ProgramFiles\Python39\python3.exe", "$env:ProgramFiles\Python39\python.exe")
-RunAndCheckError "cmd.exe" @("/c", "mklink", "$env:ProgramFiles\Python39\python3.9.exe", "$env:ProgramFiles\Python39\python.exe")
+RunAndCheckError "cmd.exe" @("/c", "mklink", "$env:ProgramFiles\Python310\python3.exe", "$env:ProgramFiles\Python310\python.exe")
+RunAndCheckError "cmd.exe" @("/c", "mklink", "$env:ProgramFiles\Python310\python3.10.exe", "$env:ProgramFiles\Python310\python.exe")
 # Upgrade pip
 RunAndCheckError "python.exe" @("-m", "pip", "install", "--upgrade", "pip")
 # Install wheel so rules_python rules will run
