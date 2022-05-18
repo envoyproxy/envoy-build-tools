@@ -7,19 +7,10 @@ ARCH="$(uname -m)"
 # Setup basic requirements and install them.
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y --no-install-recommends locales software-properties-common apt-transport-https curl gpg-agent
+apt-get install -y --no-install-recommends locales software-properties-common apt-transport-https curl gpg-agent g++
 
 # set locale
 localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
-
-# gcc-9
-add-apt-repository -y ppa:ubuntu-toolchain-r/test
-apt-get update
-apt-get install -y --no-install-recommends g++-9
-update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 1000
-update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 1000
-update-alternatives --config gcc
-update-alternatives --config g++
 
 # Google Cloud SDK
 echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" \
@@ -71,9 +62,6 @@ PACKAGES=(
     make
     ninja-build
     patch
-    python
-    python-pip
-    python-setuptools
     python3.10
     python3.10-dev
     python3.10-distutils
@@ -106,6 +94,7 @@ case $ARCH in
     'aarch64' )
         LLVM_DISTRO=aarch64-linux-gnu
         LLVM_SHA256SUM=1792badcd44066c79148ffeb1746058422cc9d838462be07e3cb19a4b724a1ee
+        apt-get install -y --no-install-recommends libtinfo5 # LLVM dependencies on Ubuntu 20.04
         ;;
 esac
 
