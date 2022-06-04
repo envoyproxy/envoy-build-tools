@@ -51,12 +51,12 @@ if [[ "$(uname -m)" == "aarch64" ]]; then
   # buildifier
   VERSION=5.1.0
   download_and_check /usr/local/bin/buildifier https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildifier-linux-arm64 \
-    559b5c903671d82dabf7644bc2ff3acf0b7db2b73dc86a95b372ed7b69d33e22
+    917d599dbb040e63ae7a7e1adb710d2057811902fdc9e35cce925ebfd966eeb8
   chmod +x /usr/local/bin/buildifier
 
   # buildozer
   download_and_check /usr/local/bin/buildozer https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildozer-linux-arm64 \
-    aff3548240003cc37d05a3c1abb3b6ee222a4508ae95aa0e643c5c4e5a5c8d63
+    0b08e384709ec4d4f5320bf31510d2cefe8f9e425a6565b31db06b2398ff9dc4
   chmod +x /usr/local/bin/buildozer
 
   # bazelisk
