@@ -6,6 +6,8 @@ function download_and_check () {
   local sha256=$3
 
   curl -fsSL --output "${to}" "${url}"
+  echo "checksum"
+  echo ${to} | sha256
   echo "${sha256}  ${to}" | sha256sum --check
 }
 
