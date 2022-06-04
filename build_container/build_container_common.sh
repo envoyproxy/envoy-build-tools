@@ -6,8 +6,6 @@ function download_and_check () {
   local sha256=$3
 
   curl -fsSL --output "${to}" "${url}"
-  echo "checksum"
-  echo ${to} | sha256sum
   echo "${sha256}  ${to}" | sha256sum --check
 }
 
@@ -53,12 +51,12 @@ if [[ "$(uname -m)" == "aarch64" ]]; then
   # buildifier
   VERSION=5.1.0
   download_and_check /usr/local/bin/buildifier https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildifier-linux-arm64 \
-    51cbf32f3dae38cfd85a24943fcc3cc386ffeb6a67531c9507f2c0eb31ca20ca
+    559b5c903671d82dabf7644bc2ff3acf0b7db2b73dc86a95b372ed7b69d33e22
   chmod +x /usr/local/bin/buildifier
 
   # buildozer
   download_and_check /usr/local/bin/buildozer https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildozer-linux-arm64 \
-    4b1eb1f77afc3e1ce2b420810f8453a0638bb46dacb12c5e37c42f0ea0f2a0c9
+    aff3548240003cc37d05a3c1abb3b6ee222a4508ae95aa0e643c5c4e5a5c8d63
   chmod +x /usr/local/bin/buildozer
 
   # bazelisk
