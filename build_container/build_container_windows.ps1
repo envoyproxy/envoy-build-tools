@@ -104,10 +104,10 @@ AddToPath $msvcFullPath
 [System.Environment]::SetEnvironmentVariable('BAZEL_VC', $msvcBasePath)
 
 # MS SDK - Debug Tools
-# Pinned to SDK version 2004 release 12/16/2020 link from https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/
+# Pinned to SDK version 2104 release from https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/
 DownloadAndCheck $env:TEMP\winsdksetup.exe `
-                 https://download.microsoft.com/download/d/8/f/d8ff148b-450c-40b3-aeed-2a3944e66bbd/windowssdk/winsdksetup.exe `
-		 4d73ddc82caa1cbe82dffdc24b7cef368919e077bad984357d447568feab1f5f
+                 https://download.microsoft.com/download/f/6/7/f673df4b-4df9-4e1c-b6ce-2e6b4236c802/windowssdk/winsdksetup.exe `
+		 6c489de4a7ff206bdb15e97fedc397aa01da570bf83c3049aaf755d9376237c2
 RunAndCheckError "cmd.exe" @("/s", "/c", "$env:TEMP\winsdksetup.exe /features OptionId.WindowsDesktopDebuggers /quiet /norestart")
 AddToPath "C:\Program Files (x86)\Windows Kits\10\Debuggers\x64"
 
