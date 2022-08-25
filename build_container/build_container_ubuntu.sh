@@ -20,17 +20,7 @@ curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
 
 # docker-ce-cli
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-case $ARCH in
-    'ppc64le' )
-        add-apt-repository "deb [arch=ppc64le] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-        ;;
-    'x86_64' )
-        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-        ;;
-    'aarch64' )
-        add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-        ;;
-esac
+add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
 # CMake
 curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | apt-key add -
@@ -53,7 +43,6 @@ PACKAGES=(
     gdb
     git
     gnupg2
-    google-cloud-sdk
     graphviz
     jq
     libffi-dev
@@ -86,24 +75,31 @@ case $ARCH in
     'ppc64le' )
         LLVM_DISTRO=powerpc64le-linux-ubuntu-18.04
         LLVM_SHA256SUM=2d504c4920885c86b306358846178bc2232dfac83b47c3b1d05861a8162980e6
+        apt-get install -y --no-install-recommends \
+        libtinfo5 # LLVM dependencies on Ubuntu 20.04
         ;;
     'x86_64' )
         LLVM_DISTRO=x86_64-linux-gnu-ubuntu-18.04
         LLVM_SHA256SUM=61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5
+        apt-get install -y --no-install-recommends \
+        google-cloud-sdk \
+        libtinfo5 # LLVM dependencies on Ubuntu 20.04
         ;;
     'aarch64' )
         LLVM_DISTRO=aarch64-linux-gnu
         LLVM_SHA256SUM=1792badcd44066c79148ffeb1746058422cc9d838462be07e3cb19a4b724a1ee
-        apt-get install -y --no-install-recommends libtinfo5 # LLVM dependencies on Ubuntu 20.04
+        apt-get install -y --no-install-recommends \
+        google-cloud-sdk \
+        libtinfo5 # LLVM dependencies on Ubuntu 20.04
         ;;
 esac
 
 # Bazel and related dependencies.
 case $ARCH in
     'ppc64le' )
-        BAZEL_LATEST="$(curl https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_16.04/latest/ 2>&1 \
+        BAZEL_LATEST="$(curl https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_$(lsb_release -r | awk '{print $2}')/latest/ 2>&1 \
           | sed -n 's/.*href="\([^"]*\).*/\1/p' | grep '^bazel' | head -n 1)"
-        curl -fSL https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_16.04/latest/${BAZEL_LATEST} \
+        curl -fSL https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_$(lsb_release -r | awk '{print $2}')/latest/${BAZEL_LATEST} \
           -o /usr/local/bin/bazel
         chmod +x /usr/local/bin/bazel
         ;;
@@ -132,6 +128,7 @@ pip3 install -U pyyaml virtualenv
 source ./build_container_common.sh
 
 # Soft link the gcc compiler (required by python env)
+ARCH=${ARCH/ppc64le/powerpc64le} # For ppc64le the ARCH variable must be renamed accordingly
 update-alternatives --install "/usr/bin/${ARCH}-linux-gnu-gcc" "${ARCH}-linux-gnu-gcc" "/usr/bin/${ARCH}-linux-gnu-gcc-9" 1
 
 apt-get clean
