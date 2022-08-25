@@ -12,7 +12,8 @@ function download_and_check () {
 function install_gn(){
   # Install gn tools which will be used for building wee8
   # amd64 & arm64 install binary, else compile from source
-  if [[ "$(uname -m)" == "x86_64" ]] || [[ "$(uname -m)" == "aarch64" ]]; then
+  ARCH=$(uname -m)
+  if [[ "${ARCH}" == "x86_64" ]] || [[ "${ARCH}" == "aarch64" ]]; then
     GN_ARCH=${ARCH/x86_64/amd64}
     GN_ARCH=${ARCH/aarch64/arm64}
     wget -O gntool.zip "https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-${GN_ARCH}/+/latest"
