@@ -21,12 +21,12 @@ package(default_visibility = ["//visibility:public"])
 toolchain(
     name = "cc-toolchain",
     exec_compatible_with = [
-        "@bazel_tools//platforms:windows",
-        "@bazel_tools//platforms:x86_64",
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
     ],
     target_compatible_with = [
-        "@bazel_tools//platforms:windows",
-        "@bazel_tools//platforms:x86_64",
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
     ],
     toolchain = "//toolchains/configs/windows/msvc-cl/cc:cc-compiler-x64_windows",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
@@ -36,8 +36,8 @@ platform(
     name = "platform",
     parents = ["@local_config_platform//:host"],
     constraint_values = [
-        "@bazel_tools//platforms:windows",
-        "@bazel_tools//platforms:x86_64",
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
     ],
     exec_properties = {
         "container-image": "docker://gcr.io/envoy-ci/envoy-build-windows@sha256:549812530b62d2b74bcd721d1e31bb4ce00be838c2653c3dfe8ff8f86b278311",
