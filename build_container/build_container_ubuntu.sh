@@ -47,6 +47,7 @@ PACKAGES=(
     jq
     libffi-dev
     libncurses-dev
+    libtinfo5
     libtool
     make
     ninja-build
@@ -67,6 +68,10 @@ PACKAGES=(
     xz-utils
     zip)
 
+if [[ "${ARCH}" == "x86_64" || "${ARCH}" == "aarch64" ]]; then
+  PACKAGES+=("google-cloud-sdk")
+fi
+
 apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 
 # Set LLVM version for each cpu architecture.
@@ -75,22 +80,14 @@ case $ARCH in
     'ppc64le' )
         LLVM_DISTRO=powerpc64le-linux-ubuntu-18.04
         LLVM_SHA256SUM=2d504c4920885c86b306358846178bc2232dfac83b47c3b1d05861a8162980e6
-        apt-get install -y --no-install-recommends \
-        libtinfo5 # LLVM dependencies on Ubuntu 20.04
         ;;
     'x86_64' )
         LLVM_DISTRO=x86_64-linux-gnu-ubuntu-18.04
         LLVM_SHA256SUM=61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5
-        apt-get install -y --no-install-recommends \
-        google-cloud-sdk \
-        libtinfo5 # LLVM dependencies on Ubuntu 20.04
         ;;
     'aarch64' )
         LLVM_DISTRO=aarch64-linux-gnu
         LLVM_SHA256SUM=1792badcd44066c79148ffeb1746058422cc9d838462be07e3cb19a4b724a1ee
-        apt-get install -y --no-install-recommends \
-        google-cloud-sdk \
-        libtinfo5 # LLVM dependencies on Ubuntu 20.04
         ;;
 esac
 
