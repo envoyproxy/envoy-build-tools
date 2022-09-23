@@ -81,7 +81,7 @@ PACKAGES=(
 apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 
 # Set LLVM version for each cpu architecture.
-LLVM_VERSION=14.0.0
+LLVM_VERSION=15.0.1
 case $ARCH in
     'ppc64le' )
         LLVM_DISTRO=powerpc64le-linux-ubuntu-18.04
