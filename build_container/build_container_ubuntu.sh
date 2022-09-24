@@ -84,8 +84,8 @@ apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 LLVM_VERSION=15.0.1
 case $ARCH in
     'ppc64le' )
-        LLVM_DISTRO=powerpc64le-linux-ubuntu-18.04
-        LLVM_SHA256SUM=2d504c4920885c86b306358846178bc2232dfac83b47c3b1d05861a8162980e6
+        LLVM_DISTRO=powerpc64le-linux-ubuntu-18.04.05
+        LLVM_SHA256SUM=e7c427e0590e8c362d0766f9125674e847be9d30986c3d6928be960b30c87e63
         ;;
     'x86_64' )
         LLVM_DISTRO=x86_64-linux-gnu-ubuntu-18.04
@@ -93,7 +93,7 @@ case $ARCH in
         ;;
     'aarch64' )
         LLVM_DISTRO=aarch64-linux-gnu
-        LLVM_SHA256SUM=1792badcd44066c79148ffeb1746058422cc9d838462be07e3cb19a4b724a1ee
+        LLVM_SHA256SUM=201b2f5e537ec88937e0e1b30512453076e73a06ca75edf9939dc0e61b5ccbd1
         apt-get install -y --no-install-recommends libtinfo5 # LLVM dependencies on Ubuntu 20.04
         ;;
 esac
