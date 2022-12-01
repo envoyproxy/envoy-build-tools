@@ -14,7 +14,6 @@ localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 
 # gdb
 add-apt-repository -y ppa:ubuntu-toolchain-r/test
-apt-get update -y
 
 # Google Cloud SDK
 echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" \
