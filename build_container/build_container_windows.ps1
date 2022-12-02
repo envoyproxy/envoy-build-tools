@@ -106,8 +106,8 @@ AddToPath $msvcFullPath
 # MS SDK - Debug Tools
 # Pinned to SDK version 2104 release from https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/
 DownloadAndCheck $env:TEMP\winsdksetup.exe `
-                 https://download.microsoft.com/download/f/6/7/f673df4b-4df9-4e1c-b6ce-2e6b4236c802/windowssdk/winsdksetup.exe `
-		 6c489de4a7ff206bdb15e97fedc397aa01da570bf83c3049aaf755d9376237c2
+                 https://download.microsoft.com/download/7/9/6/7962e9ce-cd69-4574-978c-1202654bd729/windowssdk/winsdksetup.exe `
+                 73fe3cc0e50d946d0c0a83a1424111e60dee23f0803e305a8974a963b58290c0
 RunAndCheckError "cmd.exe" @("/s", "/c", "$env:TEMP\winsdksetup.exe /features OptionId.WindowsDesktopDebuggers /quiet /norestart")
 AddToPath "C:\Program Files (x86)\Windows Kits\10\Debuggers\x64"
 
@@ -167,8 +167,8 @@ RunAndCheckError "$env:TEMP\7z-installer.exe" @("/S", "/D=$quo$env:TEMP\7z$quo")
 
 # msys2 with additional required packages
 DownloadAndCheck $env:TEMP\msys2.tar.xz `
-                 https://github.com/msys2/msys2-installer/releases/download/2022-06-03/msys2-base-x86_64-20220603.tar.xz `
-                 7a94529d2e88614424212897c963244733de758185cb615c7bb3efbad55190da
+                 https://github.com/msys2/msys2-installer/releases/download/2022-10-28/msys2-base-x86_64-20221028.tar.xz `
+                 622492c535c9372235a6233efcbbefcb064f9b671698d990b3cf71bad0fbdf0a
 RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar.xz", "-o$env:TEMP\msys2.tar", "-y")
 RunAndCheckError "$env:TEMP\7z\7z.exe" @("x", "$env:TEMP\msys2.tar", "-oC:\tools", "-y")
 AddToPath C:\tools\msys64\usr\bin
