@@ -106,8 +106,8 @@ AddToPath $msvcFullPath
 # MS SDK - Debug Tools
 # Pinned to SDK version 2104 release from https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/
 DownloadAndCheck $env:TEMP\winsdksetup.exe `
-                 https://download.microsoft.com/download/f/6/7/f673df4b-4df9-4e1c-b6ce-2e6b4236c802/windowssdk/winsdksetup.exe `
-		 6c489de4a7ff206bdb15e97fedc397aa01da570bf83c3049aaf755d9376237c2
+                 https://download.microsoft.com/download/7/9/6/7962e9ce-cd69-4574-978c-1202654bd729/windowssdk/winsdksetup.exe `
+                 73fe3cc0e50d946d0c0a83a1424111e60dee23f0803e305a8974a963b58290c0
 RunAndCheckError "cmd.exe" @("/s", "/c", "$env:TEMP\winsdksetup.exe /features OptionId.WindowsDesktopDebuggers /quiet /norestart")
 AddToPath "C:\Program Files (x86)\Windows Kits\10\Debuggers\x64"
 
