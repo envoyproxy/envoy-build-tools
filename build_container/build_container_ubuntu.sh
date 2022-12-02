@@ -12,6 +12,9 @@ apt-get install -y --no-install-recommends locales software-properties-common ap
 # set locale
 localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 
+# gdb
+add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
 # Google Cloud SDK
 echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" \
   | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
