@@ -132,6 +132,36 @@ update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 # TODO(phlax): use hashed requirements
 pip3 install -U pyyaml virtualenv
 
+##################################
+# Begin Android tools installation
+##################################
+
+sdk_install_target="/github/home/.android"
+mkdir -p "$sdk_install_target/sdk"
+pushd "$sdk_install_target"
+cmdline_file="commandlinetools-linux-7583922_latest.zip"
+curl -OL "https://dl.google.com/android/repository/$cmdline_file"
+unzip "$cmdline_file"
+mkdir -p sdk/cmdline-tools/latest
+mv cmdline-tools/* sdk/cmdline-tools/latest
+
+ANDROID_HOME="$(realpath "$sdk_install_target/sdk")"
+SDKMANAGER=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
+
+echo "y" | $SDKMANAGER --install "ndk;21.4.7075529"
+$SDKMANAGER --install "platforms;android-30"
+$SDKMANAGER --install "build-tools;30.0.2"
+
+export "ANDROID_HOME=${ANDROID_HOME}"
+export "ANDROID_SDK_ROOT=${ANDROID_HOME}"
+export "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/21.4.7075529"
+
+popd
+
+################################
+# End Android tools installation
+################################
+
 source ./build_container_common.sh
 
 # Soft link the gcc compiler (required by python env)
