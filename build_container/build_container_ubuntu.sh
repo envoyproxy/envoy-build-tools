@@ -132,6 +132,29 @@ update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 # TODO(phlax): use hashed requirements
 pip3 install -U pyyaml virtualenv
 
+########################
+# Begin JDK installation
+########################
+
+# Add Azul's public key
+apt-key adv \
+  --keyserver hkp://keyserver.ubuntu.com:80 \
+  --recv-keys 0xB1998361219BD9C9
+
+# Download and install the package that adds 
+# the Azul APT repository to the list of sources 
+curl -O https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
+
+# Install the Java 8 JDK
+apt-get install -y ./zulu-repo_1.0.0-3_all.deb
+apt-get update -y
+apt-get install -y zulu8-jdk
+rm ./zulu-repo_1.0.0-3_all.deb
+
+######################
+# End JDK installation
+######################
+
 ##################################
 # Begin Android tools installation
 ##################################
