@@ -132,58 +132,59 @@ update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 # TODO(phlax): use hashed requirements
 pip3 install -U pyyaml virtualenv
 
-########################
-# Begin JDK installation
-########################
+function install_android_tools() {
+    #############
+    # Install JDK
+    #############
 
-# Add Azul's public key
-apt-key adv \
-  --keyserver hkp://keyserver.ubuntu.com:80 \
-  --recv-keys 0xB1998361219BD9C9
+    # Add Azul's public key
+    apt-key adv \
+        --keyserver hkp://keyserver.ubuntu.com:80 \
+        --recv-keys 0xB1998361219BD9C9
 
-# Download and install the package that adds 
-# the Azul APT repository to the list of sources 
-curl -O https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
+    # Download and install the package that adds 
+    # the Azul APT repository to the list of sources 
+    curl -O https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
 
-# Install the Java 8 JDK
-apt-get install -y ./zulu-repo_1.0.0-3_all.deb
-apt-get update -y
-apt-get install -y zulu8-jdk
-rm ./zulu-repo_1.0.0-3_all.deb
+    # Install the Java 8 JDK
+    apt-get install -y ./zulu-repo_1.0.0-3_all.deb
+    apt-get update -y
+    apt-get install -y zulu8-jdk
+    rm ./zulu-repo_1.0.0-3_all.deb
 
-######################
-# End JDK installation
-######################
+    #######################
+    # Install Android tools
+    #######################
 
-##################################
-# Begin Android tools installation
-##################################
+    sdk_install_target="/github/home/.android"
+    mkdir -p "$sdk_install_target/sdk"
+    pushd "$sdk_install_target"
 
-sdk_install_target="/github/home/.android"
-mkdir -p "$sdk_install_target/sdk"
-pushd "$sdk_install_target"
-cmdline_file="commandlinetools-linux-7583922_latest.zip"
-curl -OL "https://dl.google.com/android/repository/$cmdline_file"
-unzip "$cmdline_file"
-mkdir -p sdk/cmdline-tools/latest
-mv cmdline-tools/* sdk/cmdline-tools/latest
+    cmdline_file="commandlinetools-linux-7583922_latest.zip"
+    curl -OL "https://dl.google.com/android/repository/$cmdline_file"
+    unzip "$cmdline_file"
+    mkdir -p sdk/cmdline-tools/latest
+    mv cmdline-tools/* sdk/cmdline-tools/latest
 
-ANDROID_HOME="$(realpath "$sdk_install_target/sdk")"
-SDKMANAGER=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
+    ANDROID_HOME="$(realpath "$sdk_install_target/sdk")"
+    SDKMANAGER=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
 
-echo "y" | $SDKMANAGER --install "ndk;21.4.7075529"
-$SDKMANAGER --install "platforms;android-30"
-$SDKMANAGER --install "build-tools;30.0.2"
+    echo "y" | $SDKMANAGER --install "ndk;21.4.7075529"
+    $SDKMANAGER --install "platforms;android-30"
+    $SDKMANAGER --install "build-tools;30.0.2"
 
-export "ANDROID_HOME=${ANDROID_HOME}"
-export "ANDROID_SDK_ROOT=${ANDROID_HOME}"
-export "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/21.4.7075529"
+    export "ANDROID_HOME=${ANDROID_HOME}"
+    export "ANDROID_SDK_ROOT=${ANDROID_HOME}"
+    export "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/21.4.7075529"
 
-popd
+    popd
+}
 
-################################
-# End Android tools installation
-################################
+case $ARCH in
+    'x86_64' )
+        install_android_tools
+        ;;
+esac
 
 source ./build_container_common.sh
 
