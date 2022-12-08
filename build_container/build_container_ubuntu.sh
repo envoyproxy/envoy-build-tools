@@ -156,10 +156,8 @@ function install_android_tools() {
     # Install Android tools
     #######################
 
-    sdk_install_target="/.android"
-    android_home="$sdk_install_target/sdk"
-    mkdir -p "$android_home"
-    pushd "$sdk_install_target"
+    mkdir -p "$ANDROID_HOME"
+    pushd "$ANDROID_SDK_INSTALL_TARGET"
 
     cmdline_file="commandlinetools-linux-7583922_latest.zip"
     curl -OL "https://dl.google.com/android/repository/$cmdline_file"
@@ -167,8 +165,8 @@ function install_android_tools() {
     mkdir -p sdk/cmdline-tools/latest
     mv cmdline-tools/* sdk/cmdline-tools/latest
 
-    sdkmanager=$android_home/cmdline-tools/latest/bin/sdkmanager
-    echo "y" | $sdkmanager --install "ndk;21.4.7075529"
+    sdkmanager=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
+    echo "y" | $sdkmanager --install "ndk;$ANDROID_NDK_VERSION"
     $sdkmanager --install "platforms;android-30"
     $sdkmanager --install "build-tools;30.0.2"
 
