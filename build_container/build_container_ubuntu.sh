@@ -132,6 +132,53 @@ update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 # TODO(phlax): use hashed requirements
 pip3 install -U pyyaml virtualenv
 
+function install_android_tools() {
+    #############
+    # Install JDK
+    #############
+
+    # Add Azul's public key
+    apt-key adv \
+        --keyserver hkp://keyserver.ubuntu.com:80 \
+        --recv-keys 0xB1998361219BD9C9
+
+    # Download and install the package that adds 
+    # the Azul APT repository to the list of sources 
+    curl -O https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
+
+    # Install the Java 8 JDK
+    apt-get install -y ./zulu-repo_1.0.0-3_all.deb
+    apt-get update -y
+    apt-get install -y zulu8-jdk
+    rm ./zulu-repo_1.0.0-3_all.deb
+
+    #######################
+    # Install Android tools
+    #######################
+
+    mkdir -p "$ANDROID_HOME"
+    pushd "$ANDROID_SDK_INSTALL_TARGET"
+
+    cmdline_file="commandlinetools-linux-7583922_latest.zip"
+    curl -OL "https://dl.google.com/android/repository/$cmdline_file"
+    unzip "$cmdline_file"
+    mkdir -p sdk/cmdline-tools/latest
+    mv cmdline-tools/* sdk/cmdline-tools/latest
+
+    sdkmanager=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
+    echo "y" | $sdkmanager --install "ndk;$ANDROID_NDK_VERSION"
+    $sdkmanager --install "platforms;android-30"
+    $sdkmanager --install "build-tools;30.0.2"
+
+    popd
+}
+
+case $ARCH in
+    'x86_64' )
+        install_android_tools
+        ;;
+esac
+
 source ./build_container_common.sh
 
 # Soft link the gcc compiler (required by python env)
