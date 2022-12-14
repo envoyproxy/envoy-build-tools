@@ -11,7 +11,7 @@ jobs:
         GCR_IMAGE_NAME: envoy-build
       mobile:
         OS_DISTRO: mobile
-        PUSH_GCR_IMAGE: true
+        PUSH_GCR_IMAGE: false
         GCR_IMAGE_NAME: envoy-build
       centos:
         OS_DISTRO: centos
