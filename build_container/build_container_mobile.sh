@@ -2,8 +2,6 @@
 
 set -e
 
-./build_container_ubuntu.sh
-
 #############
 # Install JDK
 #############
