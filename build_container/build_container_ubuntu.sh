@@ -56,6 +56,7 @@ PACKAGES=(
     gdb
     git
     gnupg2
+    golang
     google-cloud-sdk
     graphviz
     jq
