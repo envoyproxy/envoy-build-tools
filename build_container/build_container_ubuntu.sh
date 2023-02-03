@@ -2,6 +2,10 @@
 
 set -e
 
+# NB: The apt repository keys that are setup here can expire
+#   For this reason it is generally good to ensure that the image is
+#   updated every few months, to ensure ~fresh keys.
+
 ARCH="$(uname -m)"
 
 # Setup basic requirements and install them.
