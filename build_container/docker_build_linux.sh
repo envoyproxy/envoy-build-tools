@@ -3,6 +3,10 @@
 
 set -e
 
+# To be enabled
+# UBUNTU_DOCKER_VARIANTS=("mobile")
+UBUNTU_DOCKER_VARIANTS=()
+
 # Setting environments for buildx tools
 config_env() {
   # Install QEMU emulators
@@ -26,10 +30,24 @@ fi
 
 ci_log_run config_env
 
-ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}"
+build_and_push_variants () {
+    local variant
+    if [[ "${OS_DISTRO}" != "ubuntu" ]]; then
+        return
+    fi
+    for variant in "${UBUNTU_DOCKER_VARIANTS[@]}"; do
+        ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-${variant}:${CONTAINER_TAG}" --target "${variant}" --platform "${BUILD_TOOLS_PLATFORMS}"
+    done
+}
+
+ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target base --platform "${BUILD_TOOLS_PLATFORMS}"
+
+# variants are only pushed for the dockerhub image (not other `IMAGE_TAGS`)
+build_and_push_variants
+
 
 for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
-  ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
+    ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --target base --platform "${BUILD_TOOLS_PLATFORMS}" --push
 done
 
 # Testing after push to save CI time because this invalidates arm64 cache

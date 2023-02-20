@@ -1,5 +1,5 @@
-# envoy-build-ubuntu
-FROM ubuntu:focal AS ubuntu
+# base
+FROM ubuntu:focal as base
 
 # Workaround for: https://issuetracker.google.com/issues/216325949
 ENV CLOUDSDK_PYTHON=python3
@@ -11,8 +11,8 @@ RUN ./build_container_ubuntu.sh
 
 ENV LANG en_US.utf8
 
-# envoy-build-mobile
-FROM ubuntu AS mobile
+# mobile
+FROM ubuntu as mobile
 COPY ./build_container_mobile.sh /
 
 ENV ANDROID_SDK_INSTALL_TARGET /.android

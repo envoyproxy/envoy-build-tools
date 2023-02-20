@@ -1,4 +1,4 @@
-FROM centos:7
+FROM centos:7 as base
 
 COPY ./build_container_common.sh /
 COPY ./build_container_centos.sh /
