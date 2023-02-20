@@ -40,9 +40,10 @@ build_and_push_variants () {
 
 ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target base --platform "${BUILD_TOOLS_PLATFORMS}"
 
-# variants are only pushed for the dockerhub image (not other `IMAGE_TAGS`)
-build_and_push_variants
-
+if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
+    # variants are only pushed for the dockerhub image (not other `IMAGE_TAGS`)
+    build_and_push_variants
+fi
 
 for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
     ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --target base --platform "${BUILD_TOOLS_PLATFORMS}" --push
