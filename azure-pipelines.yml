@@ -9,9 +9,6 @@ jobs:
         OS_DISTRO: ubuntu
         PUSH_GCR_IMAGE: true
         GCR_IMAGE_NAME: envoy-build
-      mobile:
-        OS_DISTRO: mobile
-        PUSH_GCR_IMAGE: false
       centos:
         OS_DISTRO: centos
         PUSH_GCR_IMAGE: false
