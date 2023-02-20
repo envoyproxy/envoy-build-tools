@@ -25,7 +25,6 @@ jobs:
     workingDirectory: build_container
     env:
       OS_FAMILY: linux
-      IMAGE_ARCH: "amd64 arm64"
       SOURCE_BRANCH: $(Build.SourceBranch)
       DOCKERHUB_USERNAME: $(DockerUsername)
       DOCKERHUB_PASSWORD: $(DockerPassword)
@@ -69,7 +68,6 @@ jobs:
     workingDirectory: build_container
     env:
       OS_FAMILY: windows
-      IMAGE_ARCH: "amd64"
       SOURCE_BRANCH: $(Build.SourceBranch)
       DOCKERHUB_USERNAME: $(DockerUsername)
       DOCKERHUB_PASSWORD: $(DockerPassword)
