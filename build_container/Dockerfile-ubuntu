@@ -12,7 +12,7 @@ RUN ./build_container_ubuntu.sh
 ENV LANG en_US.utf8
 
 # mobile
-FROM ubuntu as mobile
+FROM base as mobile
 COPY ./build_container_mobile.sh /
 
 ENV ANDROID_SDK_INSTALL_TARGET /.android
