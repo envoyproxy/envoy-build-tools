@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:focal as base
 
 # Workaround for: https://issuetracker.google.com/issues/216325949
 ENV CLOUDSDK_PYTHON=python3
@@ -9,3 +9,6 @@ COPY ./build_container_ubuntu.sh /
 RUN ./build_container_ubuntu.sh
 
 ENV LANG en_US.utf8
+
+# This can be switched to mobile
+FROM base as extended
