@@ -35,7 +35,7 @@ build_and_push_variants () {
     fi
     for variant in "${UBUNTU_DOCKER_VARIANTS[@]}"; do
         # Only build variants for linux/amd64
-        ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-${variant}:${CONTAINER_TAG}" --target "${variant}" --platform "linux/amd64"
+        ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-${variant}:${CONTAINER_TAG}" --target "${variant}" --platform "linux/amd64" --push
     done
 }
 
