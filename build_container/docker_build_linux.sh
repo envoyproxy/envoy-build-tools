@@ -3,9 +3,7 @@
 
 set -e
 
-# To be enabled
-# UBUNTU_DOCKER_VARIANTS=("mobile")
-UBUNTU_DOCKER_VARIANTS=()
+UBUNTU_DOCKER_VARIANTS=("mobile")
 
 # Setting environments for buildx tools
 config_env() {
