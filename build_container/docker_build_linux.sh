@@ -28,14 +28,20 @@ fi
 
 ci_log_run config_env
 
+# TODO(phlax): add (json) build images config
 build_and_push_variants () {
-    local variant
+    local variant push_arg=""
     if [[ "${OS_DISTRO}" != "ubuntu" ]]; then
         return
     fi
+    if [[ "${#IMAGE_TAGS[@]}" -ne 0 ]]; then
+        # Variants are only pushed to dockerhub currently, so if we are pushing images
+        # just push the variants immediately.
+        push_arg="--push"
+    fi
     for variant in "${UBUNTU_DOCKER_VARIANTS[@]}"; do
         # Only build variants for linux/amd64
-        ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-${variant}:${CONTAINER_TAG}" --target "${variant}" --platform "linux/amd64" --push
+        ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}-${variant}:${CONTAINER_TAG}" --target "${variant}" --platform "linux/amd64" "$push_arg"
     done
 }
 
