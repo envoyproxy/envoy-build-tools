@@ -77,6 +77,17 @@ LLVM_HOST_TARGET="$(/opt/llvm/bin/llvm-config --host-target)"
 echo "/opt/llvm/lib/${LLVM_HOST_TARGET}" > /etc/ld.so.conf.d/llvm.conf
 ldconfig
 
+if [[ -n "$CLANG_TOOLS_SHA256SUM" ]]; then
+    # Pick `run-clang-tidy.py` from `clang-tools-extra` and place in filepath expected by Envoy CI.
+    # Only required for more recent LLVM/Clang versions
+    ENVOY_CLANG_TIDY_PATH=/opt/llvm/share/clang/run-clang-tidy.py
+    CLANG_TOOLS_SRC="clang-tools-extra-${LLVM_VERSION}.src"
+    CLANG_TOOLS_TARBALL="${CLANG_TOOLS_SRC}.tar.xz"
+    download_and_check "./${CLANG_TOOLS_TARBALL}" "${LLVM_DOWNLOAD_PREFIX}${LLVM_VERSION}/${CLANG_TOOLS_TARBALL}" "$CLANG_TOOLS_SHA256SUM"
+    tar JxfO "./${CLANG_TOOLS_TARBALL}" "${CLANG_TOOLS_SRC}/clang-tidy/tool/clang-tidy-diff.py" > "$ENVOY_CLANG_TIDY_PATH"
+    rm "./${CLANG_TOOLS_TARBALL}"
+fi
+
 # Install gn tools.
 install_gn
 
