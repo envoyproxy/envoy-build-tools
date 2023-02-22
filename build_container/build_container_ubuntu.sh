@@ -105,6 +105,8 @@ case $ARCH in
         ;;
 esac
 
+CLANG_TOOLS_SHA256SUM="f49de4b4502a6608425338e2d93bbe4529cac0a22f2dc1c119ef175a4e1b5bf0"
+
 # Bazel and related dependencies.
 case $ARCH in
     'ppc64le' )
