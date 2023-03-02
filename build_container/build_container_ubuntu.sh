@@ -110,9 +110,9 @@ CLANG_TOOLS_SHA256SUM="f49de4b4502a6608425338e2d93bbe4529cac0a22f2dc1c119ef175a4
 # Bazel and related dependencies.
 case $ARCH in
     'ppc64le' )
-        BAZEL_LATEST="$(curl https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_16.04/latest/ 2>&1 \
+        BAZEL_LATEST="$(curl https://ftp2.osuosl.org/pub/ppc64el/bazel/ubuntu_16.04/latest/ 2>&1 \
           | sed -n 's/.*href="\([^"]*\).*/\1/p' | grep '^bazel' | head -n 1)"
-        curl -fSL https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_16.04/latest/${BAZEL_LATEST} \
+        curl -fSL https://ftp2.osuosl.org/pub/ppc64el/bazel/ubuntu_16.04/latest/${BAZEL_LATEST} \
           -o /usr/local/bin/bazel
         chmod +x /usr/local/bin/bazel
         ;;
