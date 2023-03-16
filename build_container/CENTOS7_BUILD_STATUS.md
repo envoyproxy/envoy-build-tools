@@ -1,5 +1,35 @@
 You are strongly encouraged to test the produced Envoy binary on CentOS 7 yourselves to ensure that it satisfies your required functionality and operates as expected.
 
+## Version 1.25.x
+If you need to run this version of Envoy on CentOS 7, your best bet is to use an Envoy binary built on Oracle Linux 8 and an updated version of glibc. CentOS 7 only comes with glibc 2.17, but the Envoy binary built on Oracle Linux 8 depends on a newer version of glibc, so you have to install a newer version on your system. Be careful not to override the existing version of glibc. Here are the rough instructions for accomplishing this:
+1. Use the Oracle Linux 8 image in this repo to build envoy.
+2. Copy the resulting Envoy binary to a CentOS 7 host.
+3. Install glibc 2.28 on the CentOS 7 host. This is the only version of glibc that has been tested with Envoy 1.25.x on CentOS 7.
+    1. One option is to compile it from source.
+    ```
+    wget https://ftp.gnu.org/gnu/glibc/glibc-2.28.tar.gz
+    tar zxvf glibc-2.28.tar.gz
+    cd glibc-2.28
+    mkdir build
+    cd build
+    ../configure --prefix=/opt/glibc-2.28
+    make -j4
+    sudo make install
+    ```
+    2. Another option is to download a pre-built RPM and extract it to a specific directory.
+    ```
+    mkdir /opt/glibc-2.28
+    cd /opt/glibc-2.28
+    wget https://rpmfind.net/linux/centos/8-stream/BaseOS/x86_64/os/Packages/glibc-2.28-155.el8.x86_64.rpm
+    rpm2cpio glibc-2.28-155.el8.x86_64.rpm | cpio -idmv
+    rm glibc-2.28-155.el8.x86_64.rpm
+    ```
+4. Use [patchelf](https://github.com/NixOS/patchelf) to patch the Oracle Linux 8 Envoy binary to use the updated version of glibc ld-linux for its interpreter and set the rpath to include the libs from glibc. This allows you to start the binary using a newer glibc version that includes the features required by the Oracle Linux 8 binary. Without this, it will run the system ld-linux which is from glibc 2.17 on CentOS 7.
+```
+patchelf --set-interpreter '/opt/glibc-2.28/lib64/ld-linux-x86-64.so.2' --set-rpath '/opt/glibc-2.28/lib64/' ${path_to_envoy_binary}
+```
+5. You should now be able to run the Envoy binary on your CentOS 7 host.
+
 ## Version 1.21.x
 Envoy version 1.21 onwards cannot currently be compiled on CentOS 7.
 

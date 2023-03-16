@@ -12,6 +12,9 @@ jobs:
       centos:
         OS_DISTRO: centos
         PUSH_GCR_IMAGE: false
+      oraclelinux:
+        OS_DISTRO: oraclelinux
+        PUSH_GCR_IMAGE: false
   dependsOn: []
   timeoutInMinutes: 120
   pool:
