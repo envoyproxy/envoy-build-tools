@@ -134,13 +134,16 @@ curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
 # make python3.10 the default python3 interpreter
 update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 
-# pip installs
-# TODO(phlax): use hashed requirements
-pip3 install -U pyyaml virtualenv
-
 source ./build_container_common.sh
 
 # Soft link the gcc compiler (required by python env)
 update-alternatives --install "/usr/bin/${ARCH}-linux-gnu-gcc" "${ARCH}-linux-gnu-gcc" "/usr/bin/${ARCH}-linux-gnu-gcc-9" 1
+
+# pip installs
+# TODO(phlax): use hashed requirements
+pip3 install --no-cache-dir -U crcmod pyyaml virtualenv
+
+# check gsutil is using compiled crcmod
+gsutil version -l | grep 'compiled crcmod' | grep True
 
 apt-get clean
