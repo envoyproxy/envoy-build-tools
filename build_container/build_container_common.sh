@@ -11,21 +11,34 @@ function download_and_check () {
 
 function install_gn(){
   # Install gn tools which will be used for building wee8
+  # amd64 & arm64 install binary, else compile from source
   case "$(uname -m)" in
   "x86_64")
     GN_ARCH=amd64
+    wget -O gntool.zip "https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-${GN_ARCH}/+/latest"
+    unzip gntool.zip -d gntool
+    cp gntool/gn /usr/local/bin/gn
+    chmod +x /usr/local/bin/gn
+    rm -rf gntool*
     ;;
 
   "aarch64")
     GN_ARCH=arm64
+    wget -O gntool.zip "https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-${GN_ARCH}/+/latest"
+    unzip gntool.zip -d gntool
+    cp gntool/gn /usr/local/bin/gn
+    chmod +x /usr/local/bin/gn
+    rm -rf gntool*
     ;;
-  esac
 
-  wget -O gntool.zip "https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-${GN_ARCH}/+/latest"
-  unzip gntool.zip -d gntool
-  cp gntool/gn /usr/local/bin/gn
-  chmod +x /usr/local/bin/gn
-  rm -rf gntool*
+  "ppc64le")
+    git clone https://gn.googlesource.com/gn && cd gn
+    CC=/opt/llvm/bin/clang CXX=/opt/llvm/bin/clang++ python3 build/gen.py && \
+    ninja -C out && \
+    ln -sf out/gn /usr/local/bin/gn
+    ;;
+
+  esac
 }
 
 if [[ "$(uname -m)" == "x86_64" ]]; then

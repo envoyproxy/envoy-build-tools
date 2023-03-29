@@ -20,7 +20,7 @@ config_env() {
 
 if [[ -z "${BUILD_TOOLS_PLATFORMS}" ]]; then
   if [[ "${OS_DISTRO}" == "ubuntu" ]]; then
-    export BUILD_TOOLS_PLATFORMS=linux/arm64,linux/amd64
+    export BUILD_TOOLS_PLATFORMS=linux/arm64,linux/amd64,linux/ppc64le
   else
     export BUILD_TOOLS_PLATFORMS=linux/amd64
   fi

@@ -27,17 +27,7 @@ curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
 
 # docker-ce-cli
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-case $ARCH in
-    'ppc64le' )
-        add-apt-repository "deb [arch=ppc64le] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-        ;;
-    'x86_64' )
-        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-        ;;
-    'aarch64' )
-        add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-        ;;
-esac
+add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
 # CMake
 curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | apt-key add -
@@ -60,11 +50,11 @@ PACKAGES=(
     gdb
     git
     gnupg2
-    google-cloud-sdk
     graphviz
     jq
     libffi-dev
     libncurses-dev
+    libtinfo5
     libtool
     make
     ninja-build
@@ -85,6 +75,10 @@ PACKAGES=(
     xz-utils
     zip)
 
+if [[ "${ARCH}" == "x86_64" || "${ARCH}" == "aarch64" ]]; then
+  PACKAGES+=("google-cloud-sdk")
+fi
+
 apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 
 # Set LLVM version for each cpu architecture.
@@ -101,7 +95,6 @@ case $ARCH in
     'aarch64' )
         LLVM_DISTRO=aarch64-linux-gnu
         LLVM_SHA256SUM=1792badcd44066c79148ffeb1746058422cc9d838462be07e3cb19a4b724a1ee
-        apt-get install -y --no-install-recommends libtinfo5 # LLVM dependencies on Ubuntu 20.04
         ;;
 esac
 
@@ -110,9 +103,9 @@ CLANG_TOOLS_SHA256SUM="f49de4b4502a6608425338e2d93bbe4529cac0a22f2dc1c119ef175a4
 # Bazel and related dependencies.
 case $ARCH in
     'ppc64le' )
-        BAZEL_LATEST="$(curl https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_16.04/latest/ 2>&1 \
+        BAZEL_LATEST="$(curl https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_$(lsb_release -r | awk '{print $2}')/latest/ 2>&1 \
           | sed -n 's/.*href="\([^"]*\).*/\1/p' | grep '^bazel' | head -n 1)"
-        curl -fSL https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_16.04/latest/${BAZEL_LATEST} \
+        curl -fSL https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_$(lsb_release -r | awk '{print $2}')/latest/${BAZEL_LATEST} \
           -o /usr/local/bin/bazel
         chmod +x /usr/local/bin/bazel
         ;;
@@ -137,6 +130,7 @@ update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 source ./build_container_common.sh
 
 # Soft link the gcc compiler (required by python env)
+ARCH=${ARCH/ppc64le/powerpc64le} # For ppc64le the ARCH variable must be renamed accordingly
 update-alternatives --install "/usr/bin/${ARCH}-linux-gnu-gcc" "${ARCH}-linux-gnu-gcc" "/usr/bin/${ARCH}-linux-gnu-gcc-9" 1
 
 # pip installs
