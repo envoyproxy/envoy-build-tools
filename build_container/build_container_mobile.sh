@@ -38,9 +38,3 @@ sdkmanager=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
 echo "y" | $sdkmanager --install "ndk;$ANDROID_NDK_VERSION"
 $sdkmanager --install "platforms;android-30"
 $sdkmanager --install "build-tools;30.0.2"
-
-##########
-# Clean up
-##########
-
-apt-get clean

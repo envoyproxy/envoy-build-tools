@@ -3,7 +3,7 @@
 
 set -e
 
-UBUNTU_DOCKER_VARIANTS=("mobile")
+UBUNTU_DOCKER_VARIANTS=("minimal" "docker" "llvm" "mobile")
 
 # Setting environments for buildx tools
 config_env() {
@@ -46,7 +46,7 @@ build_and_push_variants () {
     done
 }
 
-ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target base --platform "${BUILD_TOOLS_PLATFORMS}"
+ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target kitchen-sink --platform "${BUILD_TOOLS_PLATFORMS}"
 
 if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
     # variants are only pushed for the dockerhub image (not other `IMAGE_TAGS`)
@@ -54,7 +54,7 @@ if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
 fi
 
 for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
-    ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --target base --platform "${BUILD_TOOLS_PLATFORMS}" --push
+    ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --target kitchen-sink --platform "${BUILD_TOOLS_PLATFORMS}" --push
 done
 
 # Testing after push to save CI time because this invalidates arm64 cache

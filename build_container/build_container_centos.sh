@@ -53,6 +53,7 @@ if [[ $(uname -m) == "aarch64" ]] && grep -q -e rhel /etc/*-release ; then
 fi
 
 source ./build_container_common.sh
+source ./build_container_llvm.sh
 
 # compile proper version of gn, compatible with CentOS's GLIBC version and
 # envoy wasm/v8 dependency

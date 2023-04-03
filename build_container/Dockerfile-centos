@@ -1,6 +1,9 @@
 FROM centos:7 as base
+ENV LLVM_VERSION=14.0.0
+ENV LCOV_VERSION=1.15
 
 COPY ./build_container_common.sh /
+COPY ./build_container_llvm.sh /
 COPY ./build_container_centos.sh /
 
 ENV PATH /opt/rh/rh-git218/root/usr/bin:/opt/rh/devtoolset-7/root/usr/bin:/opt/llvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -10,3 +13,6 @@ RUN echo "Defaults    secure_path = $PATH" > /etc/sudoers.d/path
 
 RUN ./build_container_centos.sh
 ENV LC_ALL en_US.UTF-8
+
+# Full image tag
+FROM base as kitchen-sink
