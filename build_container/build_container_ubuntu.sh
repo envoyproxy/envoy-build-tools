@@ -19,12 +19,6 @@ localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 # gdb
 add-apt-repository -y ppa:ubuntu-toolchain-r/test
 
-# Google Cloud SDK
-echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" \
-  | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
-  apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-
 # docker-ce-cli
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 case $ARCH in
@@ -56,7 +50,6 @@ PACKAGES=(
     gdb
     git
     gnupg2
-    google-cloud-sdk
     graphviz
     jq
     libffi-dev
@@ -132,14 +125,8 @@ update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 
 source ./build_container_common.sh
 
-# Soft link the gcc compiler (required by python env)
-update-alternatives --install "/usr/bin/${ARCH}-linux-gnu-gcc" "${ARCH}-linux-gnu-gcc" "/usr/bin/${ARCH}-linux-gnu-gcc-9" 1
-
 # pip installs
 # TODO(phlax): use hashed requirements
-pip3 install --no-cache-dir -U crcmod pyyaml virtualenv
-
-# check gsutil is using compiled crcmod
-gsutil version -l | grep 'compiled crcmod' | grep True
+pip3 install --no-cache-dir -U pyyaml virtualenv
 
 apt-get clean
