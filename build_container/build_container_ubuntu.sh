@@ -39,10 +39,6 @@ case $ARCH in
         ;;
 esac
 
-# CMake
-curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | apt-key add -
-apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
-
 # Python
 add-apt-repository ppa:deadsnakes/ppa
 
