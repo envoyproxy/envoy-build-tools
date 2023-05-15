@@ -129,4 +129,5 @@ source ./build_container_common.sh
 # TODO(phlax): use hashed requirements
 pip3 install --no-cache-dir -U pyyaml virtualenv
 
+apt-get -qq remove --purge -y cmake* ninja-build
 apt-get clean
