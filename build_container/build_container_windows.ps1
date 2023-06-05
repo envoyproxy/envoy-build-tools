@@ -80,10 +80,10 @@ DownloadAndCheck C:\tools\bazel\bazel.exe `
 AddToPath C:\tools\bazel
 
 # VS 2019 Build Tools
-# Pinned to version 16.9.4 downloaded on 1/31/2022 via https://aka.ms/vs/16/release/vs_BuildTools.exe
+# Pinned to version 17 downloaded on 6/5/2023 via https://aka.ms/vs/17/release/vs_BuildTools.exe
 DownloadAndCheck $env:TEMP\vs_BuildTools.exe `
-                 https://download.visualstudio.microsoft.com/download/pr/9a26f37e-6001-429b-a5db-c5455b93953c/460d80ab276046de2455a4115cc4e2f1e6529c9e6cb99501844ecafd16c619c4/vs_BuildTools.exe `
-                 460d80ab276046de2455a4115cc4e2f1e6529c9e6cb99501844ecafd16c619c4
+                 https://download.visualstudio.microsoft.com/download/pr/db3d4c0f-3622-4e9b-bc48-7b4d831a33a7/86341ae0fda1f685efa3b1949b6dcf52fca81a85265cf1c7b8c62dd65fa4e8cf/vs_BuildTools.exe `
+                 86341ae0fda1f685efa3b1949b6dcf52fca81a85265cf1c7b8c62dd65fa4e8cf
 # See: https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019#c-build-tools
 # Other dependent/required components including the "Microsoft.VisualStudio.Workload.MSBuildTools"
 # are added by the installer, do not need to be listed below, and cannot be supressed.
