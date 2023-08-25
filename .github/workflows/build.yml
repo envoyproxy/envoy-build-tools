@@ -15,21 +15,8 @@ concurrency:
 
 
 jobs:
-  env:
-    runs-on: ubuntu-20.04
-    outputs:
-      auth: ${{ steps.appauth.outputs.token }}
-    steps:
-    - id: appauth
-      uses: envoyproxy/toolshed/gh-actions/appauth@actions-v0.0.1
-      with:
-        key: ${{ secrets.ENVOY_CI_UPDATE_BOT_KEY }}
-        app_id: ${{ secrets.ENVOY_CI_UPDATE_APP_ID }}
-
   build_container_linux:
     runs-on: ubuntu-20.04
-    needs:
-    - env
     strategy:
       fail-fast: false
       matrix:
@@ -51,15 +38,13 @@ jobs:
         ./docker_push.sh
       env:
         OS_FAMILY: linux
-        SOURCE_BRANCH: ${{ env.GITHUB_REF }}
+        SOURCE_BRANCH: ${{ github.ref }}
         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
         GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
   build_container_windows:
     name: Build (Windows)
-    needs:
-    - env
     runs-on: windows-2019
     steps:
     - name: 'Checkout Repository'
@@ -80,7 +65,7 @@ jobs:
       shell: bash
       env:
         OS_FAMILY: windows
-        SOURCE_BRANCH: ${{ env.GITHUB_REF }}
+        SOURCE_BRANCH: ${{ github.ref }}
         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
         GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
@@ -90,49 +75,34 @@ jobs:
 
   regenerate_linux:
     runs-on: ubuntu-20.04
+    permissions:
+      contents: write
     name: Regenerate toolchains (Linux)
     needs:
-    - env
     - build_container_linux
     steps:
-    # Checkout the repo
-    - name: 'Checkout Repository (main)'
-      if: ${{ needs.env.outputs.auth }}
-      uses: actions/checkout@v3
-      with:
-        ref: main
-        fetch-depth: 0
-        token: ${{ needs.env.outputs.auth }}
     - name: 'Checkout Repository'
-      if: ${{ ! needs.env.outputs.auth }}
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - run: |
         toolchains/regenerate.sh
       env:
-        COMMIT_TOOLCHAINS: "${{ needs.env.outputs.auth && 'true' || 'false' }}"
+        COMMIT_TOOLCHAINS: true
         GCR_IMAGE_NAME: envoy-build
         OS_FAMILY: linux
-        SOURCE_BRANCH: ${{ env.GITHUB_REF }}
+        SOURCE_BRANCH: ${{ github.ref }}
 
   regenerate_windows:
     runs-on: windows-2019
+    permissions:
+      contents: write
     name: Regenerate toolchains (Windows)
     needs:
-    - env
     - build_container_windows
     - regenerate_linux
     steps:
-    - name: 'Checkout Repository (main)'
-      if: ${{ needs.env.outputs.auth }}
-      uses: actions/checkout@v3
-      with:
-        ref: main
-        fetch-depth: 0
-        token: ${{ needs.env.outputs.auth }}
     - name: 'Checkout Repository'
-      if: ${{ ! needs.env.outputs.auth }}
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
@@ -140,7 +110,7 @@ jobs:
         toolchains/regenerate.sh
       shell: bash
       env:
-        COMMIT_TOOLCHAINS: "${{ needs.env.outputs.auth && 'true' || 'false' }}"
+        COMMIT_TOOLCHAINS: true
         GCR_IMAGE_NAME: envoy-build
         OS_FAMILY: linux
-        SOURCE_BRANCH: ${{ env.GITHUB_REF }}
+        SOURCE_BRANCH: ${{ github.ref }}
