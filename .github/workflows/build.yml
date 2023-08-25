@@ -82,10 +82,16 @@ jobs:
     needs:
     - build_container_linux
     steps:
+    - id: appauth
+      uses: envoyproxy/toolshed/gh-actions/appauth@actions-v0.0.17
+      with:
+        key: ${{ secrets.ENVOY_CI_UPDATE_BOT_KEY }}
+        app_id: ${{ secrets.ENVOY_CI_UPDATE_APP_ID }}
     - name: 'Checkout Repository'
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
+        token: ${{ steps.appauth.outputs.token || env.GITHUB_TOKEN }}
     - run: |
         toolchains/regenerate.sh
       env:
@@ -103,10 +109,16 @@ jobs:
     - build_container_windows
     - regenerate_linux
     steps:
+    - id: appauth
+      uses: envoyproxy/toolshed/gh-actions/appauth@actions-v0.0.17
+      with:
+        key: ${{ secrets.ENVOY_CI_UPDATE_BOT_KEY }}
+        app_id: ${{ secrets.ENVOY_CI_UPDATE_APP_ID }}
     - name: 'Checkout Repository'
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
+        token: ${{ steps.appauth.outputs.token || env.GITHUB_TOKEN }}
     - run: |
         toolchains/regenerate.sh
       shell: bash
