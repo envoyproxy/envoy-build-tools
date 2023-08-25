@@ -23,7 +23,7 @@ function ci_log_run() {
 # Enable docker experimental
 export DOCKER_CLI_EXPERIMENTAL=enabled
 
-CONTAINER_SHA=$(git log -1 --pretty=format:"%H" .)
+CONTAINER_SHA="$(git log -1 --pretty=format:"%H" .)"
 
 echo "Building envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_SHA}"
 if curl -sSLf "https://index.docker.io/v1/repositories/envoyproxy/envoy-build-${OS_DISTRO}/tags/${CONTAINER_SHA}" > /dev/null; then
