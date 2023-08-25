@@ -22,12 +22,10 @@ jobs:
       matrix:
         include:
         - target: ubuntu
-          OS_DISTRO: ubuntu
-          PUSH_GCR_IMAGE: true
-          GCR_IMAGE_NAME: envoy-build
+          gcrPushImage: true
+          gcrImageName: envoy-build
         - target: centos
-          OS_DISTRO: centos
-          PUSH_GCR_IMAGE: false
+          gcrPushImage: false
     name: Build (Linux ${{ matrix.target }})
     steps:
     - uses: envoyproxy/toolshed/gh-actions/diskspace@actions-v0.0.17
@@ -42,6 +40,9 @@ jobs:
         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
         GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+        OS_DISTRO: ${{ matrix.target }}
+        PUSH_GCR_IMAGE: ${{ matrix.gcrPushImage }}
+        GCR_IMAGE_NAME: ${{ matrix.gcrImageName }}
 
   build_container_windows:
     name: Build (Windows)
