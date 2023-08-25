@@ -84,7 +84,7 @@ if [[ -n "$CLANG_TOOLS_SHA256SUM" ]]; then
     CLANG_TOOLS_SRC="clang-tools-extra-${LLVM_VERSION}.src"
     CLANG_TOOLS_TARBALL="${CLANG_TOOLS_SRC}.tar.xz"
     download_and_check "./${CLANG_TOOLS_TARBALL}" "${LLVM_DOWNLOAD_PREFIX}${LLVM_VERSION}/${CLANG_TOOLS_TARBALL}" "$CLANG_TOOLS_SHA256SUM"
-    tar JxfO "./${CLANG_TOOLS_TARBALL}" "${CLANG_TOOLS_SRC}/clang-tidy/tool/clang-tidy-diff.py" > "$ENVOY_CLANG_TIDY_PATH"
+    tar JxfO "./${CLANG_TOOLS_TARBALL}" "${CLANG_TOOLS_SRC}/clang-tidy/tool/run-clang-tidy.py" > "$ENVOY_CLANG_TIDY_PATH"
     rm "./${CLANG_TOOLS_TARBALL}"
 fi
 
