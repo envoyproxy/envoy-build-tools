@@ -7,6 +7,8 @@ BAZEL_VERSION=6.0.0-pre.20220421.3
 export RBE_AUTOCONF_ROOT=$(bazel info workspace)
 
 CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "${RBE_AUTOCONF_ROOT}/build_container")
+COMMITTER_NAME="update-envoy[bot]"
+COMMITTER_EMAIL="135279899+update-envoy[bot]@users.noreply.github.com"
 
 DOCKER_IMAGE="gcr.io/envoy-ci/${GCR_IMAGE_NAME}:${CONTAINER_TAG}"
 if ! docker pull ${DOCKER_IMAGE}; then
@@ -63,8 +65,8 @@ if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
   [skip ci]
   $(git log --format=%B -n 1)"
 
-  git config user.name "envoy-build-tools(Azure Pipelines)"
-  git config user.email envoy-build-tools@users.noreply.github.com
+  git config user.name "$COMMITTER_NAME"
+  git config user.email "$COMMITTER_EMAIL"
 
   git commit -m "${COMMIT_MSG}"
 
