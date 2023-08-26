@@ -76,6 +76,7 @@ jobs:
 
   regenerate_linux:
     runs-on: ubuntu-20.04
+    if: ${{ github.event_name != 'pull_request' }}
     permissions:
       contents: write
     name: Regenerate toolchains (Linux)
@@ -102,6 +103,7 @@ jobs:
 
   regenerate_windows:
     runs-on: windows-2019
+    if: ${{ github.event_name != 'pull_request' }}
     permissions:
       contents: write
     name: Regenerate toolchains (Windows)
