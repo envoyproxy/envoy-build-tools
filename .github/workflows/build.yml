@@ -126,6 +126,6 @@ jobs:
       shell: bash
       env:
         COMMIT_TOOLCHAINS: true
-        GCR_IMAGE_NAME: envoy-build
+        GCR_IMAGE_NAME: envoy-build-windows
         OS_FAMILY: linux
         SOURCE_BRANCH: ${{ github.ref }}
