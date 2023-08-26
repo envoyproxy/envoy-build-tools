@@ -69,6 +69,6 @@ if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
   git commit -m "${COMMIT_MSG}"
 
   if [[ "${SOURCE_BRANCH}" =~ ^refs/heads/.* ]]; then
-    git push git@github.com:envoyproxy/envoy-build-tools.git "HEAD:${SOURCE_BRANCH}"
+    git push "HEAD:${SOURCE_BRANCH}"
   fi
 fi
