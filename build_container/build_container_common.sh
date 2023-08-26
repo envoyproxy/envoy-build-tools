@@ -28,6 +28,7 @@ function install_gn(){
   rm -rf gntool*
 }
 
+
 if [[ "$(uname -m)" == "x86_64" ]]; then
   # buildifier
   VERSION=5.1.0
