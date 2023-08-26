@@ -71,7 +71,7 @@ jobs:
         DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
         GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
         OS_DISTRO: windows2019
-        PUSH_GCR_IMAGE: false
+        PUSH_GCR_IMAGE: true
         GCR_IMAGE_NAME: envoy-build-windows
 
   regenerate_linux:
