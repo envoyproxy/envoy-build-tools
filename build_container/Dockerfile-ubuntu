@@ -1,24 +1,32 @@
 # base
 FROM ubuntu:focal as base
-
-# Workaround for: https://issuetracker.google.com/issues/216325949
-ENV CLOUDSDK_PYTHON=python3
-
-COPY ./build_container_common.sh /
-COPY ./build_container_ubuntu.sh /
-
+ENV BAZELISK_SHA256SUM=ce52caa51ef9e509fb6b7e5ad892e5cf10feb0794b0aed4d2f36adb00a1a2779 \
+    BAZELISK_SHA256SUM_ARM64=6070bf70915e92b3a5ce8eee6f4a8a0968bb350be2a98b80b0fd2fc13ce8a254 \
+    BAZELISK_VERSION=1.18.0 \
+    BUILD_TOOLS_VERSION=5.1.0 \
+    BUILDIFIER_SHA256SUM=52bf6b102cb4f88464e197caac06d69793fa2b05f5ad50a7e7bf6fbd656648a3 \
+    BUILDIFIER_SHA256SUM_ARM64=917d599dbb040e63ae7a7e1adb710d2057811902fdc9e35cce925ebfd966eeb8 \
+    BUILDOZER_SHA256SUM=7346ce1396dfa9344a5183c8e3e6329f067699d71c4391bd28317391228666bf \
+    BUILDOZER_SHA256SUM_ARM64=0b08e384709ec4d4f5320bf31510d2cefe8f9e425a6565b31db06b2398ff9dc4 \
+    CLANG_TOOLS_SHA256SUM=f49de4b4502a6608425338e2d93bbe4529cac0a22f2dc1c119ef175a4e1b5bf0 \
+    LANG=en_US.utf8 \
+    LLVM_DISTRO=x86_64-linux-gnu-ubuntu-18.04 \
+    LLVM_DISTRO_ARM64=aarch64-linux-gnu \
+    LLVM_DISTRO_PPC64LE=powerpc64le-linux-ubuntu-18.04 \
+    LLVM_SHA256SUM=61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5 \
+    LLVM_SHA256SUM_ARM64=1792badcd44066c79148ffeb1746058422cc9d838462be07e3cb19a4b724a1ee \
+    LLVM_SHA256SUM_PPC64LE=2d504c4920885c86b306358846178bc2232dfac83b47c3b1d05861a8162980e6 \
+    LLVM_VERSION=14.0.0
+COPY ./build_container_common.sh / \
+    ./build_container_ubuntu.sh /
 RUN ./build_container_ubuntu.sh
-
-ENV LANG en_US.utf8
 
 # mobile
 FROM base as mobile
+ENV ANDROID_HOME=/.android/sdk \
+    ANDROID_NDK_HOME=/.android/sdk/ndk/21.4.7075529 \
+    ANDROID_NDK_VERSION=21.4.7075529 \
+    ANDROID_SDK_INSTALL_TARGET=/.android \
+    ANDROID_SDK_ROOT=/.android/sdk
 COPY ./build_container_mobile.sh /
-
-ENV ANDROID_SDK_INSTALL_TARGET /.android
-ENV ANDROID_HOME /.android/sdk
-ENV ANDROID_SDK_ROOT /.android/sdk
-ENV ANDROID_NDK_VERSION 21.4.7075529
-ENV ANDROID_NDK_HOME /.android/sdk/ndk/21.4.7075529
-
 RUN ./build_container_mobile.sh

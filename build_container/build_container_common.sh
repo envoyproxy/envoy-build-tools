@@ -1,71 +1,52 @@
 #!/bin/bash -e
 
-function download_and_check () {
-  local to=$1
-  local url=$2
-  local sha256=$3
+DEB_ARCH=amd64
+if [[ "$(uname -m)" == "aarch64" ]]; then
+    DEB_ARCH=arm64
+    BUILDIFIER_SHA256SUM="$BUILDIFIER_SHA256SUM_ARM64"
+    BUILDOZER_SHA256SUM="$BUILDOZER_SHA256SUM_ARM64"
+    BAZELISK_SHA256SUM="$BAZELISK_SHA256SUM_ARM64"
+fi
 
-  curl -fsSL --output "${to}" "${url}"
-  echo "${sha256}  ${to}" | sha256sum --check
+
+function download_and_check () {
+    local to=$1
+    local url=$2
+    local sha256=$3
+    echo "Download: ${url} -> ${to}"
+    curl -fsSL --output "${to}" "${url}"
+    echo "${sha256}  ${to}" | sha256sum --check
 }
 
 function install_gn(){
-  # Install gn tools which will be used for building wee8
-  case "$(uname -m)" in
-  "x86_64")
-    GN_ARCH=amd64
-    ;;
-
-  "aarch64")
-    GN_ARCH=arm64
-    ;;
-  esac
-
-  wget -O gntool.zip "https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-${GN_ARCH}/+/latest"
-  unzip gntool.zip -d gntool
-  cp gntool/gn /usr/local/bin/gn
-  chmod +x /usr/local/bin/gn
-  rm -rf gntool*
+    # Install gn tools which will be used for building wee8
+    wget -O gntool.zip "https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-${DEB_ARCH}/+/latest"
+    unzip gntool.zip -d gntool
+    cp gntool/gn /usr/local/bin/gn
+    chmod +x /usr/local/bin/gn
+    rm -rf gntool*
 }
 
+# buildifier
+download_and_check \
+    /usr/local/bin/buildifier \
+    "https://github.com/bazelbuild/buildtools/releases/download/${BUILD_TOOLS_VERSION}/buildifier-linux-${DEB_ARCH}" \
+    "${BUILDIFIER_SHA256SUM}"
+chmod +x /usr/local/bin/buildifier
 
-if [[ "$(uname -m)" == "x86_64" ]]; then
-  # buildifier
-  VERSION=5.1.0
-  download_and_check /usr/local/bin/buildifier https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildifier-linux-amd64 \
-    52bf6b102cb4f88464e197caac06d69793fa2b05f5ad50a7e7bf6fbd656648a3
-  chmod +x /usr/local/bin/buildifier
+# buildozer
+download_and_check \
+    /usr/local/bin/buildozer \
+    "https://github.com/bazelbuild/buildtools/releases/download/${BUILD_TOOLS_VERSION}/buildozer-linux-${DEB_ARCH}" \
+    "${BUILDOZER_SHA256SUM}"
+chmod +x /usr/local/bin/buildozer
 
-  # buildozer
-  download_and_check /usr/local/bin/buildozer https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildozer-linux-amd64 \
-    7346ce1396dfa9344a5183c8e3e6329f067699d71c4391bd28317391228666bf
-  chmod +x /usr/local/bin/buildozer
-
-  # bazelisk
-  VERSION=1.18.0
-  download_and_check /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v${VERSION}/bazelisk-linux-amd64 \
-    ce52caa51ef9e509fb6b7e5ad892e5cf10feb0794b0aed4d2f36adb00a1a2779
-  chmod +x /usr/local/bin/bazel
-fi
-
-if [[ "$(uname -m)" == "aarch64" ]]; then
-  # buildifier
-  VERSION=5.1.0
-  download_and_check /usr/local/bin/buildifier https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildifier-linux-arm64 \
-    917d599dbb040e63ae7a7e1adb710d2057811902fdc9e35cce925ebfd966eeb8
-  chmod +x /usr/local/bin/buildifier
-
-  # buildozer
-  download_and_check /usr/local/bin/buildozer https://github.com/bazelbuild/buildtools/releases/download/"$VERSION"/buildozer-linux-arm64 \
-    0b08e384709ec4d4f5320bf31510d2cefe8f9e425a6565b31db06b2398ff9dc4
-  chmod +x /usr/local/bin/buildozer
-
-  # bazelisk
-  VERSION=1.18.0
-  download_and_check /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v${VERSION}/bazelisk-linux-arm64 \
-    6070bf70915e92b3a5ce8eee6f4a8a0968bb350be2a98b80b0fd2fc13ce8a254
-  chmod +x /usr/local/bin/bazel
-fi
+# bazelisk
+download_and_check \
+    /usr/local/bin/bazel \
+    "https://github.com/bazelbuild/bazelisk/releases/download/v${BAZELISK_VERSION}/bazelisk-linux-${DEB_ARCH}" \
+    "${BAZELISK_SHA256SUM}"
+chmod +x /usr/local/bin/bazel
 
 LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-${LLVM_DISTRO}"
 LLVM_DOWNLOAD_PREFIX=${LLVM_DOWNLOAD_PREFIX:-https://github.com/llvm/llvm-project/releases/download/llvmorg-}
