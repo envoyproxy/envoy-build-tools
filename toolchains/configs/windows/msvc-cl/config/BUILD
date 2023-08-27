@@ -40,7 +40,7 @@ platform(
         "@platforms//cpu:x86_64",
     ],
     exec_properties = {
-        "container-image": "docker://gcr.io/envoy-ci/envoy-build-windows@sha256:a28203ca4ca5b31e6f2d9e20896abbe2b5d7f75b646127dfd02b0b25472558cd",
+        "container-image": "docker://gcr.io/envoy-ci/envoy-build-windows@sha256:ca3216ace4205c3ee903db2eaed7c09f98f2f0771c9334542860cab08cb7b2e0",
         "OSFamily": "Windows",
     },
 )
