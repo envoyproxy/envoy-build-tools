@@ -3,6 +3,7 @@
 set -o pipefail
 
 export RBE_AUTOCONF_ROOT=$(bazel info workspace)
+BAZEL_OUTPUT_BASE=$(bazel info output_base)
 BAZEL_VERSION="$(cat .bazelversion)"
 CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "${RBE_AUTOCONF_ROOT}/build_container")
 COMMIT_HASH="$(git rev-parse HEAD)"
@@ -10,7 +11,7 @@ LAST_COMMIT_MESSAGE="$(git log --format=%B -n 1)"
 COMMITTER_NAME="update-envoy[bot]"
 COMMITTER_EMAIL="135279899+update-envoy[bot]@users.noreply.github.com"
 DOCKER_IMAGE="gcr.io/envoy-ci/${GCR_IMAGE_NAME}:${CONTAINER_TAG}"
-RBE_CONFIG_GEN_DIR="${RBE_AUTOCONF_ROOT}/external/bazel_toolchains/cmd/rbe_configs_gen"
+RBE_CONFIG_GEN_DIR="${BAZEL_OUTPUT_BASE}/external/bazel_toolchains/cmd/rbe_configs_gen"
 BAZELRC_DEST="${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}/.latest.bazelrc"
 COMMIT_MSG="Regenerate ${OS_FAMILY} toolchains from ${COMMIT_HASH}
 
