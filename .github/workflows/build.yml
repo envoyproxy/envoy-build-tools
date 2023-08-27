@@ -9,6 +9,9 @@ on:
     - main
   pull_request:
 
+env:
+  image_prefix: envoyproxy/envoy-build-
+
 concurrency:
   group: ${{ github.event.inputs.head_ref || github.run_id }}-${{ github.workflow }}
   cancel-in-progress: true
@@ -17,6 +20,11 @@ concurrency:
 jobs:
   build_container_linux:
     runs-on: ubuntu-20.04
+    if: >-
+      ${{
+          github.repository == 'envoyproxy/envoy-build-tools'
+          || vars.ENVOY_CI_RUN == 'true'
+      }}
     strategy:
       fail-fast: false
       matrix:
@@ -41,6 +49,7 @@ jobs:
         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
         GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+        IMAGE_PREFIX: ${{ env.image_prefix }}
         OS_DISTRO: ${{ matrix.target }}
         PUSH_GCR_IMAGE: ${{ matrix.gcrPushImage }}
         GCR_IMAGE_NAME: ${{ matrix.gcrImageName }}
@@ -48,6 +57,11 @@ jobs:
   build_container_windows:
     name: Build (Windows)
     runs-on: windows-2019
+    if: >-
+      ${{
+          github.repository == 'envoyproxy/envoy-build-tools'
+          || vars.ENVOY_CI_RUN == 'true'
+      }}
     steps:
     - name: 'Checkout Repository'
       uses: actions/checkout@v3
@@ -71,6 +85,7 @@ jobs:
         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
         GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+        IMAGE_PREFIX: ${{ env.image_prefix }}
         OS_DISTRO: windows2019
         PUSH_GCR_IMAGE: true
         GCR_IMAGE_NAME: envoy-build-windows
