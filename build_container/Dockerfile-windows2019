@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/windows/servercore:ltsc2019
+FROM mcr.microsoft.com/windows/servercore:10.0.17763.4737@sha256:b0c2ac899596060ce3300010971ce246a3edd1be268acabd7fffdaa9a9a9cb9a
 
 ENV MSYS2_ARG_CONV_EXCL "*"
 
