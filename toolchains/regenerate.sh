@@ -45,7 +45,17 @@ RBE_CONFIG_GEN_DIR=$(bazel info output_base)/external/bazel_toolchains/cmd/rbe_c
 (cd "${RBE_CONFIG_GEN_DIR}" && go build)
 
 for TOOLCHAIN in ${TOOLCHAIN_LIST}; do
-  "${RBE_CONFIG_GEN_DIR}/rbe_configs_gen" -exec_os ${OS_FAMILY} -generate_java_configs=false -generate_cpp_configs -output_src_root "${RBE_AUTOCONF_ROOT}" -output_config_path toolchains/configs/${OS_FAMILY}/${TOOLCHAIN} -target_os ${OS_FAMILY} -bazel_version ${BAZEL_VERSION} -toolchain_container ${DOCKER_IMAGE} -cpp_env_json "${RBE_AUTOCONF_ROOT}/toolchains/${TOOLCHAIN}.env.json"
+    echo "Building toolchain: ${TOOLCHAIN}"
+    "${RBE_CONFIG_GEN_DIR}/rbe_configs_gen" \
+        -exec_os ${OS_FAMILY} \
+        -generate_java_configs=false \
+        -generate_cpp_configs \
+        -output_src_root "${RBE_AUTOCONF_ROOT}" \
+        -output_config_path toolchains/configs/${OS_FAMILY}/${TOOLCHAIN} \
+        -target_os ${OS_FAMILY} \
+        -bazel_version ${BAZEL_VERSION} \
+        -toolchain_container ${DOCKER_IMAGE} \
+        -cpp_env_json "${RBE_AUTOCONF_ROOT}/toolchains/${TOOLCHAIN}.env.json"
 done
 
 cp "${BAZELRC_LATEST}" "${BAZELRC_DEST}"
