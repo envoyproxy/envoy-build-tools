@@ -34,7 +34,6 @@ jobs:
     - run: |
         cd build_container
         ./docker_push.sh
-        docker images
       env:
         OS_FAMILY: linux
         SOURCE_BRANCH: ${{ github.ref }}
@@ -61,9 +60,9 @@ jobs:
         GCLOUD_SDK_ARCHIVE_CHECKSUM: c81e80040f7f609dbc50c42cd0cd402988a5c47f467372d40b5aaca0733f46f4
     - run: |
         export PATH="${PROGRAMFILES}/google-cloud-sdk/bin:${PATH}"
+        echo $PATH
         cd build_container
         ./docker_push.sh
-        docker images
       shell: bash
       env:
         OS_FAMILY: windows

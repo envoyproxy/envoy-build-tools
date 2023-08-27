@@ -1,68 +1,51 @@
-#!/bin/bash -e
+#!/bin/bash
 
-set -o pipefail
+set -e
 
 BAZEL_VERSION="$(cat .bazelversion)"
+
+export RBE_AUTOCONF_ROOT=$(bazel info workspace)
+
 CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "${RBE_AUTOCONF_ROOT}/build_container")
-COMMIT_HASH="$(git rev-parse HEAD)"
-LAST_COMMIT_MESSAGE="$(git log --format=%B -n 1)"
 COMMITTER_NAME="update-envoy[bot]"
 COMMITTER_EMAIL="135279899+update-envoy[bot]@users.noreply.github.com"
+
 DOCKER_IMAGE="gcr.io/envoy-ci/${GCR_IMAGE_NAME}:${CONTAINER_TAG}"
-export RBE_AUTOCONF_ROOT=$(bazel info workspace)
-RBE_CONFIG_GEN_DIR="${RBE_AUTOCONF_ROOT}/external/bazel_toolchains/cmd/rbe_configs_gen"
-BAZELRC_DEST="${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}/.latest.bazelrc"
-COMMIT_MSG="Regenerate ${OS_FAMILY} toolchains from ${COMMIT_HASH}
-
-[skip ci]
-${LAST_COMMIT_MESSAGE}"
-
-
-echo "Pulling Docker image: ${DOCKER_IMAGE}"
-if ! docker pull -q ${DOCKER_IMAGE}; then
+if ! docker pull ${DOCKER_IMAGE}; then
   echo "Image is not built, skip..."
   exit 0
 fi
 
 # If we are committing changes, pull before modifying to ensure no conflicts
-if [[ "${COMMIT_TOOLCHAINS}" == "true" ]]; then
-    git pull origin refs/heads/main --ff-only
+if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
+  git pull origin refs/heads/main --ff-only
 fi
 
 rm -rf "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
 mkdir -p "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
 
-case "${OS_FAMILY}" in
+case ${OS_FAMILY} in
   linux)
-    TOOLCHAIN_LIST=(clang clang_libcxx gcc)
-    BAZELRC_LATEST="${RBE_AUTOCONF_ROOT}/toolchains/linux.latest.bazelrc"
+    TOOLCHAIN_LIST="clang clang_libcxx gcc"
+    BAZELRC_LATEST=${RBE_AUTOCONF_ROOT}/toolchains/linux.latest.bazelrc
     ;;
   windows)
-    TOOLCHAIN_LIST=(msvc-cl clang-cl)
-    BAZELRC_LATEST="${RBE_AUTOCONF_ROOT}/toolchains/windows.latest.bazelrc"
+    TOOLCHAIN_LIST="msvc-cl clang-cl"
+    BAZELRC_LATEST=${RBE_AUTOCONF_ROOT}/toolchains/windows.latest.bazelrc
     ;;
 esac
+
+BAZELRC_DEST=${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}/.latest.bazelrc
 
 # Fetch external dependencies
 bazel fetch :all
 
 # Build utility for generating RBE config
-cd "${RBE_CONFIG_GEN_DIR}" || exit 1
-go build
-cd - || exit 1
+RBE_CONFIG_GEN_DIR=$(bazel info output_base)/external/bazel_toolchains/cmd/rbe_configs_gen
+(cd "${RBE_CONFIG_GEN_DIR}" && go build)
 
-for TOOLCHAIN in "${TOOLCHAIN_LIST[@]}"; do
-    echo "Generate toolchain: ${TOOLCHAIN}"
-    "${RBE_CONFIG_GEN_DIR}/rbe_configs_gen" \
-        -exec_os ${OS_FAMILY} \
-        -generate_java_configs=false \
-        -generate_cpp_configs \
-        -output_src_root "${RBE_AUTOCONF_ROOT}" \
-        -output_config_path "toolchains/configs/${OS_FAMILY}/${TOOLCHAIN}" \
-        -target_os "${OS_FAMILY}" \
-        -bazel_version "${BAZEL_VERSION}" \
-        -toolchain_container "${DOCKER_IMAGE}" \
-        -cpp_env_json "${RBE_AUTOCONF_ROOT}/toolchains/${TOOLCHAIN}.env.json"
+for TOOLCHAIN in ${TOOLCHAIN_LIST}; do
+  "${RBE_CONFIG_GEN_DIR}/rbe_configs_gen" -exec_os ${OS_FAMILY} -generate_java_configs=false -generate_cpp_configs -output_src_root "${RBE_AUTOCONF_ROOT}" -output_config_path toolchains/configs/${OS_FAMILY}/${TOOLCHAIN} -target_os ${OS_FAMILY} -bazel_version ${BAZEL_VERSION} -toolchain_container ${DOCKER_IMAGE} -cpp_env_json "${RBE_AUTOCONF_ROOT}/toolchains/${TOOLCHAIN}.env.json"
 done
 
 cp "${BAZELRC_LATEST}" "${BAZELRC_DEST}"
@@ -72,17 +55,22 @@ chmod -R 755 "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
 git add "${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}"
 
 if [[ -z "$(git diff HEAD --name-only)" ]]; then
-    echo "No toolchain changes."
-    exit 0
+  echo "No toolchain changes."
+  exit 0
 fi
 
-if [[ "${COMMIT_TOOLCHAINS}" == "true" ]]; then
-    git config user.name "$COMMITTER_NAME"
-    git config user.email "$COMMITTER_EMAIL"
-    git commit -m "${COMMIT_MSG}"
+if [[ "true" == "${COMMIT_TOOLCHAINS}" ]]; then
+  COMMIT_MSG="Regenerate ${OS_FAMILY} toolchains from $(git rev-parse HEAD)
 
-    if [[ "${SOURCE_BRANCH}" =~ ^refs/heads/.* ]]; then
-        echo "Pushing toolchains ..."
-        git push origin "HEAD:${SOURCE_BRANCH}"
-    fi
+  [skip ci]
+  $(git log --format=%B -n 1)"
+
+  git config user.name "$COMMITTER_NAME"
+  git config user.email "$COMMITTER_EMAIL"
+
+  git commit -m "${COMMIT_MSG}"
+
+  if [[ "${SOURCE_BRANCH}" =~ ^refs/heads/.* ]]; then
+    git push origin "HEAD:${SOURCE_BRANCH}"
+  fi
 fi
