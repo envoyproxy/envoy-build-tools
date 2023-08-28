@@ -125,6 +125,13 @@ jobs:
     - build_container_windows
     - regenerate_linux
     steps:
+    - run: |
+        rm -rf /c/Windows/System32/bash.exe
+      shell: bash
+    - run: |
+        curl -sSL -o /usr/bin/bazel.exe https://github.com/bazelbuild/bazelisk/releases/download/v1.4.0/bazelisk-windows-amd64.exe
+        chmod +x /usr/bin/bazel.exe
+      shell: bash
     - id: appauth
       uses: envoyproxy/toolshed/gh-actions/appauth@actions-v0.0.17
       with:
