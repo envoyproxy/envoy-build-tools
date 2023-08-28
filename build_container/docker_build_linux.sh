@@ -1,29 +1,28 @@
-#!/bin/bash
-#The ppc64le is not supported by google-cloud-sdk. So ppc64le is temporary removed.
+#!/bin/bash -e
 
-set -e
+set -o pipefail
 
 UBUNTU_DOCKER_VARIANTS=("mobile")
 
 # Setting environments for buildx tools
 config_env() {
-  # Install QEMU emulators
-  docker run --rm --privileged tonistiigi/binfmt --install all
+    # Install QEMU emulators
+    docker run --rm --privileged tonistiigi/binfmt --install all
 
-  # Remove older build instance
-  docker buildx rm envoy-build-tools-builder || :
-  docker buildx create --use --name envoy-build-tools-builder --platform "${BUILD_TOOLS_PLATFORMS}"
+    # Remove older build instance
+    docker buildx rm envoy-build-tools-builder || :
+    docker buildx create --use --name envoy-build-tools-builder --platform "${BUILD_TOOLS_PLATFORMS}"
 }
 
 [[ -z "${OS_DISTRO}" ]] && OS_DISTRO="ubuntu"
 [[ -z "${IMAGE_NAME}" ]] && IMAGE_NAME="envoyproxy/envoy-build-${OS_DISTRO}"
 
 if [[ -z "${BUILD_TOOLS_PLATFORMS}" ]]; then
-  if [[ "${OS_DISTRO}" == "ubuntu" ]]; then
-    export BUILD_TOOLS_PLATFORMS=linux/arm64,linux/amd64
-  else
-    export BUILD_TOOLS_PLATFORMS=linux/amd64
-  fi
+    if [[ "${OS_DISTRO}" == "ubuntu" ]]; then
+        export BUILD_TOOLS_PLATFORMS=linux/arm64,linux/amd64
+    else
+        export BUILD_TOOLS_PLATFORMS=linux/amd64
+    fi
 fi
 
 ci_log_run config_env
@@ -59,5 +58,4 @@ done
 
 # Testing after push to save CI time because this invalidates arm64 cache
 ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" --platform "linux/amd64" --load
-echo "Test linux container: ${IMAGE_NAME}:${CONTAINER_TAG}"
-docker run --rm -v "$(pwd)/docker_test_linux.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" true
+ci_log_run docker run --rm -v "$(pwd)/docker_test_linux.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" true
