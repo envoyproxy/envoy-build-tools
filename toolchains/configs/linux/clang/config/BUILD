@@ -42,7 +42,7 @@ platform(
         "@bazel_tools//tools/cpp:clang",
     ],
     exec_properties = {
-        "container-image": "docker://gcr.io/envoy-ci/envoy-build@sha256:c3c535fff416a5c3c1eafe490ae9778b8cb56d7da5c28a534931afd549ae2f8c",
+        "container-image": "docker://gcr.io/envoy-ci/envoy-build@sha256:8e6933ba965f9fc60865eb7eefbfc6c150a76a1a12ce6631b74aa084e6832608",
         "OSFamily": "Linux",
     },
 )
