@@ -13,6 +13,8 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 apt-get install -y --no-install-recommends locales software-properties-common apt-transport-https curl gpg-agent g++
 
+LSB_RELEASE="$(lsb_release -cs)"
+
 # set locale
 localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 
@@ -23,15 +25,17 @@ add-apt-repository -y ppa:ubuntu-toolchain-r/test
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 case $ARCH in
     'ppc64le' )
-        add-apt-repository "deb [arch=ppc64le] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        DEB_ARCH=ppc64le
         ;;
     'x86_64' )
-        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        DEB_ARCH=amd64
         ;;
     'aarch64' )
-        add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        DEB_ARCH=arm64
         ;;
 esac
+
+add-apt-repository "deb [arch=${DEB_ARCH}] https://download.docker.com/linux/ubuntu ${LSB_RELEASE} stable"
 
 # Python
 add-apt-repository ppa:deadsnakes/ppa
@@ -76,34 +80,20 @@ PACKAGES=(
 
 apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 
-# Set LLVM version for each cpu architecture.
-LLVM_VERSION=14.0.0
 case $ARCH in
     'ppc64le' )
-        LLVM_DISTRO=powerpc64le-linux-ubuntu-18.04
-        LLVM_SHA256SUM=2d504c4920885c86b306358846178bc2232dfac83b47c3b1d05861a8162980e6
-        ;;
-    'x86_64' )
-        LLVM_DISTRO=x86_64-linux-gnu-ubuntu-18.04
-        LLVM_SHA256SUM=61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5
-        ;;
-    'aarch64' )
-        LLVM_DISTRO=aarch64-linux-gnu
-        LLVM_SHA256SUM=1792badcd44066c79148ffeb1746058422cc9d838462be07e3cb19a4b724a1ee
-        apt-get install -y --no-install-recommends libtinfo5 # LLVM dependencies on Ubuntu 20.04
-        ;;
-esac
-
-CLANG_TOOLS_SHA256SUM="f49de4b4502a6608425338e2d93bbe4529cac0a22f2dc1c119ef175a4e1b5bf0"
-
-# Bazel and related dependencies.
-case $ARCH in
-    'ppc64le' )
+        LLVM_DISTRO="$LLVM_DISTRO_PPC64LE"
+        LLVM_SHA256SUM="$LLVM_SHA256SUM_PPC64LE"
         BAZEL_LATEST="$(curl https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_16.04/latest/ 2>&1 \
           | sed -n 's/.*href="\([^"]*\).*/\1/p' | grep '^bazel' | head -n 1)"
-        curl -fSL https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_16.04/latest/${BAZEL_LATEST} \
+        curl -fSL "https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_16.04/latest/${BAZEL_LATEST}" \
           -o /usr/local/bin/bazel
         chmod +x /usr/local/bin/bazel
+        ;;
+    'aarch64' )
+        LLVM_DISTRO="$LLVM_DISTRO_ARM64"
+        LLVM_SHA256SUM="$LLVM_SHA256SUM_ARM64"
+        apt-get install -y --no-install-recommends libtinfo5 # LLVM dependencies on Ubuntu 20.04
         ;;
 esac
 
