@@ -42,7 +42,6 @@ jobs:
     - run: |
         cd build_container
         ./docker_push.sh
-        docker images
       env:
         OS_FAMILY: linux
         SOURCE_BRANCH: ${{ github.ref }}
@@ -77,7 +76,6 @@ jobs:
         export PATH="${PROGRAMFILES}/google-cloud-sdk/bin:${PATH}"
         cd build_container
         ./docker_push.sh
-        docker images
       shell: bash
       env:
         OS_FAMILY: windows
