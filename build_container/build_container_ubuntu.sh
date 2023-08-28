@@ -99,7 +99,6 @@ esac
 
 # additional apt installs
 apt-get install -y aspell expect
-rm -rf /var/lib/apt/lists/*
 
 # Setup tcpdump for non-root.
 groupadd -r pcap
