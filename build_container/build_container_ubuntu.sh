@@ -35,6 +35,7 @@ apt-get update -y
 
 PACKAGES=(
     aspell
+    aspell-en
     automake
     bc
     bzip2
