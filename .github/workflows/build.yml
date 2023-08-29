@@ -52,6 +52,20 @@ jobs:
         OS_DISTRO: ${{ matrix.target }}
         PUSH_GCR_IMAGE: ${{ matrix.gcrPushImage }}
         GCR_IMAGE_NAME: ${{ matrix.gcrImageName }}
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      if: ${{ github.event_name == 'pull_request' && matrix.name == 'ubuntu' }}
+      with:
+        go-version: '1.16'
+    - run: |
+        toolchains/regenerate.sh
+      if: ${{ github.event_name == 'pull_request' && matrix.name == 'ubuntu' }}
+      env:
+        OS_FAMILY: linux
+        SOURCE_BRANCH: ${{ github.ref }}
+        NO_PULL_IMAGE: true
+        DOCKER_IMAGE: envoyproxy/envoy-build-ubuntu
+        DOCKER_IMAGE_SUFFIX: -amd64
 
   build_container_windows:
     name: Build (Windows)
@@ -87,6 +101,22 @@ jobs:
         OS_DISTRO: windows2019
         PUSH_GCR_IMAGE: true
         GCR_IMAGE_NAME: envoy-build-windows
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      if: ${{ github.event_name == 'pull_request' }}
+      with:
+        go-version: '1.16'
+    - run: |
+        toolchains/regenerate.sh || {
+            echo "::error file=toolchains/regenerate.sh::Unable to regenerate Windows toolchains"
+        }
+      if: ${{ github.event_name == 'pull_request' }}
+      shell: bash
+      env:
+        OS_FAMILY: windows
+        SOURCE_BRANCH: ${{ github.ref }}
+        NO_PULL_IMAGE: true
+        DOCKER_IMAGE: envoyproxy/envoy-build-windows2019
 
   regenerate_linux:
     runs-on: ubuntu-20.04
@@ -106,7 +136,11 @@ jobs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
-        token: ${{ steps.appauth.outputs.token || env.GITHUB_TOKEN }}
+        token: ${{ steps.appauth.outputs.token }}
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.16'
     - run: |
         toolchains/regenerate.sh
       env:
@@ -141,7 +175,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
-        token: ${{ steps.appauth.outputs.token || env.GITHUB_TOKEN }}
+        token: ${{ steps.appauth.outputs.token  }}
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
