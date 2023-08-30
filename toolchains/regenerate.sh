@@ -10,7 +10,6 @@ COMMIT_HASH="$(git rev-parse HEAD)"
 LAST_COMMIT_MESSAGE="$(git log --format=%B -n 1)"
 COMMITTER_NAME="update-envoy[bot]"
 COMMITTER_EMAIL="135279899+update-envoy[bot]@users.noreply.github.com"
-DOCKER_IMAGE="gcr.io/envoy-ci/${GCR_IMAGE_NAME}:${CONTAINER_TAG}"
 RBE_CONFIG_GEN_DIR="${BAZEL_OUTPUT_BASE}/external/bazel_toolchains/cmd/rbe_configs_gen"
 BAZELRC_DEST="${RBE_AUTOCONF_ROOT}/toolchains/configs/${OS_FAMILY}/.latest.bazelrc"
 COMMIT_MSG="Regenerate ${OS_FAMILY} toolchains from ${COMMIT_HASH}
@@ -18,12 +17,27 @@ COMMIT_MSG="Regenerate ${OS_FAMILY} toolchains from ${COMMIT_HASH}
 [skip ci]
 ${LAST_COMMIT_MESSAGE}"
 
-
-echo "Pulling Docker image: ${DOCKER_IMAGE}"
-if ! docker pull -q ${DOCKER_IMAGE}; then
-  echo "Image is not built, skip..."
-  exit 0
+if [[ "$GCR_IMAGE_NAME" ]]; then
+    DOCKER_IMAGE="gcr.io/envoy-ci/${GCR_IMAGE_NAME}:${CONTAINER_TAG}"
+elif [[ "$DOCKER_IMAGE" ]]; then
+    DOCKER_IMAGE="${DOCKER_IMAGE}:${CONTAINER_TAG}${DOCKER_IMAGE_SUFFIX}"
+else
+    echo "Neither DOCKER_IMAGE nor GCR_IMAGE_NAME set, exiting"
+    exit 1
 fi
+
+pull_image () {
+    echo "Pulling Docker image: ${DOCKER_IMAGE}"
+    if ! docker pull -q ${DOCKER_IMAGE}; then
+        echo "Image is not built, skip..."
+        exit 0
+    fi
+}
+
+if [[ -z "$NO_PULL_IMAGE" ]]; then
+    pull_image
+fi
+
 
 # If we are committing changes, pull before modifying to ensure no conflicts
 if [[ "${COMMIT_TOOLCHAINS}" == "true" ]]; then
@@ -86,4 +100,7 @@ if [[ "${COMMIT_TOOLCHAINS}" == "true" ]]; then
         echo "Pushing toolchains ..."
         git push origin "HEAD:${SOURCE_BRANCH}"
     fi
+else
+    echo "Not committing, changes that would be made"
+    git diff
 fi

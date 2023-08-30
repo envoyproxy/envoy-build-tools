@@ -11,3 +11,5 @@ for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
     docker tag "envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_TAG}" "${IMAGE_TAG}"
     docker push "${IMAGE_TAG}"
 done
+
+docker build -f "Dockerfile-${OS_DISTRO}" -t "envoyproxy/envoy-build-${OS_DISTRO}:${CONTAINER_TAG}" .

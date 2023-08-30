@@ -6,6 +6,11 @@ set -e
 
 IMAGE_PREFIX="${IMAGE_PREFIX:-envoyproxy/envoy-build-}"
 GCR_IMAGE_PREFIX=gcr.io/envoy-ci/
+# Enable docker experimental
+export DOCKER_CLI_EXPERIMENTAL=enabled
+CONTAINER_SHA="$(git log -1 --pretty=format:"%H" .)"
+CONTAINER_TAG="${CONTAINER_SHA}"
+IMAGE_TAGS=()
 
 
 ci_log_run () {
@@ -24,21 +29,17 @@ ci_log_run_end () {
     fi
 }
 
-# Enable docker experimental
-export DOCKER_CLI_EXPERIMENTAL=enabled
+pull_image () {
+    ci_log_run echo "Building ${IMAGE_PREFIX}${OS_DISTRO}:${CONTAINER_SHA}"
+    if curl -sSLf "https://index.docker.io/v1/repositories/${IMAGE_PREFIX}${OS_DISTRO}/tags/${CONTAINER_SHA}" &> /dev/null; then
+        echo "${IMAGE_PREFIX}${OS_DISTRO}:${CONTAINER_SHA} exists."
+        ci_log_run_end
+        exit 0
+    fi
+    ci_log_run_end
+}
 
-CONTAINER_SHA="$(git log -1 --pretty=format:"%H" .)"
-
-ci_log_run echo "Building ${IMAGE_PREFIX}${OS_DISTRO}:${CONTAINER_SHA}"
-if curl -sSLf "https://index.docker.io/v1/repositories/${IMAGE_PREFIX}${OS_DISTRO}/tags/${CONTAINER_SHA}" &> /dev/null; then
-    echo "${IMAGE_PREFIX}${OS_DISTRO}:${CONTAINER_SHA} exists."
-    exit 0
-fi
-ci_log_run_end
-
-CONTAINER_TAG="${CONTAINER_SHA}"
-
-IMAGE_TAGS=()
+pull_image
 
 if [[ "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
     LOG_CONTINUE=1
@@ -58,5 +59,5 @@ source "./docker_build_${OS_FAMILY}.sh"
 ci_log_run docker images
 
 if [[ "${#IMAGE_TAGS[@]}" == "0" ]]; then
-  echo 'Ignoring PR branch for docker push.'
+    echo 'Ignoring PR branch for docker push.'
 fi
