@@ -75,8 +75,8 @@ mkdir -Force C:\tools
 # Bazelisk
 mkdir -Force C:\tools\bazel
 DownloadAndCheck C:\tools\bazel\bazel.exe `
-                 https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/bazelisk-windows-amd64.exe `
-                 d63dfd730add443533a8dd684addd998e2276dc4c65de946b59944c39762b716
+                 https://github.com/bazelbuild/bazelisk/releases/download/v1.11.0/bazelisk-windows-amd64.exe `
+                 0eca0630e072434c63614b009bf5b63a7dff489a8676b560ce63e0d91ab731cd
 AddToPath C:\tools\bazel
 
 # VS 2019 Build Tools
