@@ -54,18 +54,23 @@ jobs:
         GCR_IMAGE_NAME: ${{ matrix.gcrImageName }}
     - name: Set up Go
       uses: actions/setup-go@v4
-      if: ${{ github.event_name == 'pull_request' && matrix.name == 'ubuntu' }}
+      if: ${{ github.event_name == 'pull_request' && matrix.target == 'ubuntu' }}
       with:
         go-version: '1.16'
     - run: |
+        CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "./build_container")
+        docker run -d -p 5000:5000 --restart always --name registry registry:2
+        docker tag "envoyproxy/envoy-build-ubuntu:${CONTAINER_TAG}-amd64" "localhost:5000/envoy-build-ubuntu:${CONTAINER_TAG}"
+        docker push "localhost:5000/envoy-build-ubuntu:${CONTAINER_TAG}"
+      if: ${{ github.event_name == 'pull_request' && matrix.target == 'ubuntu' }}
+    - run: |
         toolchains/regenerate.sh
-      if: ${{ github.event_name == 'pull_request' && matrix.name == 'ubuntu' }}
+      if: ${{ github.event_name == 'pull_request' && matrix.target == 'ubuntu' }}
       env:
         OS_FAMILY: linux
         SOURCE_BRANCH: ${{ github.ref }}
         NO_PULL_IMAGE: true
-        DOCKER_IMAGE: envoyproxy/envoy-build-ubuntu
-        DOCKER_IMAGE_SUFFIX: -amd64
+        DOCKER_IMAGE: localhost:5000/envoy-build-ubuntu
 
   build_container_windows:
     name: Build (Windows)
@@ -78,6 +83,10 @@ jobs:
     steps:
     - name: 'Checkout Repository'
       uses: actions/checkout@v3
+    - run: |
+        mkdir C:\registry
+        docker run -d -p 5000:5000 --restart=always --name registry -v C:\registry:C:\registry stefanscherer/registry-windows:2.6.2
+      if: ${{ github.event_name == 'pull_request' }}
     - run: |
         curl -fsSL --output "$TEMP/gcloud-sdk.zip" "$GCLOUD_SDK_ARCHIVE_URL"
         echo "${GCLOUD_SDK_ARCHIVE_CHECKSUM} $TEMP/gcloud-sdk.zip" | sha256sum --check
@@ -107,6 +116,12 @@ jobs:
       with:
         go-version: '1.16'
     - run: |
+        CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "./build_container")
+        docker tag "envoyproxy/envoy-build-windows2019:${CONTAINER_TAG}" "localhost:5000/envoy-build-windows2019:${CONTAINER_TAG}"
+        docker push "localhost:5000/envoy-build-windows2019:${CONTAINER_TAG}"
+      shell: bash
+      if: ${{ github.event_name == 'pull_request' }}
+    - run: |
         toolchains/regenerate.sh || {
             echo "::error file=toolchains/regenerate.sh::Unable to regenerate Windows toolchains"
         }
@@ -116,7 +131,7 @@ jobs:
         OS_FAMILY: windows
         SOURCE_BRANCH: ${{ github.ref }}
         NO_PULL_IMAGE: true
-        DOCKER_IMAGE: envoyproxy/envoy-build-windows2019
+        DOCKER_IMAGE: localhost:5000/envoy-build-windows2019
 
   regenerate_linux:
     runs-on: ubuntu-20.04

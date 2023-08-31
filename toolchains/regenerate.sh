@@ -102,5 +102,5 @@ if [[ "${COMMIT_TOOLCHAINS}" == "true" ]]; then
     fi
 else
     echo "Not committing, changes that would be made"
-    git diff
+    git diff HEAD
 fi
