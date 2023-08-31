@@ -2,9 +2,11 @@
 
 set -o pipefail
 
+BAZEL_VERSION=6.0.0-pre.20220421.3
+
 export RBE_AUTOCONF_ROOT=$(bazel info workspace)
 BAZEL_OUTPUT_BASE=$(bazel info output_base)
-BAZEL_VERSION="$(cat .bazelversion)"
+# BAZEL_VERSION="$(cat .bazelversion)"
 CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "${RBE_AUTOCONF_ROOT}/build_container")
 COMMIT_HASH="$(git rev-parse HEAD)"
 LAST_COMMIT_MESSAGE="$(git log --format=%B -n 1)"
