@@ -1,5 +1,7 @@
 FROM mcr.microsoft.com/windows/servercore:ltsc2019@sha256:b90fc3f0259aa56a97616946f6f5d061bd54c3d5c08d2eaff482fd56ab95a6f4
 
+# No change
+
 ENV MSYS2_ARG_CONV_EXCL "*"
 
 ENV TMPDIR C:\\Windows\\Temp
