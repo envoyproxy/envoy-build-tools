@@ -40,7 +40,7 @@ COPY --from=llvm \
 COPY --from=llvm \
     /opt/libcxx_msan /opt/libcxx_msan
 COPY --from=llvm \
-    /opt/libcxx_msan /opt/libcxx_tsan
+    /opt/libcxx_tsan /opt/libcxx_tsan
 COPY --from=llvm \
     /usr/local/bin/gn /usr/local/bin/gn
 COPY ./build_container_common.sh / \
