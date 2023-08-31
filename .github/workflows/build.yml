@@ -110,6 +110,13 @@ jobs:
         OS_DISTRO: windows2019
         PUSH_GCR_IMAGE: true
         GCR_IMAGE_NAME: envoy-build-windows
+
+    - run: |
+        CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "./build_container")
+        docker run "envoyproxy/envoy-build-windows2019:${CONTAINER_TAG}" bazel version
+      shell: bash
+
+
     - name: Set up Go
       uses: actions/setup-go@v4
       if: ${{ github.event_name == 'pull_request' }}
