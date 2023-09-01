@@ -4,22 +4,8 @@ set -o pipefail
 
 ARCH="$(uname -m)"
 YUM_PKGS=(
-    autoconf
     cmake3
-    devtoolset-9-binutils
-    devtoolset-9-gcc
-    devtoolset-9-gcc-c++
-    devtoolset-9-libatomic-devel
-    glibc-static
-    java-1.8.0-openjdk-headless
-    libstdc++-static
-    libtool
-    make
-    ninja-build
-    patch
-    openssl
-    python27
-    sudo)
+    ninja-build)
 
 install_gn () {
     # compile proper version of gn, compatible with CentOS's GLIBC version and

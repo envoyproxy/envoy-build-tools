@@ -13,7 +13,7 @@ download_and_check () {
     local url=$2
     local sha256=$3
     echo "Download: ${url} -> ${to}"
-    curl -fsSL --output "${to}" "${url}"
+    wget -q -O "${to}" "${url}"
     echo "${sha256}  ${to}" | sha256sum --check
 }
 
@@ -54,9 +54,6 @@ install_libcxx () {
 
 install_llvm
 
-git config --global --add safe.directory /source
-mv ~/.gitconfig /etc/gitconfig
-
 # Install sanitizer instrumented libc++, skipping for architectures other than x86_64 for now.
 if [[ "$(uname -m)" != "x86_64" ]]; then
   mkdir /opt/libcxx_msan
@@ -69,7 +66,7 @@ export PATH="/opt/llvm/bin:${PATH}"
 WORKDIR=$(mktemp -d)
 
 pushd "${WORKDIR}"
-curl -sSfL "https://github.com/llvm/llvm-project/archive/llvmorg-${LLVM_VERSION}.tar.gz" | tar zx
+wget -q -O -  "https://github.com/llvm/llvm-project/archive/llvmorg-${LLVM_VERSION}.tar.gz" | tar zx
 install_libcxx MemoryWithOrigins msan
 install_libcxx Thread tsan
 popd
