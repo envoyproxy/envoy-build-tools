@@ -23,17 +23,21 @@ ARG APT_KEY_DEADSNAKES=F23C5A6CF475977595C89F51BA6932366A755776 \
     LLVM_SHA256SUM_PPC64LE=2d504c4920885c86b306358846178bc2232dfac83b47c3b1d05861a8162980e6 \
     LLVM_VERSION=14.0.0
 ENV LANG=$LANG
+SHELL ["/bin/bash", "-c"]
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
-    --mount=type=bind,source=/build_container_ubuntu_base.sh,target=/build_container_ubuntu_base.sh \
-    ./build_container_ubuntu_base.sh
+    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/ubuntu_fun.sh,target=/ubuntu_fun.sh \
+    . ./ubuntu_fun.sh \
+    && install_base
 
 FROM env as llvm
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
-    --mount=type=bind,source=/build_container_llvm.sh,target=/build_container_llvm.sh \
-    --mount=type=bind,source=/build_container_ubuntu_llvm.sh,target=/build_container_ubuntu_llvm.sh \
-    ./build_container_ubuntu_llvm.sh
+    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/ubuntu_fun.sh,target=/ubuntu_fun.sh \
+    . ./ubuntu_fun.sh \
+    && install_llvm
 
 FROM env as base
 COPY --from=llvm /opt /opt
@@ -42,9 +46,10 @@ COPY --from=llvm \
     /usr/local/bin/gn
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
-    --mount=type=bind,source=/build_container_common.sh,target=/build_container_common.sh \
-    --mount=type=bind,source=/build_container_ubuntu.sh,target=/build_container_ubuntu.sh \
-    ./build_container_ubuntu.sh
+    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/ubuntu_fun.sh,target=/ubuntu_fun.sh \
+    . ./ubuntu_fun.sh \
+    && install
 
 # mobile
 FROM base as mobile
@@ -55,5 +60,7 @@ ENV ANDROID_HOME=/.android/sdk \
     ANDROID_SDK_ROOT=/.android/sdk
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
-    --mount=type=bind,source=/build_container_mobile.sh,target=/build_container_mobile.sh \
-    ./build_container_mobile.sh
+    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/ubuntu_fun.sh,target=/ubuntu_fun.sh \
+    . ./ubuntu_fun.sh \
+    && mobile_install
