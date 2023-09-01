@@ -19,32 +19,19 @@ ARG BAZELISK_SHA256SUM=ce52caa51ef9e509fb6b7e5ad892e5cf10feb0794b0aed4d2f36adb00
     LLVM_VERSION=10.0.0
 ENV LC_ALL=$LC_ALL \
     PATH=/opt/rh/rh-git218/root/usr/bin:/opt/rh/devtoolset-7/root/usr/bin:/opt/llvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-# Note: rh-git218 is needed to run `git -C` in docs build process.
-# httpd24 is equired by rh-git218
-RUN ARCH="$(uname -m)" \
-    && localedef -c -f UTF-8 -i en_US en_US.UTF-8 \
-    && if [[ "${ARCH}" == "x86_64" ]]; then yum install -y centos-release-scl epel-release; fi \
-    && yum update -y -q \
-    && yum install -y -q rh-git218 \
-    && echo "/opt/rh/httpd24/root/usr/lib64" > /etc/ld.so.conf.d/httpd24.conf \
-    && ldconfig
+RUN --mount=type=bind,source=/build_container_centos_base.sh,target=/build_container_centos_base.sh \
+    ./build_container_centos_base.sh
 
 FROM env as llvm
-COPY ./build_container_llvm.sh / \
-    ./build_container_centos_llvm.sh /
-RUN ./build_container_centos_llvm.sh
+RUN --mount=type=bind,source=/build_container_llvm.sh,target=/build_container_llvm.sh \
+    --mount=type=bind,source=/build_container_centos_llvm.sh,target=/build_container_centos_llvm.sh \
+    ./build_container_centos_llvm.sh
 
 FROM env as base
+COPY --from=llvm /opt /opt
 COPY --from=llvm \
-    /opt/llvm /opt/llvm
-COPY --from=llvm \
-    /opt/libcxx_msan /opt/libcxx_msan
-COPY --from=llvm \
-    /opt/libcxx_tsan /opt/libcxx_tsan
-COPY --from=llvm \
-    /usr/local/bin/gn /usr/local/bin/gn
-COPY ./build_container_common.sh / \
-    ./build_container_centos.sh /
-RUN mkdir /etc/sudoers.d \
-    && echo "Defaults    secure_path = $PATH" > /etc/sudoers.d/path \
-    && ./build_container_centos.sh
+    /usr/local/bin/gn \
+    /usr/local/bin/gn
+RUN --mount=type=bind,source=/build_container_common.sh,target=/build_container_common.sh \
+    --mount=type=bind,source=/build_container_centos.sh,target=/build_container_centos.sh \
+    ./build_container_centos.sh

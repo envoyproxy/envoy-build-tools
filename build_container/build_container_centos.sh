@@ -5,16 +5,10 @@ ARCH="$(uname -m)"
 
 YUM_PKGS=(
     autoconf
-    devtoolset-9-binutils
-    devtoolset-9-gcc
-    devtoolset-9-gcc-c++
-    devtoolset-9-libatomic-devel
     doxygen
-    glibc-static
     graphviz
     java-1.8.0-openjdk-headless
     jq
-    libstdc++-static
     libtool
     make
     openssl
@@ -24,7 +18,6 @@ YUM_PKGS=(
     sudo
     tcpdump
     unzip
-    wget
     which)
 
 yum update -y -q
@@ -41,6 +34,10 @@ if [[ $(uname -m) == "aarch64" ]] && grep -q -e rhel /etc/*-release ; then
   exit 0
 fi
 
-source ./build_container_common.sh
-install_build
-yum clean all
+install_centos () {
+    mkdir /etc/sudoers.d
+    echo "Defaults    secure_path = $PATH" > /etc/sudoers.d/path
+    source ./build_container_common.sh
+    install_build
+    yum clean all
+}

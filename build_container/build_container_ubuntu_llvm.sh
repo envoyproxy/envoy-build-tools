@@ -9,23 +9,15 @@ set -e
 ARCH="$(uname -m)"
 
 PACKAGES=(
-    automake
-    bzip2
     cmake
     cmake-data
-    git
-    libffi-dev
-    libtool
-    make
     ninja-build
-    patch
-    unzip
-    wget
-    xz-utils)
+    python3)
+
 
 install_gn(){
     # Install gn tools which will be used for building wee8
-    wget -O gntool.zip "https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-${DEB_ARCH}/+/latest"
+    wget -q -O gntool.zip "https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-${DEB_ARCH}/+/latest"
     unzip -q gntool.zip -d gntool
     cp gntool/gn /usr/local/bin/gn
     chmod +x /usr/local/bin/gn

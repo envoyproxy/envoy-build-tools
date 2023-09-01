@@ -1,5 +1,7 @@
 FROM ubuntu:focal@sha256:33a5cc25d22c45900796a1aca487ad7a7cb09f09ea00b779e3b2026b4fc2faba as env
-ARG BAZELISK_SHA256SUM=ce52caa51ef9e509fb6b7e5ad892e5cf10feb0794b0aed4d2f36adb00a1a2779 \
+ARG APT_KEY_DEADSNAKES=F23C5A6CF475977595C89F51BA6932366A755776 \
+    APT_KEY_TOOLCHAIN=60C317803A41BA51845E371A1E9377A2BA9EF27F \
+    BAZELISK_SHA256SUM=ce52caa51ef9e509fb6b7e5ad892e5cf10feb0794b0aed4d2f36adb00a1a2779 \
     BAZELISK_SHA256SUM_ARM64=6070bf70915e92b3a5ce8eee6f4a8a0968bb350be2a98b80b0fd2fc13ce8a254 \
     BAZELISK_VERSION=1.18.0 \
     BUILD_TOOLS_VERSION=5.1.0 \
@@ -23,32 +25,25 @@ ARG BAZELISK_SHA256SUM=ce52caa51ef9e509fb6b7e5ad892e5cf10feb0794b0aed4d2f36adb00
 ENV LANG=$LANG
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
-    ARCH="$(uname -m)" \
-    && apt-get -qq update -y \
-    && apt-get -qq install -y --no-install-recommends locales software-properties-common apt-transport-https curl gpg-agent g++ \
-    && if [ "${ARCH}" = "aarch64" ]; then \
-           apt-get -qq install -y libtinfo5; \
-       fi \
-    && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+    --mount=type=bind,source=/build_container_ubuntu_base.sh,target=/build_container_ubuntu_base.sh \
+    ./build_container_ubuntu_base.sh
 
 FROM env as llvm
-COPY ./build_container_llvm.sh / \
-    ./build_container_ubuntu_llvm.sh /
-RUN ./build_container_ubuntu_llvm.sh
-
-FROM env as base
-COPY --from=llvm \
-    /opt/llvm /opt/llvm
-COPY --from=llvm \
-    /opt/libcxx_msan /opt/libcxx_msan
-COPY --from=llvm \
-    /opt/libcxx_tsan /opt/libcxx_tsan
-COPY --from=llvm \
-    /usr/local/bin/gn /usr/local/bin/gn
-COPY ./build_container_common.sh / \
-    ./build_container_ubuntu.sh /
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
+    --mount=type=bind,source=/build_container_llvm.sh,target=/build_container_llvm.sh \
+    --mount=type=bind,source=/build_container_ubuntu_llvm.sh,target=/build_container_ubuntu_llvm.sh \
+    ./build_container_ubuntu_llvm.sh
+
+FROM env as base
+COPY --from=llvm /opt /opt
+COPY --from=llvm \
+    /usr/local/bin/gn \
+    /usr/local/bin/gn
+RUN --mount=type=tmpfs,target=/var/cache/apt \
+    --mount=type=tmpfs,target=/var/lib/apt/lists \
+    --mount=type=bind,source=/build_container_common.sh,target=/build_container_common.sh \
+    --mount=type=bind,source=/build_container_ubuntu.sh,target=/build_container_ubuntu.sh \
     ./build_container_ubuntu.sh
 
 # mobile
@@ -58,7 +53,7 @@ ENV ANDROID_HOME=/.android/sdk \
     ANDROID_NDK_VERSION=21.4.7075529 \
     ANDROID_SDK_INSTALL_TARGET=/.android \
     ANDROID_SDK_ROOT=/.android/sdk
-COPY ./build_container_mobile.sh /
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
+    --mount=type=bind,source=/build_container_mobile.sh,target=/build_container_mobile.sh \
     ./build_container_mobile.sh
