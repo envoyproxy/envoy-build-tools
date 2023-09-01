@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/windows/servercore:10.0.17763.4252@sha256:b90fc3f0259aa56a97616946f6f5d061bd54c3d5c08d2eaff482fd56ab95a6f4
+FROM mcr.microsoft.com/windows/servercore:ltsc2022@sha256:f1974546e8a73746e6c60781895341dd7a6760e28534d3d0cc5f3c88c1f5825a
 
 ENV MSYS2_ARG_CONV_EXCL "*"
 
