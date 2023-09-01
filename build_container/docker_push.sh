@@ -54,7 +54,9 @@ if [[ "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
     ci_log_run_end
 fi
 
-source "./docker_build_${OS_FAMILY}.sh"
+cd "${OS_FAMILY}" || exit 1
+
+source "./docker_build.sh"
 
 ci_log_run docker images
 
