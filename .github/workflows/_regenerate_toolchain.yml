@@ -40,6 +40,7 @@ jobs:
         go-version: '1.16'
     - run: |
         toolchains/regenerate.sh
+      shell: bash
       env:
         COMMIT_TOOLCHAINS: true
         GCR_IMAGE_NAME: ${{ inputs.gcr_name }}
