@@ -1,0 +1,104 @@
+name: Build image
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+    secrets:
+      dockerhub_username:
+      dockerhub_password:
+      gcp_key:
+
+    inputs:
+      image_prefix:
+        type: string
+        default: envoyproxy/envoy-build-
+
+      os_family:
+        type: string
+        default: linux
+
+      distro:
+        type: string
+        required: true
+      test_toolchain:
+        type: boolean
+        default: false
+
+      host_platform:
+        type: string
+        default: ubuntu-22.04
+
+      gcr_push:
+        type: boolean
+        default: false
+      gcr_name:
+        type: string
+        default:
+
+jobs:
+  image:
+    runs-on: ${{ inputs.host_platform }}
+    name: Build and test Docker image
+    steps:
+    - uses: envoyproxy/toolshed/gh-actions/diskspace@actions-v0.0.17
+      if: ${{ inputs.os_family != 'windows' }}
+    - name: 'Checkout Repository'
+      uses: actions/checkout@v3
+    - run: |
+        curl -fsSL --output "$TEMP/gcloud-sdk.zip" "$GCLOUD_SDK_ARCHIVE_URL"
+        echo "${GCLOUD_SDK_ARCHIVE_CHECKSUM} $TEMP/gcloud-sdk.zip" | sha256sum --check
+        unzip -q "$TEMP/gcloud-sdk.zip" -d "$PROGRAMFILES"
+      shell: bash
+      if: ${{ inputs.os_family == 'windows' }}
+      env:
+        GCLOUD_SDK_ARCHIVE_URL: https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-289.0.0-windows-x86_64.zip
+        GCLOUD_SDK_ARCHIVE_CHECKSUM: c81e80040f7f609dbc50c42cd0cd402988a5c47f467372d40b5aaca0733f46f4
+    - run: |
+        if [[ "${{inputs.os_family }}" == "windows" ]]; then
+            export PATH="${PROGRAMFILES}/google-cloud-sdk/bin:${PATH}"
+        fi
+        cd build_container
+        ./docker_push.sh
+      shell: bash
+      env:
+        OS_FAMILY: ${{ inputs.os_family }}
+        SOURCE_BRANCH: ${{ github.ref }}
+        DOCKERHUB_USERNAME: ${{ inputs.dockerhub_username }}
+        DOCKERHUB_PASSWORD: ${{ inputs.dockerhub_password }}
+        GCP_SERVICE_ACCOUNT_KEY: ${{ inputs.gcp_key }}
+        IMAGE_PREFIX: ${{ inputs.image_prefix }}
+        OS_DISTRO: ${{ inputs.distro }}
+        PUSH_GCR_IMAGE: ${{ inputs.gcr_push }}
+        GCR_IMAGE_NAME: ${{ inputs.gcr_name }}
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      if: ${{ inputs.test_toolchain }}
+      with:
+        go-version: '1.16'
+    - run: |
+        CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "./build_container")
+        echo "tag=${CONTAINER_TAG}" >> "$GITHUB_OUTPUT"
+      id: container
+      if: ${{ inputs.test_toolchain }}
+      shell: bash
+    - uses: envoyproxy/toolshed/gh-actions/docker/registry@actions-v0.0.18
+      if: ${{ inputs.test_toolchain && inputs.os_family != 'windows' }}
+      with:
+        load: envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }}-amd64
+        as: envoy-build-ubuntu:${{ steps.container.outputs.tag }}
+    - uses: envoyproxy/toolshed/gh-actions/docker/registry@actions-v0.0.18
+      if: ${{ inputs.test_toolchain && inputs.os_family == 'windows' }}
+      with:
+        image: stefanscherer/registry-windows:2.6.2
+        load: envoyproxy/envoy-build-windows2019:${{ steps.container.outputs.tag }}
+    - run: |
+        toolchains/regenerate.sh
+      if: ${{ inputs.test_toolchain }}
+      shell: bash
+      env:
+        OS_FAMILY: ${{ inputs.os_family }}
+        SOURCE_BRANCH: ${{ github.ref }}
+        NO_PULL_IMAGE: true
+        DOCKER_IMAGE: localhost:5000/envoy-build-${{ inputs.distro }}
