@@ -65,9 +65,9 @@ jobs:
       env:
         OS_FAMILY: ${{ inputs.os_family }}
         SOURCE_BRANCH: ${{ github.ref }}
-        DOCKERHUB_USERNAME: ${{ inputs.dockerhub_username }}
-        DOCKERHUB_PASSWORD: ${{ inputs.dockerhub_password }}
-        GCP_SERVICE_ACCOUNT_KEY: ${{ inputs.gcp_key }}
+        DOCKERHUB_USERNAME: ${{ secrets.dockerhub_username }}
+        DOCKERHUB_PASSWORD: ${{ secrets.dockerhub_password }}
+        GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.gcp_key }}
         IMAGE_PREFIX: ${{ inputs.image_prefix }}
         OS_DISTRO: ${{ inputs.distro }}
         PUSH_GCR_IMAGE: ${{ inputs.gcr_push }}
