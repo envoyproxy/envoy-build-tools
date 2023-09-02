@@ -57,7 +57,7 @@ install_libcxx () {
           -DCMAKE_INSTALL_PREFIX="/opt/libcxx_${LIBCXX_PATH}" \
           "../llvm-project-llvmorg-${LLVM_VERSION}/llvm"
     ninja install-cxx install-cxxabi
-    if [[ ! -z "$(diff --exclude=__config_site -r /opt/libcxx_${LIBCXX_PATH}/include/c++ /opt/llvm/include/c++)" ]]; then
+    if [[ -n "$(diff --exclude=__config_site -r "/opt/libcxx_${LIBCXX_PATH}/include/c++" /opt/llvm/include/c++)" ]]; then
         echo "Different libc++ is installed";
         exit 1
     fi

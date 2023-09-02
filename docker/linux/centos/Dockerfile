@@ -20,14 +20,14 @@ ARG BAZELISK_SHA256SUM=ce52caa51ef9e509fb6b7e5ad892e5cf10feb0794b0aed4d2f36adb00
 ENV LC_ALL=$LC_ALL \
     PATH=/opt/rh/rh-git218/root/usr/bin:/opt/rh/devtoolset-7/root/usr/bin:/opt/llvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
-    --mount=type=bind,source=/centos_fun.sh,target=/centos_fun.sh \
-    . ./centos_fun.sh \
+    --mount=type=bind,source=/centos/fun.sh,target=/centos/fun.sh \
+    . ./centos/fun.sh \
     && install_base
 
 FROM env as llvm
 RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
-    --mount=type=bind,source=/centos_fun.sh,target=/centos_fun.sh \
-    . ./centos_fun.sh \
+    --mount=type=bind,source=/centos/fun.sh,target=/centos/fun.sh \
+    . ./centos/fun.sh \
     && install_llvm
 
 FROM env as base
@@ -36,6 +36,6 @@ COPY --from=llvm \
     /usr/local/bin/gn \
     /usr/local/bin/gn
 RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
-    --mount=type=bind,source=/centos_fun.sh,target=/centos_fun.sh \
-    . ./centos_fun.sh \
+    --mount=type=bind,source=/centos/fun.sh,target=/centos/fun.sh \
+    . ./centos/fun.sh \
     && install
