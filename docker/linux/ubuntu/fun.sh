@@ -7,6 +7,11 @@ set -o pipefail
 
 
 LSB_RELEASE="$(lsb_release -cs)"
+APT_KEYS=(
+    "${APT_KEY_DEADSNAKES}"
+    "${APT_KEY_TOOLCHAIN}")
+APT_KEYS_MOBILE=(
+    "$APT_KEY_AZUL")
 APT_REPOS=(
     "http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu  ${LSB_RELEASE} main"
     "[arch=${DEB_ARCH}] https://download.docker.com/linux/ubuntu ${LSB_RELEASE} stable"
@@ -71,10 +76,9 @@ add_apt_keys () {
     apt-get update -y
     apt-get -qq install -y --no-install-recommends gnupg2
     wget -q -O - https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-    # deadsnakes
-    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "${APT_KEY_DEADSNAKES}"
-    # toolchain
-    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "${APT_KEY_TOOLCHAIN}"
+    for key in "${@}"; do
+        apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "$key"
+    done
 }
 
 add_apt_repos () {
@@ -114,33 +118,30 @@ install_gn (){
 mobile_install_android () {
     mkdir -p "$ANDROID_HOME"
     cd "$ANDROID_SDK_INSTALL_TARGET"
-    cmdline_file="commandlinetools-linux-7583922_latest.zip"
-    wget -q "https://dl.google.com/android/repository/$cmdline_file"
-    unzip -q "$cmdline_file"
+    wget -q -O android-tools.zip "${ANDROID_CLI_TOOLS}"
+    unzip -q android-tools.zip
+    rm android-tools.zip
     mkdir -p sdk/cmdline-tools/latest
     mv cmdline-tools/* sdk/cmdline-tools/latest
-    sdkmanager=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
-    echo "y" | $sdkmanager --install "ndk;$ANDROID_NDK_VERSION"
-    $sdkmanager --install "platforms;android-30"
-    $sdkmanager --install "build-tools;30.0.2"
+    sdkmanager="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
+    echo "y" | $sdkmanager --install "ndk;${ANDROID_NDK_VERSION}" | grep -v = || true
+    $sdkmanager --install "platforms;android-30" | grep -v = || true
+    $sdkmanager --install "build-tools;30.0.2" | grep -v = || true
 }
 
 mobile_install_jdk () {
-    # Add Azul's public key
-    apt-key adv \
-            --keyserver hkp://keyserver.ubuntu.com:80 \
-            --recv-keys 0xB1998361219BD9C9
     # Download and install the package that adds
     # the Azul APT repository to the list of sources
-    wget -q https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
+    wget -q -O zulu.deb "${ZULU_INSTALL_DEB}"
     # Install the Java 8 JDK
-    apt-get install -y ./zulu-repo_1.0.0-3_all.deb
+    apt-get install -y ./zulu.deb
     apt-get update -y
     apt-get install -y zulu8-jdk
-    rm ./zulu-repo_1.0.0-3_all.deb
+    rm ./zulu.deb
 }
 
 mobile_install () {
+    add_apt_keys "${APT_KEYS_MOBILE[@]}"
     mobile_install_jdk
     mobile_install_android
 }
@@ -159,7 +160,7 @@ install () {
     if [[ "$ARCH" == "ppc64le" ]]; then
         install_ppc64le_bazel
     fi
-    add_apt_keys
+    add_apt_keys "${APT_KEYS[@]}"
     add_apt_repos "${APT_REPOS[@]}"
     apt-get install -y --no-install-recommends "${UBUNTU_PACKAGES[@]}"
     setup_python

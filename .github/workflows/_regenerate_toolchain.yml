@@ -19,6 +19,11 @@ on:
         type: string
         default: envoy-build
 
+      go_version:
+        type: string
+        default: '1.16'
+
+
 jobs:
   regenerate_toolchain:
     runs-on: ${{ inputs.host_platform }}
@@ -37,7 +42,8 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.16'
+        go-version: ${{ inputs.go_version }}
+        cache: false
     - run: |
         toolchains/regenerate.sh
       shell: bash

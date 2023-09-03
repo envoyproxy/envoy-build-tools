@@ -72,11 +72,8 @@ install_san () {
         mkdir /opt/libcxx_tsan
         return 0
     fi
-
     export PATH="/opt/llvm/bin:${PATH}"
-
     WORKDIR=$(mktemp -d)
-
     pushd "${WORKDIR}"
     wget -q -O -  "https://github.com/llvm/llvm-project/archive/llvmorg-${LLVM_VERSION}.tar.gz" | tar zx
     install_libcxx MemoryWithOrigins msan
@@ -92,14 +89,12 @@ install_build_tools () {
         "https://github.com/bazelbuild/buildtools/releases/download/${BUILD_TOOLS_VERSION}/buildifier-linux-${DEB_ARCH}" \
         "${BUILDIFIER_SHA256SUM}"
     chmod +x /usr/local/bin/buildifier
-
     # buildozer
     download_and_check \
         /usr/local/bin/buildozer \
         "https://github.com/bazelbuild/buildtools/releases/download/${BUILD_TOOLS_VERSION}/buildozer-linux-${DEB_ARCH}" \
         "${BUILDOZER_SHA256SUM}"
     chmod +x /usr/local/bin/buildozer
-
     # bazelisk
     download_and_check \
         /usr/local/bin/bazel \
