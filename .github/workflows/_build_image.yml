@@ -30,6 +30,10 @@ on:
         type: string
         default: ubuntu-22.04
 
+      go_version:
+        type: string
+        default: '1.16'
+
       gcr_push:
         type: boolean
         default: false
@@ -43,13 +47,21 @@ jobs:
     name: Build and test Docker image
     steps:
     - uses: envoyproxy/toolshed/gh-actions/diskspace@actions-v0.0.17
+      name: 'Free disk space'
       if: ${{ inputs.os_family != 'windows' }}
-    - name: 'Checkout Repository'
+    - name: 'Checkout repository'
       uses: actions/checkout@v3
+    - run: |
+        CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "./docker")
+        echo "tag=${CONTAINER_TAG}" >> "$GITHUB_OUTPUT"
+      id: container
+      shell: bash
+      name: Container hash
     - run: |
         curl -fsSL --output "$TEMP/gcloud-sdk.zip" "$GCLOUD_SDK_ARCHIVE_URL"
         echo "${GCLOUD_SDK_ARCHIVE_CHECKSUM} $TEMP/gcloud-sdk.zip" | sha256sum --check
         unzip -q "$TEMP/gcloud-sdk.zip" -d "$PROGRAMFILES"
+      name: Install gcloud (Windows)
       shell: bash
       if: ${{ inputs.os_family == 'windows' }}
       env:
@@ -59,8 +71,9 @@ jobs:
         if [[ "${{inputs.os_family }}" == "windows" ]]; then
             export PATH="${PROGRAMFILES}/google-cloud-sdk/bin:${PATH}"
         fi
-        cd build_container
-        ./docker_push.sh
+        cd docker
+        ./push.sh
+      name: Build (${{ inputs.image_prefix }}${{ inputs.distro }}@${{ steps.container.outputs.tag }})
       shell: bash
       env:
         OS_FAMILY: ${{ inputs.os_family }}
@@ -76,20 +89,16 @@ jobs:
       uses: actions/setup-go@v4
       if: ${{ inputs.test_toolchain }}
       with:
-        go-version: '1.16'
-    - run: |
-        CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "./build_container")
-        echo "tag=${CONTAINER_TAG}" >> "$GITHUB_OUTPUT"
-      id: container
-      if: ${{ inputs.test_toolchain }}
-      shell: bash
+        go-version: ${{ inputs.go_version }}
     - uses: envoyproxy/toolshed/gh-actions/docker/registry@actions-v0.0.18
       if: ${{ inputs.test_toolchain && inputs.os_family != 'windows' }}
+      name: 'Start and load Docker registry'
       with:
         load: envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }}-amd64
         as: envoy-build-ubuntu:${{ steps.container.outputs.tag }}
     - uses: envoyproxy/toolshed/gh-actions/docker/registry@actions-v0.0.18
       if: ${{ inputs.test_toolchain && inputs.os_family == 'windows' }}
+      name: 'Start and load Docker registry (Windows)'
       with:
         image: stefanscherer/registry-windows:2.6.2
         load: envoyproxy/envoy-build-windows2019:${{ steps.container.outputs.tag }}

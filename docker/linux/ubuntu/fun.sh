@@ -2,9 +2,15 @@
 
 set -o pipefail
 
-
+# shellcheck source=docker/linux/common_fun.sh
 . ./common_fun.sh
 
+
+LSB_RELEASE="$(lsb_release -cs)"
+APT_REPOS=(
+    "http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu  ${LSB_RELEASE} main"
+    "[arch=${DEB_ARCH}] https://download.docker.com/linux/ubuntu ${LSB_RELEASE} stable"
+    "http://ppa.launchpad.net/deadsnakes/ppa/ubuntu ${LSB_RELEASE} main")
 COMMON_PACKAGES=(
     apt-transport-https
     ca-certificates
@@ -71,12 +77,11 @@ add_apt_keys () {
 }
 
 add_apt_repos () {
+    local repo
     apt-get update -y
     apt-get -qq install -y ca-certificates
     for repo in "${@}"; do
-        name="$(echo "$repo" | cut -d' ' -f1)"
-        data="$(echo "$repo" | cut -d' ' -f2-)"
-        echo "deb ${data}" >> "/etc/apt/sources.list"
+        echo "deb ${repo}" >> "/etc/apt/sources.list"
     done
     apt-get update -y
 }
@@ -157,7 +162,6 @@ install () {
     add_apt_repos "${APT_REPOS[@]}"
     apt-get install -y --no-install-recommends "${UBUNTU_PACKAGES[@]}"
     setup_python
-    # source ./build_container_common.sh
     install_build
 }
 

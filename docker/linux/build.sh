@@ -3,6 +3,7 @@
 set -o pipefail
 
 UBUNTU_DOCKER_VARIANTS=("mobile")
+IMAGE_TAGS=${IMAGE_TAGS:-}
 
 # Setting environments for buildx tools
 config_env() {
@@ -34,28 +35,29 @@ build_and_push_variants () {
     fi
     local variant=""
     local push_arg=()
-    if [[ "${#IMAGE_TAGS[@]}" -ne 0 ]]; then
+    if [[ -n "${IMAGE_TAGS}" ]]; then
         # Variants are only pushed to dockerhub currently, so if we are pushing images
         # just push the variants immediately.
         push_arg+=(--push)
     fi
     for variant in "${UBUNTU_DOCKER_VARIANTS[@]}"; do
         # Only build variants for linux/amd64
-        ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${variant}-${CONTAINER_TAG}" --target "${variant}" --platform "linux/amd64" "${push_arg[@]}"
+        ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${variant}-${CONTAINER_TAG}" --target "${variant}" --platform "linux/amd64" "${push_arg[@]}"
     done
 }
 
-ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target base --platform "${BUILD_TOOLS_PLATFORMS}"
+ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target base --platform "${BUILD_TOOLS_PLATFORMS}"
 
 if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
     # variants are only pushed for the dockerhub image (not other `IMAGE_TAGS`)
     build_and_push_variants
 fi
-
-for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
-    ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --target base --platform "${BUILD_TOOLS_PLATFORMS}" --push
-done
+if [[ -n "${IMAGE_TAGS}" ]]; then
+    for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
+        ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_TAG}" --target base --platform "${BUILD_TOOLS_PLATFORMS}" --push
+    done
+fi
 
 # Testing after push to save CI time because this invalidates arm64 cache
-ci_log_run docker buildx build . -f "Dockerfile-${OS_DISTRO}" -t "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" --platform "linux/amd64" --load
-ci_log_run docker run --rm -v "$(pwd)/docker_test_linux.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" true
+ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" --platform "linux/amd64" --load
+ci_log_run docker run --rm -v "$(pwd)/docker/linux/test.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" true

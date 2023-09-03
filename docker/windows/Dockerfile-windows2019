@@ -6,8 +6,8 @@ ENV TMPDIR C:\\Windows\\Temp
 ENV TMP C:\\Windows\\Temp
 ENV TEMP C:\\Windows\\Temp
 
-COPY ./build_container_windows.ps1 /
+COPY ./docker_windows.ps1 /
 
-RUN powershell.exe .\\build_container_windows.ps1
+RUN powershell.exe .\\docker_windows.ps1
 
-RUN del /F/S/Q .\\build_container_windows.ps1
+RUN del /F/S/Q .\\docker_windows.ps1

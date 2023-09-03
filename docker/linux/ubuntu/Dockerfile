@@ -27,16 +27,16 @@ SHELL ["/bin/bash", "-c"]
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
-    --mount=type=bind,source=/ubuntu_fun.sh,target=/ubuntu_fun.sh \
-    . ./ubuntu_fun.sh \
+    --mount=type=bind,source=/ubuntu/fun.sh,target=/ubuntu/fun.sh \
+    . ./ubuntu/fun.sh \
     && install_base
 
 FROM env as llvm
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
-    --mount=type=bind,source=/ubuntu_fun.sh,target=/ubuntu_fun.sh \
-    . ./ubuntu_fun.sh \
+    --mount=type=bind,source=/ubuntu/fun.sh,target=/ubuntu/fun.sh \
+    . ./ubuntu/fun.sh \
     && install_llvm
 
 FROM env as base
@@ -47,8 +47,8 @@ COPY --from=llvm \
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
-    --mount=type=bind,source=/ubuntu_fun.sh,target=/ubuntu_fun.sh \
-    . ./ubuntu_fun.sh \
+    --mount=type=bind,source=/ubuntu/fun.sh,target=/ubuntu/fun.sh \
+    . ./ubuntu/fun.sh \
     && install
 
 # mobile
@@ -61,6 +61,6 @@ ENV ANDROID_HOME=/.android/sdk \
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
-    --mount=type=bind,source=/ubuntu_fun.sh,target=/ubuntu_fun.sh \
-    . ./ubuntu_fun.sh \
+    --mount=type=bind,source=/ubuntu/fun.sh,target=/ubuntu/fun.sh \
+    . ./ubuntu/fun.sh \
     && mobile_install

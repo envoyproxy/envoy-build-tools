@@ -56,10 +56,10 @@ fi
 
 cd "${OS_FAMILY}" || exit 1
 
-source "./docker_build.sh"
+source "./build.sh"
 
 ci_log_run docker images
 
-if [[ "${#IMAGE_TAGS[@]}" == "0" ]]; then
+if [[ "${#IMAGE_TAGS[@]}" -eq 0 ]]; then
     echo 'Ignoring PR branch for docker push.'
 fi

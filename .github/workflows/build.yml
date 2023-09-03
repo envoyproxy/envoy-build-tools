@@ -45,7 +45,7 @@ jobs:
       gcr_name: ${{ matrix.gcr_name != '' && matrix.gcr_name || 'envoy-build' }}
       os_family: ${{ matrix.os_family != '' && matrix.os_family || 'linux' }}
       host_platform: ${{ matrix.host_platform != '' && matrix.host_platform || 'ubuntu-22.04' }}
-      test_toolchain: ${{ matrix.target != 'centos' }}
+      test_toolchain: ${{ github.event_name == 'pull_request' && matrix.target != 'centos' }}
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub_password: ${{ secrets.DOCKERHUB_PASSWORD }}

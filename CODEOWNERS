@@ -2,4 +2,4 @@
 * @envoyproxy/build-tools-maintainers @envoyproxy/dependency-shepherds
 
 # Windows build container config
-/build_container/*windows* @envoyproxy/windows-dev
+/docker/*windows* @envoyproxy/windows-dev

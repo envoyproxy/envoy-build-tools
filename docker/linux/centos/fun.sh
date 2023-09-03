@@ -2,6 +2,7 @@
 
 set -o pipefail
 
+# shellcheck source=docker/linux/common_fun.sh
 . ./common_fun.sh
 
 
@@ -73,7 +74,7 @@ install_llvm () {
     ln -s /usr/bin/cmake3 /usr/bin/cmake
     # For LLVM to pick right libstdc++
     ln -s /opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9 /usr/lib/gcc/x86_64-redhat-linux
-    # The build_container_common.sh will be skipped when building centOS
+    # The installation will be skipped when building centOS
     # image on Arm64 platform since some building issues are still unsolved.
     # It will be fixed until those issues solved on Arm64 platform.
     if [[ "$ARCH" == "aarch64" ]] && grep -q -e rhel /etc/*-release ; then
@@ -92,11 +93,4 @@ install () {
     yum install -y -q "${YUM_PKGS[@]}"
     # For LLVM to pick right libstdc++
     ln -s /opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9 /usr/lib/gcc/x86_64-redhat-linux
-    # The build_container_common.sh will be skipped when building centOS
-    # image on Arm64 platform since some building issues are still unsolved.
-    # It will be fixed until those issues solved on Arm64 platform.
-    if [[ $(uname -m) == "aarch64" ]] && grep -q -e rhel /etc/*-release ; then
-        echo "Now, the CentOS image can not be built on arm64 platform!"
-        exit 0
-    fi
 }
