@@ -90,6 +90,7 @@ jobs:
       if: ${{ inputs.test_toolchain }}
       with:
         go-version: ${{ inputs.go_version }}
+        cache: false
     - uses: envoyproxy/toolshed/gh-actions/docker/registry@actions-v0.0.18
       if: ${{ inputs.test_toolchain && inputs.os_family != 'windows' }}
       name: 'Start and load Docker registry'
