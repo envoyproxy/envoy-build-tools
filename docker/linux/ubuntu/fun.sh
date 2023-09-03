@@ -20,14 +20,22 @@ COMMON_PACKAGES=(
     unzip
     wget
     xz-utils)
+CI_PACKAGES=(
+    aspell
+    aspell-en
+    git
+    gnupg2
+    gpg-agent
+    jq
+    patch
+    time
+    sudo)
 LLVM_PACKAGES=(
     cmake
     cmake-data
     ninja-build
     python3)
 UBUNTU_PACKAGES=(
-    aspell
-    aspell-en
     automake
     bc
     bzip2
@@ -37,16 +45,11 @@ UBUNTU_PACKAGES=(
     doxygen
     expect
     gdb
-    git
-    gnupg2
-    gpg-agent
     graphviz
-    jq
     libffi-dev
     libncurses-dev
     libtool
     make
-    patch
     python3.10
     python3.10-dev
     python3.10-distutils
@@ -54,9 +57,7 @@ UBUNTU_PACKAGES=(
     rsync
     ssh-client
     strace
-    sudo
     tcpdump
-    time
     tshark
     zip)
 
@@ -163,6 +164,11 @@ install () {
     apt-get install -y --no-install-recommends "${UBUNTU_PACKAGES[@]}"
     setup_python
     install_build
+}
+
+install_ci () {
+    apt-get -qq update -y
+    apt-get -qq install -y --no-install-recommends "${CI_PACKAGES[@]}"
 }
 
 install_llvm () {
