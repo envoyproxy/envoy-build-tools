@@ -164,12 +164,12 @@ install () {
     add_apt_repos "${APT_REPOS[@]}"
     apt-get install -y --no-install-recommends "${UBUNTU_PACKAGES[@]}"
     setup_python
-    install_build
 }
 
 install_ci () {
     apt-get -qq update -y
     apt-get -qq install -y --no-install-recommends "${CI_PACKAGES[@]}"
+    install_build
 }
 
 install_llvm () {
