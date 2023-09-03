@@ -39,7 +39,15 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     . ./ubuntu/fun.sh \
     && install_llvm
 
-FROM env as base
+FROM env as ci
+RUN --mount=type=tmpfs,target=/var/cache/apt \
+    --mount=type=tmpfs,target=/var/lib/apt/lists \
+    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/ubuntu/fun.sh,target=/ubuntu/fun.sh \
+    . ./ubuntu/fun.sh \
+    && install_ci
+
+FROM ci as full
 COPY --from=llvm /opt /opt
 COPY --from=llvm \
     /usr/local/bin/gn \
@@ -52,7 +60,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     && install
 
 # mobile
-FROM base as mobile
+FROM full as mobile
 ENV ANDROID_HOME=/.android/sdk \
     ANDROID_NDK_HOME=/.android/sdk/ndk/21.4.7075529 \
     ANDROID_NDK_VERSION=21.4.7075529 \
@@ -64,3 +72,5 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=bind,source=/ubuntu/fun.sh,target=/ubuntu/fun.sh \
     . ./ubuntu/fun.sh \
     && mobile_install
+
+FROM full

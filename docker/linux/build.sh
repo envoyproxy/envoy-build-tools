@@ -2,7 +2,7 @@
 
 set -o pipefail
 
-UBUNTU_DOCKER_VARIANTS=("mobile")
+UBUNTU_DOCKER_VARIANTS=("ci" "mobile")
 IMAGE_TAGS=${IMAGE_TAGS:-}
 
 # Setting environments for buildx tools
@@ -46,7 +46,7 @@ build_and_push_variants () {
     done
 }
 
-ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target base --platform "${BUILD_TOOLS_PLATFORMS}"
+ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target full --platform "${BUILD_TOOLS_PLATFORMS}"
 
 if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
     # variants are only pushed for the dockerhub image (not other `IMAGE_TAGS`)
@@ -54,7 +54,7 @@ if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
 fi
 if [[ -n "${IMAGE_TAGS}" ]]; then
     for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
-        ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_TAG}" --target base --platform "${BUILD_TOOLS_PLATFORMS}" --push
+        ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_TAG}" --target full --platform "${BUILD_TOOLS_PLATFORMS}" --push
     done
 fi
 

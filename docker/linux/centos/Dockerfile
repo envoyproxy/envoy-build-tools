@@ -30,7 +30,7 @@ RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
     . ./centos/fun.sh \
     && install_llvm
 
-FROM env as base
+FROM env as full
 COPY --from=llvm /opt /opt
 COPY --from=llvm \
     /usr/local/bin/gn \
@@ -39,3 +39,5 @@ RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
     --mount=type=bind,source=/centos/fun.sh,target=/centos/fun.sh \
     . ./centos/fun.sh \
     && install
+
+FROM full
