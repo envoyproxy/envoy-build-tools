@@ -12,8 +12,6 @@ case $ARCH in
         ;;
     'aarch64' )
         DEB_ARCH=arm64
-        BUILDIFIER_SHA256SUM="$BUILDIFIER_SHA256SUM_ARM64"
-        BUILDOZER_SHA256SUM="$BUILDOZER_SHA256SUM_ARM64"
         BAZELISK_SHA256SUM="$BAZELISK_SHA256SUM_ARM64"
         LLVM_DISTRO="$LLVM_DISTRO_ARM64"
         LLVM_SHA256SUM="$LLVM_SHA256SUM_ARM64"
@@ -83,18 +81,6 @@ install_san () {
 
 ## Build install fun
 install_build_tools () {
-    # buildifier
-    download_and_check \
-        /usr/local/bin/buildifier \
-        "https://github.com/bazelbuild/buildtools/releases/download/${BUILD_TOOLS_VERSION}/buildifier-linux-${DEB_ARCH}" \
-        "${BUILDIFIER_SHA256SUM}"
-    chmod +x /usr/local/bin/buildifier
-    # buildozer
-    download_and_check \
-        /usr/local/bin/buildozer \
-        "https://github.com/bazelbuild/buildtools/releases/download/${BUILD_TOOLS_VERSION}/buildozer-linux-${DEB_ARCH}" \
-        "${BUILDOZER_SHA256SUM}"
-    chmod +x /usr/local/bin/buildozer
     # bazelisk
     download_and_check \
         /usr/local/bin/bazel \
