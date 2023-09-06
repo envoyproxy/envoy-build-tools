@@ -79,6 +79,9 @@ DownloadAndCheck C:\tools\bazel\bazel.exe `
                  d63dfd730add443533a8dd684addd998e2276dc4c65de946b59944c39762b716
 AddToPath C:\tools\bazel
 
+# Download Bazel
+bazel.exe version
+
 # VS 2019 Build Tools
 # Pinned to version 16.9.4 downloaded on 1/31/2022 via https://aka.ms/vs/16/release/vs_BuildTools.exe
 DownloadAndCheck $env:TEMP\vs_BuildTools.exe `
