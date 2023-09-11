@@ -15,10 +15,10 @@ ARG ANDROID_CLI_TOOLS=https://dl.google.com/android/repository/commandlinetools-
     LLVM_DISTRO_ARM64=aarch64-linux-gnu \
     LLVM_DISTRO_PPC64LE=powerpc64le-linux-ubuntu-18.04 \
     LLVM_DOWNLOAD_PREFIX=https://github.com/llvm/llvm-project/releases/download/llvmorg- \
-    LLVM_SHA256SUM=61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5 \
-    LLVM_SHA256SUM_ARM64=1792badcd44066c79148ffeb1746058422cc9d838462be07e3cb19a4b724a1ee \
-    LLVM_SHA256SUM_PPC64LE=2d504c4920885c86b306358846178bc2232dfac83b47c3b1d05861a8162980e6 \
-    LLVM_VERSION=14.0.0 \
+    LLVM_SHA256SUM=38bc7f5563642e73e69ac5626724e206d6d539fbef653541b34cae0ba9c3f036 \
+    LLVM_SHA256SUM_ARM64=8ca4d68cf103da8331ca3f35fe23d940c1b78fb7f0d4763c1c059e352f5d1bec \
+    LLVM_SHA256SUM_PPC64LE=7fc9f07ff0fcf191df93fe4adc1da555e43f62fe1d3ddafb15c943f72b1bda17 \
+    LLVM_VERSION=15.0.6 \
     ZULU_INSTALL_DEB=https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
 ENV LANG=$LANG
 SHELL ["/bin/bash", "-c"]
