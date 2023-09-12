@@ -69,5 +69,7 @@ if [[ -n "${IMAGE_TAGS}" ]]; then
     done
 fi
 
-# Testing after push to save CI time because this invalidates arm64 cache
-ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "linux/amd64" --load
+if [[ "$LOAD_IMAGE" == "true" ]]; then
+    # Testing after push to save CI time because this invalidates arm64 cache
+    ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "linux/amd64" --load
+fi
