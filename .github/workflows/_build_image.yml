@@ -95,8 +95,7 @@ jobs:
       if: ${{ inputs.test_toolchain && inputs.os_family != 'windows' }}
       name: 'Start and load Docker registry'
       with:
-        load: envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }}-amd64
-        as: envoy-build-ubuntu:${{ steps.container.outputs.tag }}
+        load: envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }}
     - uses: envoyproxy/toolshed/gh-actions/docker/registry@actions-v0.0.18
       if: ${{ inputs.test_toolchain && inputs.os_family == 'windows' }}
       name: 'Start and load Docker registry (Windows)'

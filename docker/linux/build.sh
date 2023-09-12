@@ -2,7 +2,7 @@
 
 set -o pipefail
 
-UBUNTU_DOCKER_VARIANTS=("ci" "mobile")
+UBUNTU_DOCKER_VARIANTS=("ci" "mobile" "test")
 IMAGE_TAGS=${IMAGE_TAGS:-}
 
 # Setting environments for buildx tools
@@ -11,7 +11,7 @@ config_env() {
     docker run --rm --privileged tonistiigi/binfmt --install all
 
     # Remove older build instance
-    docker buildx rm envoy-build-tools-builder || :
+    docker buildx rm envoy-build-tools-builder &> /dev/null || :
     docker buildx create --use --name envoy-build-tools-builder --platform "${BUILD_TOOLS_PLATFORMS}"
 }
 
@@ -33,16 +33,27 @@ build_and_push_variants () {
     if [[ "${OS_DISTRO}" != "ubuntu" ]]; then
         return
     fi
-    local variant=""
+    local variant="" platform
     local push_arg=()
-    if [[ -n "${IMAGE_TAGS}" ]]; then
-        # Variants are only pushed to dockerhub currently, so if we are pushing images
-        # just push the variants immediately.
-        push_arg+=(--push)
-    fi
     for variant in "${UBUNTU_DOCKER_VARIANTS[@]}"; do
-        # Only build variants for linux/amd64
-        ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${variant}-${CONTAINER_TAG}" --target "${variant}" --platform "linux/amd64" "${push_arg[@]}"
+        if [[ -n "${IMAGE_TAGS}" && "$variant" != "test" ]]; then
+            # Variants are only pushed to dockerhub currently, so if we are pushing images
+            # just push the variants immediately.
+            push_arg+=(--push)
+        fi
+
+        if [[ "$variant" == "test" ]]; then
+            platform="linux/amd64,linux/arm64"
+        else
+            # Only build variants for linux/amd64
+            platform="linux/amd64"
+        fi
+        ci_log_run docker buildx build . \
+                   -f "${OS_DISTRO}/Dockerfile" \
+                   -t "${IMAGE_NAME}:${variant}-${CONTAINER_TAG}" \
+                   --target "${variant}" \
+                   --platform "$platform" \
+                   "${push_arg[@]}"
     done
 }
 
@@ -59,5 +70,4 @@ if [[ -n "${IMAGE_TAGS}" ]]; then
 fi
 
 # Testing after push to save CI time because this invalidates arm64 cache
-ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" --platform "linux/amd64" --load
-ci_log_run docker run --rm -v "$(pwd)/docker/linux/test.sh":/test.sh "${IMAGE_NAME}:${CONTAINER_TAG}-amd64" true
+ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "linux/amd64" --load
