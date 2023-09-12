@@ -107,14 +107,12 @@ install_clang_tools () {
     CLANG_TOOLS_SRC="clang-tools-extra-${LLVM_VERSION}.src"
     CLANG_TOOLS_TARBALL="${CLANG_TOOLS_SRC}.tar.xz"
     download_and_check "./${CLANG_TOOLS_TARBALL}" "${LLVM_DOWNLOAD_PREFIX}${LLVM_VERSION}/${CLANG_TOOLS_TARBALL}" "$CLANG_TOOLS_SHA256SUM"
+    mkdir -p /opt/llvm/share/clang/
     tar JxfO "./${CLANG_TOOLS_TARBALL}" "${CLANG_TOOLS_SRC}/clang-tidy/tool/run-clang-tidy.py" > "$ENVOY_CLANG_TIDY_PATH"
     rm "./${CLANG_TOOLS_TARBALL}"
 }
 
 install_build () {
-    LLVM_HOST_TARGET="$(/opt/llvm/bin/llvm-config --host-target)"
-    echo "/opt/llvm/lib/${LLVM_HOST_TARGET}" > /etc/ld.so.conf.d/llvm.conf
-    ldconfig
     setup_tcpdump
     install_build_tools
     install_clang_tools

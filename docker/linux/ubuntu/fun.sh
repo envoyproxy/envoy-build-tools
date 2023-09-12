@@ -6,33 +6,47 @@ set -o pipefail
 . ./common_fun.sh
 
 
+if ! command -v lsb_release &> /dev/null; then
+    apt-get -qq update -y
+    apt-get -qq install -y --no-install-recommends locales
+    localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+    apt-get -qq update -y
+    apt-get -qq install -y --no-install-recommends lsb-release
+fi
+
 LSB_RELEASE="$(lsb_release -cs)"
-APT_KEYS=(
-    "${APT_KEY_DEADSNAKES}"
+APT_KEYS_ENV=(
     "${APT_KEY_TOOLCHAIN}")
+APT_KEYS=(
+    "${APT_KEY_DEADSNAKES}")
+APT_REPOS_LLVM=(
+    "https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main")
 APT_KEYS_MOBILE=(
     "$APT_KEY_AZUL")
+APT_REPOS_ENV=(
+    "http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu  ${LSB_RELEASE} main")
 APT_REPOS=(
-    "http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu  ${LSB_RELEASE} main"
     "[arch=${DEB_ARCH}] https://download.docker.com/linux/ubuntu ${LSB_RELEASE} stable"
     "http://ppa.launchpad.net/deadsnakes/ppa/ubuntu ${LSB_RELEASE} main")
 COMMON_PACKAGES=(
     apt-transport-https
     ca-certificates
     g++
+    git
     gpg-agent
-    lsb-release
     unzip
     wget
     xz-utils)
 CI_PACKAGES=(
     aspell
     aspell-en
-    git
     gnupg2
     gpg-agent
     jq
+    libcap2-bin
+    make
     patch
+    tcpdump
     time
     sudo)
 LLVM_PACKAGES=(
@@ -62,7 +76,6 @@ UBUNTU_PACKAGES=(
     rsync
     ssh-client
     strace
-    tcpdump
     tshark
     zip)
 
@@ -72,13 +85,18 @@ if [[ "$ARCH" == "aarch64" ]]; then
 fi
 
 
-add_apt_keys () {
+add_ubuntu_keys () {
     apt-get update -y
     apt-get -qq install -y --no-install-recommends gnupg2
-    wget -q -O - https://download.docker.com/linux/ubuntu/gpg | apt-key add -
     for key in "${@}"; do
         apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "$key"
     done
+}
+
+add_apt_key () {
+    apt-get update -y
+    apt-get -qq install -y --no-install-recommends gnupg2
+    wget -q -O - "$1" | apt-key add -
 }
 
 add_apt_repos () {
@@ -96,14 +114,17 @@ apt_install () {
     apt-get -qq install -y --no-install-recommends --no-install-suggests "${@}"
 }
 
-setup_locales () {
-    apt_install locales
-    localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+ensure_stdlibcc () {
+    apt list libstdc++6 | grep installed | grep "$LIBSTDCXX_EXPECTED_VERSION"
 }
 
 install_base () {
-    setup_locales
     apt_install "${COMMON_PACKAGES[@]}"
+    add_ubuntu_keys "${APT_KEYS_ENV[@]}"
+    add_apt_repos "${APT_REPOS_ENV[@]}"
+    apt-get -qq update
+    apt-get -qq dist-upgrade -y
+    ensure_stdlibcc
 }
 
 install_gn (){
@@ -141,7 +162,7 @@ mobile_install_jdk () {
 }
 
 mobile_install () {
-    add_apt_keys "${APT_KEYS_MOBILE[@]}"
+    add_ubuntu_keys "${APT_KEYS_MOBILE[@]}"
     mobile_install_jdk
     mobile_install_android
 }
@@ -160,19 +181,30 @@ install () {
     if [[ "$ARCH" == "ppc64le" ]]; then
         install_ppc64le_bazel
     fi
-    add_apt_keys "${APT_KEYS[@]}"
+    add_apt_key "${APT_KEY_DOCKER}"
+    add_ubuntu_keys "${APT_KEYS[@]}"
     add_apt_repos "${APT_REPOS[@]}"
-    apt-get install -y --no-install-recommends "${UBUNTU_PACKAGES[@]}"
+    apt-get -qq update
+    apt-get -qq install -y --no-install-recommends "${UBUNTU_PACKAGES[@]}"
+    apt-get -qq update
+    apt-get -qq upgrade -y
+    ensure_stdlibcc
+    LLVM_HOST_TARGET="$(/opt/llvm/bin/llvm-config --host-target)"
+    echo "/opt/llvm/lib/${LLVM_HOST_TARGET}" > /etc/ld.so.conf.d/llvm.conf
+    ldconfig
     setup_python
 }
 
 install_ci () {
+    ensure_stdlibcc
     apt-get -qq update -y
     apt-get -qq install -y --no-install-recommends "${CI_PACKAGES[@]}"
     install_build
 }
 
 install_llvm () {
+    add_apt_key "${APT_KEY_KITWARE}"
+    add_apt_repos "${APT_REPOS_LLVM[@]}"
     apt-get -qq update -y
     apt-get -qq install -y --no-install-recommends "${LLVM_PACKAGES[@]}"
     install_llvm_bins
