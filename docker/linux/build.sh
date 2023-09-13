@@ -26,8 +26,6 @@ if [[ -z "${BUILD_TOOLS_PLATFORMS}" ]]; then
     fi
 fi
 
-ci_log_run config_env
-
 # TODO(phlax): add (json) build images config
 build_and_push_variants () {
     if [[ "${OS_DISTRO}" != "ubuntu" ]]; then
@@ -56,6 +54,14 @@ build_and_push_variants () {
                    "${push_arg[@]}"
     done
 }
+
+docker ps -a
+
+ci_log_run config_env
+
+docker ps -a
+
+exit 1
 
 ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target full --platform "${BUILD_TOOLS_PLATFORMS}"
 
