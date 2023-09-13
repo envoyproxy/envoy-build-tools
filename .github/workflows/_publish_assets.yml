@@ -84,7 +84,7 @@ jobs:
       shell: bash
 
     - run: |
-        echo "version=15.0.6" >> "$GITHUB_OUTPUTS"
+        echo "version=15.0.6" >> "$GITHUB_OUTPUT"
         version=$(docker run --rm \
             -v /tmp/output:/tmp/output \
             envoyproxy/envoy-build-ubuntu:4b5f02f16efe900701d734d3c1b5c560c90ed9d4 \
