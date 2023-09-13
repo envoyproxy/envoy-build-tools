@@ -90,8 +90,8 @@ if [[ "$LOAD_IMAGE" == "true" ]]; then
                -t "localhost:5000/${IMAGE_NAME}:${CONTAINER_TAG}-arm64" \
                --platform "linux/arm64"
     ci_log_run docker manifest create \
-               envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }}-multi \
-               envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }} \
-               envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }}-arm64
+               "envoyproxy/envoy-build-ubuntu:${CONTAINER_TAG}-multi" \
+               "envoyproxy/envoy-build-ubuntu:${CONTAINER_TAG}" \
+               "envoyproxy/envoy-build-ubuntu:${CONTAINER_TAG}-arm64"
 
 fi
