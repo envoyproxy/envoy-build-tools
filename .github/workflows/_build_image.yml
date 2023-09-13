@@ -49,6 +49,8 @@ jobs:
     runs-on: ${{ inputs.host_platform }}
     name: Build and test Docker image
     steps:
+    - run: |
+        exit 1
     - uses: envoyproxy/toolshed/gh-actions/diskspace@actions-v0.0.17
       name: 'Free disk space'
       if: ${{ inputs.os_family != 'windows' }}

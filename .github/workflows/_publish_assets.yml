@@ -1,0 +1,156 @@
+name: Publish assets
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+    secrets:
+      bot_key:
+      bot_id:
+
+    inputs:
+      host_platform:
+        type: string
+        default: ubuntu-22.04
+      dry_run:
+        type: boolean
+        default: true
+
+
+jobs:
+  image:
+    runs-on: ${{ inputs.host_platform }}
+    name: Build and test Docker image
+    steps:
+    - name: 'Checkout repository'
+      uses: actions/checkout@v3
+
+    - run: |
+        version=$(cat TOOLS_VERSION)
+        version_date="$(echo "$version" | cut -d- -f1)"
+        date_today="$(date '+%Y.%m.%d')"
+        if [[ "${version_date}" != "$date_today" ]]; then
+            echo "Version date is not today's date or correct format (expected ${date_today}), exiting"
+            exit 1
+        fi
+        url=https://github.com/envoyproxy/envoy-build-tools/archive/refs/tags/${version}.tar.gz
+        if curl --output /dev/null --silent --head --fail "$url"; then
+            exists=true
+        else
+            exists=false
+        fi
+        echo "exists=${exists}" >> "$GITHUB_OUTPUT"
+        echo "version=${version}" >> "$GITHUB_OUTPUT"
+      id: release
+      shell: bash
+
+    - run: |
+        CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "./docker")
+        echo "tag=${CONTAINER_TAG}" >> "$GITHUB_OUTPUT"
+      if: ${{ steps.release.outputs.exists != 'true' || inputs.dry_run }}
+      id: container
+      shell: bash
+      name: Container hash
+
+    - run: |
+        GPG_KEY=$(cat not-secret.key)
+        echo "key=${GPG_KEY}" >> "$GITHUB_OUTPUT"
+      id: gpg
+      shell: bash
+      if: ${{ steps.release.outputs.exists != 'true' || inputs.dry_run }}
+    - name: Import GPG key
+      if: ${{ steps.release.outputs.exists != 'true' || inputs.dry_run }}
+      uses: crazy-max/ghaction-import-gpg@v6
+      with:
+        gpg_private_key: "${{ steps.gpg.outputs.key }}"
+
+    - run: |
+        sudo mkdir /mnt/cache
+        sudo mount -t tmpfs none /mnt/cache
+      shell: bash
+      if: ${{ steps.release.outputs.exists != 'true' || inputs.dry_run }}
+    - uses: actions/download-artifact@v3
+      if: ${{ github.event_name == 'DISABLED' }}
+      # if: ${{ steps.release.outputs.exists != 'true' || inputs.dry_run }}
+      with:
+        name: envoy-build-ubuntu
+        path: /mnt/cache/envoy-build-ubuntu.tar.zst
+    - run: |
+        zstd -dcf /mnt/cache/envoy-build-ubuntu.tar.zst | docker load
+        docker images
+      if: ${{ github.event_name == 'DISABLED' }}
+      # if: ${{ steps.release.outputs.exists != 'true' || inputs.dry_run }}
+      shell: bash
+
+    - run: |
+        echo "version=15.0.6" >> "$GITHUB_OUTPUTS"
+        version=$(docker run --rm \
+            -v /tmp/output:/tmp/output \
+            envoyproxy/envoy-build-ubuntu:4b5f02f16efe900701d734d3c1b5c560c90ed9d4 \
+            echo "$LLVM_VERSION")
+        echo "VERSION: ${version}"
+      id: llvm
+      if: ${{ steps.release.outputs.exists != 'true' || inputs.dry_run }}
+
+    - run: |
+        echo "Publishing assets for ${{ steps.container.outputs.tag }}"
+        BINS=(
+            clang-format
+            clang-tidy)
+        BIN_PATHS=()
+        for bin in "${BINS[@]}"; do
+            BIN_PATHS+=("/opt/llvm/bin/${bin}")
+        done
+        mkdir -p /tmp/output/x64
+        docker run --rm \
+            -v /tmp/output:/tmp/output \
+            envoyproxy/envoy-build-ubuntu:4b5f02f16efe900701d734d3c1b5c560c90ed9d4 \
+            cp -a "${BIN_PATHS[@]}" /tmp/output/x64
+        ls -alh /tmp/output/x64
+        tar cf /tmp/x64.tar -C /tmp/output/ .
+        du -sh /tmp/output
+      shell: bash
+      if: ${{ steps.release.outputs.exists != 'true' || inputs.dry_run }}
+
+    - uses: actions/setup-python@v4
+      if: ${{ steps.release.outputs.exists != 'true' || inputs.dry_run }}
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    - run: pip install -r requirements.txt
+      if: ${{ steps.release.outputs.exists != 'true' || inputs.dry_run }}
+      shell: bash
+
+    - run: |
+        arch="$(uname -m)"
+        bin_suffix="${arch}-${{ steps.llvm.outputs.version }}-ubuntu-20"
+        BINS=(
+            clang-format
+            clang-tidy)
+        sign_args=()
+        for bin in "${BINS[@]}"; do
+            sign_args+=(-m x64/${bin}:bin/${bin}-${bin_suffix})
+        done
+        envoy.gpg.sign \
+            --out signed.tar \
+            ${sign_args[@]} \
+            /tmp/x64.tar
+      shell: bash
+      if: ${{ steps.release.outputs.exists != 'true' || inputs.dry_run }}
+
+    - run: |
+        echo "Release version: ${{ steps.release.outputs.version }}"
+        publish_args=(
+            .
+            --publish-assets signed.tar
+            --publish-commitish=main)
+
+        if [[ ${{ inputs.dry_run }} == "true" ]]; then
+            publish_args+=(--dry-run)
+        fi
+        echo "${{ steps.release.outputs.version }}" > VERSION.txt
+
+        envoy.project publish "${publish_args[@]}"
+      shell: bash
+      if: ${{ steps.release.outputs.exists != 'true' || inputs.dry_run }}

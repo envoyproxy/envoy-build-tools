@@ -52,6 +52,17 @@ jobs:
       dockerhub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
       gcp_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
+  publish_assets:
+    permissions:
+      contents: write
+    name: Publish bazel assets (Linux)
+    uses: ./.github/workflows/_publish_assets.yml
+    with:
+      dry_run: ${{ github.event_name == 'pull_request' }}
+    secrets:
+      bot_key: ${{ secrets.ENVOY_CI_UPDATE_BOT_KEY }}
+      bot_id: ${{ secrets.ENVOY_CI_UPDATE_APP_ID }}
+
   regenerate_linux:
     permissions:
       contents: write

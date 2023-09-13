@@ -23,7 +23,8 @@ ARG ANDROID_CLI_TOOLS=https://dl.google.com/android/repository/commandlinetools-
     LLVM_SHA256SUM_PPC64LE=7fc9f07ff0fcf191df93fe4adc1da555e43f62fe1d3ddafb15c943f72b1bda17 \
     LLVM_VERSION=15.0.6 \
     ZULU_INSTALL_DEB=https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
-ENV LANG=$LANG
+ENV LANG=$LANG \
+    LLVM_VERSION=$LLVM_VERSION
 SHELL ["/bin/bash", "-ec"]
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
