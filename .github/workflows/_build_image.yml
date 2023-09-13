@@ -55,7 +55,8 @@ jobs:
     - name: 'Checkout repository'
       uses: actions/checkout@v3
     - uses: envoyproxy/toolshed/gh-actions/docker/registry@actions-v0.0.18
-      if: ${{ (inputs.test_toolchain || inputs.upload_ubuntu_image) && inputs.os_family != 'windows' }}
+      if: ${{ inputs.os_family != 'windows' }}
+      # (inputs.test_toolchain || inputs.upload_ubuntu_image) &&
       name: 'Start Docker registry'
     - run: |
         CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "./docker")
