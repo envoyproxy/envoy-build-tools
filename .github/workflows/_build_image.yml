@@ -25,6 +25,9 @@ on:
       test_toolchain:
         type: boolean
         default: false
+      upload_ubuntu_image:
+        type: boolean
+        default: false
 
       host_platform:
         type: string
@@ -112,3 +115,16 @@ jobs:
         SOURCE_BRANCH: ${{ github.ref }}
         NO_PULL_IMAGE: true
         DOCKER_IMAGE: localhost:5000/envoy-build-${{ inputs.distro }}
+
+    - run: |
+        sudo mkdir -p /mnt/cache
+        sudo mount -t tmpfs none /mnt/cache
+        docker save envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }} \
+            | zstd - -q -T0 -o /mnt/cache/envoy-build-ubuntu-${{ steps.container.outputs.tag }}.tar.zst
+      if: ${{ inputs.upload_ubuntu_image }}
+      shell: bash
+    - uses: actions/upload-artifact@v3
+      if: ${{ inputs.upload_ubuntu_image }}
+      with:
+        name: envoy-build-ubuntu
+        path: /mnt/cache/envoy-build-ubuntu-${{ steps.container.outputs.tag }}.tar.zst
