@@ -70,6 +70,19 @@ if [[ -n "${IMAGE_TAGS}" ]]; then
 fi
 
 if [[ "$LOAD_IMAGE" == "true" ]]; then
-    # Testing after push to save CI time because this invalidates arm64 cache
-    ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "linux/amd64" --load
+    ci_log_run docker buildx build . \
+               --push \
+               -f "${OS_DISTRO}/Dockerfile" \
+               -t "localhost:5000/${IMAGE_NAME}:${CONTAINER_TAG}" \
+               --platform "linux/amd64"
+    ci_log_run docker buildx build . \
+               --push \
+               -f "${OS_DISTRO}/Dockerfile" \
+               -t "localhost:5000/${IMAGE_NAME}:${CONTAINER_TAG}-arm64" \
+               --platform "linux/arm64"
+    ci_log_run docker manifest create \
+               envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }}-multi \
+               envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }} \
+               envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }}-arm64
+
 fi

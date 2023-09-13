@@ -25,6 +25,9 @@ on:
       test_toolchain:
         type: boolean
         default: false
+      upload_ubuntu_image:
+        type: boolean
+        default: false
 
       host_platform:
         type: string
@@ -51,6 +54,9 @@ jobs:
       if: ${{ inputs.os_family != 'windows' }}
     - name: 'Checkout repository'
       uses: actions/checkout@v3
+    - uses: envoyproxy/toolshed/gh-actions/docker/registry@actions-v0.0.18
+      if: ${{ (inputs.test_toolchain || inputs.upload_ubuntu_image) && inputs.os_family != 'windows' }}
+      name: 'Start Docker registry'
     - run: |
         CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "./docker")
         echo "tag=${CONTAINER_TAG}" >> "$GITHUB_OUTPUT"
@@ -93,11 +99,6 @@ jobs:
         go-version: ${{ inputs.go_version }}
         cache: false
     - uses: envoyproxy/toolshed/gh-actions/docker/registry@actions-v0.0.18
-      if: ${{ inputs.test_toolchain && inputs.os_family != 'windows' }}
-      name: 'Start and load Docker registry'
-      with:
-        load: envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }}
-    - uses: envoyproxy/toolshed/gh-actions/docker/registry@actions-v0.0.18
       if: ${{ inputs.test_toolchain && inputs.os_family == 'windows' }}
       name: 'Start and load Docker registry (Windows)'
       with:
@@ -112,3 +113,15 @@ jobs:
         SOURCE_BRANCH: ${{ github.ref }}
         NO_PULL_IMAGE: true
         DOCKER_IMAGE: localhost:5000/envoy-build-${{ inputs.distro }}
+    - run: |
+        sudo mkdir -p /mnt/cache
+        sudo mount -t tmpfs none /mnt/cache
+        docker save envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }}-multi \
+            | zstd - -q -T0 -o /mnt/cache/envoy-build-ubuntu-${{ steps.container.outputs.tag }}.tar.zst
+      if: ${{ inputs.upload_ubuntu_image }}
+      shell: bash
+    - uses: actions/upload-artifact@v3
+      if: ${{ inputs.upload_ubuntu_image }}
+      with:
+        name: envoy-build-ubuntu-${{ steps.container.outputs.tag }}
+        path: /mnt/cache/envoy-build-ubuntu-${{ steps.container.outputs.tag }}.tar.zst
