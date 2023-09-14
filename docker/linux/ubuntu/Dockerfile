@@ -69,7 +69,10 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/ubuntu/test.sh,target=/ubuntu/test.sh \
     ./ubuntu/test.sh
-
+COPY \
+    ./ubuntu/buildifier \
+    ./ubuntu/buildozer \
+    /usr/local/bin
 
 # mobile
 FROM full as mobile
