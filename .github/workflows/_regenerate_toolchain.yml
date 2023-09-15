@@ -46,7 +46,7 @@ jobs:
         cache: false
     - run: |
         toolchains/regenerate.sh || {
-            if [[ "${{ input.os_family }}" ]]; then
+            if [[ "${{ inputs.os_family }}" ]]; then
                 name=Winfail
                 message="Windows failed regenerating toolchains"
                 echo "::error file=${name},title=${name}::${message}"
