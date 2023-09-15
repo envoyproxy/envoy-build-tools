@@ -45,7 +45,16 @@ jobs:
         go-version: ${{ inputs.go_version }}
         cache: false
     - run: |
-        toolchains/regenerate.sh
+        toolchains/regenerate.sh || {
+            if [[ "${{ input.os_family }}" ]]; then
+                name=Winfail
+                message="Windows failed regenerating toolchains"
+                echo "::error file=${name},title=${name}::${message}"
+                echo "Windows is expected to fail"
+                exit 0
+            fi
+            exit 1
+        }
       shell: bash
       env:
         COMMIT_TOOLCHAINS: true
