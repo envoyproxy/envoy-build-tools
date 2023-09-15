@@ -60,6 +60,7 @@ UBUNTU_PACKAGES=(
     bzip2
     curl
     devscripts
+    docker-buildx-plugin
     docker-ce-cli
     doxygen
     expect
