@@ -57,6 +57,7 @@ LLVM_PACKAGES=(
 UBUNTU_PACKAGES=(
     automake
     bc
+    byobu
     bzip2
     curl
     devscripts
