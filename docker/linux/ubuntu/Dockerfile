@@ -3,6 +3,7 @@ ARG ANDROID_CLI_TOOLS=https://dl.google.com/android/repository/commandlinetools-
     APT_KEY_DEADSNAKES=F23C5A6CF475977595C89F51BA6932366A755776 \
     APT_KEY_TOOLCHAIN=60C317803A41BA51845E371A1E9377A2BA9EF27F \
     APT_KEY_AZUL=0xB1998361219BD9C9 \
+    APT_KEY_K8S=https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/xUbuntu_20.04/Release.key \
     APT_KEY_KITWARE=https://apt.kitware.com/keys/kitware-archive-latest.asc \
     APT_KEY_DOCKER=https://download.docker.com/linux/ubuntu/gpg \
     BAZELISK_SHA256SUM=ce52caa51ef9e509fb6b7e5ad892e5cf10feb0794b0aed4d2f36adb00a1a2779 \
