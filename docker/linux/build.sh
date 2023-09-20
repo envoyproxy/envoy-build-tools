@@ -33,9 +33,9 @@ build_and_push_variants () {
     if [[ "${OS_DISTRO}" != "ubuntu" ]]; then
         return
     fi
-    local variant="" platform
-    local push_arg=()
+    local variant="" platform push_arg
     for variant in "${UBUNTU_DOCKER_VARIANTS[@]}"; do
+        push_arg=()
         if [[ -n "${IMAGE_TAGS}" && "$variant" != "test" ]]; then
             # Variants are only pushed to dockerhub currently, so if we are pushing images
             # just push the variants immediately.
