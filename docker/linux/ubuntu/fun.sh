@@ -14,6 +14,7 @@ if ! command -v lsb_release &> /dev/null; then
     apt-get -qq install -y --no-install-recommends lsb-release
 fi
 
+
 LSB_RELEASE="$(lsb_release -cs)"
 APT_KEYS_ENV=(
     "${APT_KEY_TOOLCHAIN}")
@@ -27,12 +28,14 @@ APT_REPOS_ENV=(
     "http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu  ${LSB_RELEASE} main")
 APT_REPOS=(
     "[arch=${DEB_ARCH}] https://download.docker.com/linux/ubuntu ${LSB_RELEASE} stable"
-    "http://ppa.launchpad.net/deadsnakes/ppa/ubuntu ${LSB_RELEASE} main")
+    "http://ppa.launchpad.net/deadsnakes/ppa/ubuntu ${LSB_RELEASE} main"
+    "http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/ /")
 COMMON_PACKAGES=(
     apt-transport-https
     ca-certificates
     g++
     git
+    gnupg2
     gpg-agent
     unzip
     wget
@@ -40,8 +43,6 @@ COMMON_PACKAGES=(
 CI_PACKAGES=(
     aspell
     aspell-en
-    gnupg2
-    gpg-agent
     jq
     libcap2-bin
     make
@@ -76,6 +77,7 @@ UBUNTU_PACKAGES=(
     python3.10-distutils
     rpm
     rsync
+    skopeo
     ssh-client
     strace
     tshark
@@ -89,7 +91,6 @@ fi
 
 add_ubuntu_keys () {
     apt-get update -y
-    apt-get -qq install -y --no-install-recommends gnupg2
     for key in "${@}"; do
         apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "$key"
     done
@@ -97,8 +98,12 @@ add_ubuntu_keys () {
 
 add_apt_key () {
     apt-get update -y
-    apt-get -qq install -y --no-install-recommends gnupg2
     wget -q -O - "$1" | apt-key add -
+}
+
+add_apt_k8s_key () {
+    apt-get update -y
+    wget -q -O - "$1" | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/devel_kubic_libcontainers_stable.gpg > /dev/null
 }
 
 add_apt_repos () {
@@ -184,6 +189,7 @@ install () {
         install_ppc64le_bazel
     fi
     add_apt_key "${APT_KEY_DOCKER}"
+    add_apt_k8s_key "${APT_KEY_K8S}"
     add_ubuntu_keys "${APT_KEYS[@]}"
     add_apt_repos "${APT_REPOS[@]}"
     apt-get -qq update
