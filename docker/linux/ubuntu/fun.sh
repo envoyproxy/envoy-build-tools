@@ -18,8 +18,6 @@ fi
 LSB_RELEASE="$(lsb_release -cs)"
 APT_KEYS_ENV=(
     "${APT_KEY_TOOLCHAIN}")
-APT_KEYS=(
-    "${APT_KEY_DEADSNAKES}")
 APT_REPOS_LLVM=(
     "https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main")
 APT_KEYS_MOBILE=(
@@ -28,7 +26,6 @@ APT_REPOS_ENV=(
     "http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu  ${LSB_RELEASE} main")
 APT_REPOS=(
     "[arch=${DEB_ARCH}] https://download.docker.com/linux/ubuntu ${LSB_RELEASE} stable"
-    "http://ppa.launchpad.net/deadsnakes/ppa/ubuntu ${LSB_RELEASE} main"
     "http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/ /")
 COMMON_PACKAGES=(
     apt-transport-https
@@ -72,9 +69,6 @@ UBUNTU_PACKAGES=(
     libncurses-dev
     libtool
     make
-    python3.10
-    python3.10-dev
-    python3.10-distutils
     rpm
     rsync
     skopeo
@@ -89,6 +83,7 @@ if [[ "$ARCH" == "aarch64" ]]; then
 fi
 
 
+# This is not currently used
 add_ubuntu_keys () {
     apt-get update -y
     for key in "${@}"; do
@@ -174,23 +169,12 @@ mobile_install () {
     mobile_install_android
 }
 
-setup_python () {
-    # Get pip for python3.10
-    curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
-    # make python3.10 the default python3 interpreter
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
-    # pip installs
-    # TODO(phlax): use hashed requirements
-    pip3 install --no-cache-dir -U pyyaml virtualenv
-}
-
 install () {
     if [[ "$ARCH" == "ppc64le" ]]; then
         install_ppc64le_bazel
     fi
     add_apt_key "${APT_KEY_DOCKER}"
     add_apt_k8s_key "${APT_KEY_K8S}"
-    add_ubuntu_keys "${APT_KEYS[@]}"
     add_apt_repos "${APT_REPOS[@]}"
     apt-get -qq update
     apt-get -qq install -y --no-install-recommends "${UBUNTU_PACKAGES[@]}"
@@ -200,7 +184,6 @@ install () {
     LLVM_HOST_TARGET="$(/opt/llvm/bin/llvm-config --host-target)"
     echo "/opt/llvm/lib/${LLVM_HOST_TARGET}" > /etc/ld.so.conf.d/llvm.conf
     ldconfig
-    setup_python
 }
 
 install_ci () {
