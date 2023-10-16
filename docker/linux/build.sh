@@ -42,7 +42,7 @@ build_and_push_variants () {
             push_arg+=(--push)
         fi
 
-        if [[ "$variant" == "test" ]]; then
+        if [[ "$variant" == "test" || "$variant" == "cmake" ]]; then
             platform="linux/amd64,linux/arm64"
         else
             # Only build variants for linux/amd64
