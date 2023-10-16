@@ -51,7 +51,7 @@ if [[ "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
         gcloud auth configure-docker --quiet
         # TODO(phlax): remove this once 1.26 branch is EOL
         if [[ "${OS_DISTRO}" == "ubuntu" ]]; then
-            TAG_SUFFIX="::cmake"
+            TAG_SUFFIX="|cmake"
         fi
         IMAGE_TAGS+=("${GCR_IMAGE_PREFIX}${GCR_IMAGE_NAME}:${CONTAINER_SHA}${TAG_SUFFIX}")
     fi
