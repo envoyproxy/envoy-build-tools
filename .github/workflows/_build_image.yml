@@ -96,7 +96,7 @@ jobs:
       if: ${{ inputs.test_toolchain && inputs.os_family != 'windows' }}
       name: 'Start and load Docker registry'
       with:
-        load: envoyproxy/envoy-build-ubuntu:cmake-${{ steps.container.outputs.tag }}
+        load: envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }}
     - uses: envoyproxy/toolshed/gh-actions/docker/registry@actions-v0.0.18
       if: ${{ inputs.test_toolchain && inputs.os_family == 'windows' }}
       name: 'Start and load Docker registry (Windows)'
@@ -112,5 +112,3 @@ jobs:
         SOURCE_BRANCH: ${{ github.ref }}
         NO_PULL_IMAGE: true
         DOCKER_IMAGE: localhost:5000/envoy-build-${{ inputs.distro }}
-        # TODO(phlax): remove when 1.26 goes EOL
-        CONTAINER_PREFIX: "${{ inputs.distro == 'ubuntu' && 'cmake-' || '' }}"
