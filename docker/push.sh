@@ -49,7 +49,11 @@ if [[ "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
     if [[ "${PUSH_GCR_IMAGE}" == "true" ]]; then
         echo ${GCP_SERVICE_ACCOUNT_KEY} | base64 --decode | gcloud auth activate-service-account --key-file=-
         gcloud auth configure-docker --quiet
-        IMAGE_TAGS+=("${GCR_IMAGE_PREFIX}${GCR_IMAGE_NAME}:${CONTAINER_SHA}")
+        # TODO(phlax): remove this once 1.26 branch is EOL
+        if [[ "${OS_DISTRO}" == "ubuntu" ]]; then
+            TAG_SUFFIX="::cmake"
+        fi
+        IMAGE_TAGS+=("${GCR_IMAGE_PREFIX}${GCR_IMAGE_NAME}:${CONTAINER_SHA}${TAG_SUFFIX}")
     fi
     ci_log_run_end
 fi
