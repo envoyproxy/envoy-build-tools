@@ -2,7 +2,7 @@
 
 set -o pipefail
 
-UBUNTU_DOCKER_VARIANTS=("ci" "mobile" "test")
+UBUNTU_DOCKER_VARIANTS=("ci" "mobile" "cmake" "test")
 IMAGE_TAGS=${IMAGE_TAGS:-}
 
 # Setting environments for buildx tools

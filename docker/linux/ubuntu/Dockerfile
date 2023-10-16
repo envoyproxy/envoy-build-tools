@@ -74,6 +74,17 @@ COPY \
     ./ubuntu/buildozer \
     /usr/local/bin
 
+
+# cmake/legacy (for 1.26 branch)
+FROM full as cmake
+RUN --mount=type=tmpfs,target=/var/cache/apt \
+    --mount=type=tmpfs,target=/var/lib/apt/lists \
+    curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | apt-key add - \
+    && echo "deb https://apt.kitware.com/ubuntu/ focal main" >> /etc/apt/sources.list \
+    && apt-get -qq update -y \
+    && apt-get -qq install --no-install-recommends cmake ninja-build
+
+
 # mobile
 FROM full as mobile
 ENV ANDROID_HOME=/.android/sdk \
