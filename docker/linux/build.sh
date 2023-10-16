@@ -66,8 +66,8 @@ if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
 fi
 if [[ -n "${IMAGE_TAGS}" ]]; then
     for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
-        if [[ "$IMAGE_TAG" == *::* ]]; then
-            IFS="::" read -ra parts <<< "$IMAGE_TAG"
+        if [[ "$IMAGE_TAG" == *|* ]]; then
+            IFS="|" read -ra parts <<< "$IMAGE_TAG"
             ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${parts[0]}" --target "${parts[1]}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
         else
             ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_TAG}" --target full --platform "${BUILD_TOOLS_PLATFORMS}" --push
