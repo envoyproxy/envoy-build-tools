@@ -67,6 +67,7 @@ UBUNTU_PACKAGES=(
     graphviz
     libffi-dev
     libncurses-dev
+    libssl-dev
     libtool
     make
     rpm
