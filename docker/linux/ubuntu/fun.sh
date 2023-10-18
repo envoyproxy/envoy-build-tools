@@ -157,10 +157,10 @@ mobile_install_jdk () {
     # Download and install the package that adds
     # the Azul APT repository to the list of sources
     wget -q -O zulu.deb "${ZULU_INSTALL_DEB}"
-    # Install the Java 8 JDK
+    # Install the Java 11 JDK
     apt-get install -y ./zulu.deb
     apt-get update -y
-    apt-get install -y zulu8-jdk
+    apt-get install -y zulu11-jdk
     rm ./zulu.deb
 }
 
