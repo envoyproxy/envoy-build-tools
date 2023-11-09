@@ -13,7 +13,11 @@ config_env() {
 
     # Remove older build instance
     docker buildx rm envoy-build-tools-builder &> /dev/null || :
-    docker buildx create --use --name envoy-build-tools-builder --platform "${BUILD_TOOLS_PLATFORMS}"
+    docker buildx create \
+           --use \
+           --name envoy-build-tools-builder \
+           --driver-opt network=host \
+           --platform "${BUILD_TOOLS_PLATFORMS}"
 }
 
 [[ -z "${OS_DISTRO}" ]] && OS_DISTRO="ubuntu"
@@ -26,8 +30,6 @@ if [[ -z "${BUILD_TOOLS_PLATFORMS}" ]]; then
         export BUILD_TOOLS_PLATFORMS=linux/amd64
     fi
 fi
-
-ci_log_run config_env
 
 # TODO(phlax): add (json) build images config
 build_and_push_variants () {
@@ -58,7 +60,11 @@ build_and_push_variants () {
     done
 }
 
+ci_log_run config_env
+
 ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target full --platform "${BUILD_TOOLS_PLATFORMS}"
+
+docker ps -a
 
 if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
     # variants are only pushed for the dockerhub image (not other `IMAGE_TAGS`)
@@ -76,6 +82,22 @@ if [[ -n "${IMAGE_TAGS}" ]]; then
 fi
 
 if [[ "$LOAD_IMAGE" == "true" ]]; then
-    # Testing after push to save CI time because this invalidates arm64 cache
-    ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "linux/amd64" --load
+
+    docker ps -a
+
+    ci_log_run docker buildx build . \
+               --push \
+               -f "${OS_DISTRO}/Dockerfile" \
+               -t "localhost:5000/${IMAGE_NAME}:${CONTAINER_TAG}" \
+               --platform "linux/amd64"
+    ci_log_run docker buildx build . \
+               --push \
+               -f "${OS_DISTRO}/Dockerfile" \
+               -t "localhost:5000/${IMAGE_NAME}:${CONTAINER_TAG}-arm64" \
+               --platform "linux/arm64"
+    ci_log_run docker manifest create \
+               "envoyproxy/envoy-build-ubuntu:${CONTAINER_TAG}-multi" \
+               "envoyproxy/envoy-build-ubuntu:${CONTAINER_TAG}" \
+               "envoyproxy/envoy-build-ubuntu:${CONTAINER_TAG}-arm64"
+
 fi

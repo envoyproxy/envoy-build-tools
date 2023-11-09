@@ -46,6 +46,7 @@ jobs:
       os_family: ${{ matrix.os_family != '' && matrix.os_family || 'linux' }}
       host_platform: ${{ matrix.host_platform != '' && matrix.host_platform || 'ubuntu-22.04' }}
       test_toolchain: ${{ github.event_name == 'pull_request' && matrix.target != 'centos' }}
+      upload_ubuntu_image: ${{ github.event_name == 'pull_request' && matrix.target == 'ubuntu' }}
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
