@@ -125,9 +125,9 @@ install_build () {
 setup_tcpdump () {
     # Setup tcpdump for non-root.
     groupadd -r pcap
-    chgrp pcap /usr/sbin/tcpdump
-    chmod 750 /usr/sbin/tcpdump
-    setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
+    chgrp pcap /usr/bin/tcpdump
+    chmod 750 /usr/bin/tcpdump
+    setcap cap_net_raw,cap_net_admin=eip /usr/bin/tcpdump
 }
 
 ## PPCLE64 FUN
