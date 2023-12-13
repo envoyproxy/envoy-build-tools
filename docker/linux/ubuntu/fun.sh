@@ -30,13 +30,14 @@ APT_REPOS=(
 COMMON_PACKAGES=(
     apt-transport-https
     ca-certificates
-    g++
-    git
     gnupg2
     gpg-agent
     unzip
     wget
     xz-utils)
+DEV_PACKAGES=(
+    g++-13
+    git)
 CI_PACKAGES=(
     aspell
     aspell-en
@@ -126,7 +127,9 @@ install_base () {
     add_ubuntu_keys "${APT_KEYS_ENV[@]}"
     add_apt_repos "${APT_REPOS_ENV[@]}"
     apt-get -qq update
+    apt_install "${DEV_PACKAGES[@]}"
     apt-get -qq dist-upgrade -y
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 1
     ensure_stdlibcc
 }
 
