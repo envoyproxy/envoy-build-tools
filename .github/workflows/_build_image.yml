@@ -57,6 +57,10 @@ jobs:
       id: container
       shell: bash
       name: Container hash
+    - uses: actions/setup-python@v4
+      if: ${{ inputs.os_family == 'windows' }}
+      with:
+        python-version: '3.10'
     - run: |
         curl -fsSL --output "$TEMP/gcloud-sdk.zip" "$GCLOUD_SDK_ARCHIVE_URL"
         echo "${GCLOUD_SDK_ARCHIVE_CHECKSUM} $TEMP/gcloud-sdk.zip" | sha256sum --check
