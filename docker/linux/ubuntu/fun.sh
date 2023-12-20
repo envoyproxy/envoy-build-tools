@@ -36,7 +36,7 @@ COMMON_PACKAGES=(
     wget
     xz-utils)
 DEV_PACKAGES=(
-    g++-13
+    g++-11
     git)
 CI_PACKAGES=(
     aspell
@@ -129,7 +129,7 @@ install_base () {
     apt-get -qq update
     apt_install "${DEV_PACKAGES[@]}"
     apt-get -qq dist-upgrade -y
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 1
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 1
     ensure_stdlibcc
 }
 
