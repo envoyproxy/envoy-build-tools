@@ -64,6 +64,7 @@ if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
     # variants are only pushed for the dockerhub image (not other `IMAGE_TAGS`)
     build_and_push_variants
 fi
+
 if [[ -n "${IMAGE_TAGS}" ]]; then
     for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
         if [[ "$IMAGE_TAG" == *"|"* ]]; then
