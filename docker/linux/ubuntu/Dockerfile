@@ -88,8 +88,8 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
 # mobile
 FROM full as mobile
 ENV ANDROID_HOME=/.android/sdk \
-    ANDROID_NDK_HOME=/.android/sdk/ndk/21.4.7075529 \
-    ANDROID_NDK_VERSION=21.4.7075529 \
+    ANDROID_NDK_HOME=/.android/sdk/ndk/26.2.11394342 \
+    ANDROID_NDK_VERSION=26.2.11394342 \
     ANDROID_SDK_INSTALL_TARGET=/.android \
     ANDROID_SDK_ROOT=/.android/sdk
 RUN --mount=type=tmpfs,target=/var/cache/apt \
