@@ -17,7 +17,6 @@
 
 package(default_visibility = ["//visibility:public"])
 
-
 toolchain(
     name = "cc-toolchain",
     exec_compatible_with = [
@@ -34,7 +33,6 @@ toolchain(
 
 platform(
     name = "platform",
-    parents = ["@local_config_platform//:host"],
     constraint_values = [
         "@platforms//os:windows",
         "@platforms//cpu:x86_64",
@@ -43,4 +41,5 @@ platform(
         "container-image": "docker://gcr.io/envoy-ci/envoy-build-windows@sha256:c63f9c947298101e36e7337bcb7604e50635bbfd7634b74adb0ffeb3cc349412",
         "OSFamily": "Windows",
     },
+    parents = ["@local_config_platform//:host"],
 )
