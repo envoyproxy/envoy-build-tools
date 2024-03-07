@@ -43,20 +43,21 @@ install_llvm_bins () {
 install_libcxx () {
     local LLVM_USE_SANITIZER=$1
     local LIBCXX_PATH=$2
-    mkdir "${LIBCXX_PATH}"
-    pushd "${LIBCXX_PATH}"
+    pushd llvm-project-llvmorg-${LLVM_VERSION}
     cmake -GNinja \
-          -DLLVM_ENABLE_PROJECTS="libcxxabi;libcxx" \
+          -B "${LIBCXX_PATH}" \
+          -S "runtimes" \
+          -DLLVM_ENABLE_RUNTIMES="libcxxabi;libcxx" \
           -DLLVM_USE_LINKER=lld \
           -DLLVM_USE_SANITIZER="${LLVM_USE_SANITIZER}" \
+          -DLIBCXX_ENABLE_SHARED=NO \
           -DCMAKE_BUILD_TYPE=RelWithDebInfo \
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
-          -DCMAKE_INSTALL_PREFIX="/opt/libcxx_${LIBCXX_PATH}" \
-          "../llvm-project-llvmorg-${LLVM_VERSION}/llvm"
-    ninja install-cxx install-cxxabi
-    if [[ -n "$(diff --exclude=__config_site -r "/opt/libcxx_${LIBCXX_PATH}/include/c++" /opt/llvm/include/c++)" ]]; then
-        echo "Different libc++ is installed";
+          -DCMAKE_INSTALL_PREFIX="/opt/libcxx_${LIBCXX_PATH}"
+    ninja -C "${LIBCXX_PATH}" install-cxx install-cxxabi
+    if [[ -n "$(diff --exclude=module.modulemap --exclude=__config_site -r "/opt/libcxx_${LIBCXX_PATH}/include/c++" /opt/llvm/include/c++)" ]]; then
+        echo "Different libc++ is installed"
         exit 1
     fi
     rm -rf "/opt/libcxx_${LIBCXX_PATH}/include"
