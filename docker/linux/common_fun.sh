@@ -50,7 +50,6 @@ install_libcxx () {
           -DLLVM_ENABLE_RUNTIMES="libcxxabi;libcxx" \
           -DLLVM_USE_LINKER=lld \
           -DLLVM_USE_SANITIZER="${LLVM_USE_SANITIZER}" \
-          -DLIBCXX_ENABLE_SHARED=NO \
           -DCMAKE_BUILD_TYPE=RelWithDebInfo \
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
