@@ -53,7 +53,8 @@ install_libcxx () {
           -DCMAKE_BUILD_TYPE=RelWithDebInfo \
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
-          -DCMAKE_INSTALL_PREFIX="/opt/libcxx_${LIBCXX_PATH}"
+          -DCMAKE_INSTALL_PREFIX="/opt/libcxx_${LIBCXX_PATH}" \
+          -DCMAKE_POSITION_INDEPENDENT_CODE=ON
     ninja -C "${LIBCXX_PATH}" install-cxx install-cxxabi
     if [[ -n "$(diff --exclude=module.modulemap --exclude=__config_site -r "/opt/libcxx_${LIBCXX_PATH}/include/c++" /opt/llvm/include/c++)" ]]; then
         echo "Different libc++ is installed"
