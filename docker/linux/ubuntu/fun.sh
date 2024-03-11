@@ -32,6 +32,7 @@ COMMON_PACKAGES=(
     ca-certificates
     gnupg2
     gpg-agent
+    libtinfo5
     unzip
     wget
     xz-utils)
@@ -78,11 +79,6 @@ UBUNTU_PACKAGES=(
     strace
     tshark
     zip)
-
-
-if [[ "$ARCH" == "aarch64" ]]; then
-    COMMON_PACKAGES+=(libtinfo5)
-fi
 
 
 # This is not currently used
