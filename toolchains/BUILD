@@ -7,6 +7,7 @@ platform(
     exec_properties = create_rbe_exec_properties_dict(
         docker_add_capabilities = "SYS_PTRACE,NET_RAW,NET_ADMIN",
         docker_network = "standard",
+        docker_privileged = True,
     ),
     parents = ["//toolchains/configs/linux/clang/config:platform"],
 )
@@ -16,6 +17,7 @@ platform(
     exec_properties = create_rbe_exec_properties_dict(
         docker_add_capabilities = "SYS_PTRACE,NET_RAW,NET_ADMIN",
         docker_network = "standard",
+        docker_privileged = True,
     ),
     parents = ["//toolchains/configs/linux/clang_libcxx/config:platform"],
 )
