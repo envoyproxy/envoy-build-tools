@@ -91,7 +91,7 @@ add_ubuntu_keys () {
 
 add_apt_key () {
     apt-get update -y
-    wget -q -O - "$1" | apt-key add -
+    wget -q -O - "$1" > /etc/apt/trusted.gpg.d/"$2"
 }
 
 add_apt_k8s_key () {
@@ -173,7 +173,7 @@ install () {
     if [[ "$ARCH" == "ppc64le" ]]; then
         install_ppc64le_bazel
     fi
-    add_apt_key "${APT_KEY_DOCKER}"
+    add_apt_key "${APT_KEY_DOCKER}" "docker.asc"
     add_apt_k8s_key "${APT_KEY_K8S}"
     add_apt_repos "${APT_REPOS[@]}"
     apt-get -qq update
@@ -194,7 +194,7 @@ install_ci () {
 }
 
 install_llvm () {
-    add_apt_key "${APT_KEY_KITWARE}"
+    add_apt_key "${APT_KEY_KITWARE}" "kitware.asc"
     add_apt_repos "${APT_REPOS_LLVM[@]}"
     apt-get -qq update -y
     apt-get -qq install -y --no-install-recommends "${LLVM_PACKAGES[@]}"

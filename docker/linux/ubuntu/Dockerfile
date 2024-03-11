@@ -1,4 +1,4 @@
-FROM ubuntu:focal@sha256:33a5cc25d22c45900796a1aca487ad7a7cb09f09ea00b779e3b2026b4fc2faba as env
+FROM ubuntu:jammy@sha256:c9cf959fd83770dfdefd8fb42cfef0761432af36a764c077aed54bbc5bb25368 as env
 ARG ANDROID_CLI_TOOLS=https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip \
     APT_KEY_TOOLCHAIN=60C317803A41BA51845E371A1E9377A2BA9EF27F \
     APT_KEY_AZUL=0xB1998361219BD9C9 \
@@ -79,8 +79,8 @@ COPY \
 FROM full as cmake
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
-    curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | apt-key add - \
-    && echo "deb https://apt.kitware.com/ubuntu/ focal main" >> /etc/apt/sources.list \
+    curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc -o /etc/apt/trusted.gpg.d/kitware.asc \
+    && echo "deb https://apt.kitware.com/ubuntu/ jammy main" >> /etc/apt/sources.list \
     && apt-get -qq update -y \
     && apt-get -qq install --no-install-recommends cmake ninja-build
 
