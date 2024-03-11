@@ -99,7 +99,7 @@ def rbe_toolchains_config(generator = False, force = False):
     linux_exec_properties = create_rbe_exec_properties_dict(
         docker_add_capabilities = "SYS_PTRACE,NET_RAW,NET_ADMIN",
         docker_network = "standard",
-        docker_privileted = True,
+        docker_privileged = True,
         docker_ulimits="memlock=-1,nice=-20,rtprio=10,stack=8388608")
 
     _envoy_rbe_toolchain("rbe_ubuntu_clang", _CLANG_ENV, "clang", _TOOLCHAIN_CONFIG_SUITE_SPEC_LINUX, _ENVOY_BUILD_IMAGE_DIGEST_LINUX, linux_exec_properties, generator, force)
