@@ -73,7 +73,7 @@ jobs:
         GCR_IMAGE_NAME: ${{ inputs.gcr_name }}
         LOAD_IMAGE: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
     - name: Set up Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       if: ${{ inputs.test_toolchain }}
       with:
         go-version: ${{ inputs.go_version }}
