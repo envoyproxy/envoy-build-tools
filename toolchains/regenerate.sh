@@ -52,10 +52,6 @@ case "${OS_FAMILY}" in
     TOOLCHAIN_LIST=(clang clang_libcxx gcc)
     BAZELRC_LATEST="${RBE_AUTOCONF_ROOT}/toolchains/linux.latest.bazelrc"
     ;;
-  windows)
-    TOOLCHAIN_LIST=(msvc-cl clang-cl)
-    BAZELRC_LATEST="${RBE_AUTOCONF_ROOT}/toolchains/windows.latest.bazelrc"
-    ;;
 esac
 
 # Fetch external dependencies

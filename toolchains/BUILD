@@ -30,13 +30,3 @@ platform(
     ),
     parents = ["//toolchains/configs/linux/gcc/config:platform"],
 )
-
-platform(
-    name = "rbe_windows_clang_cl_platform",
-    parents = ["//toolchains/configs/windows/clang-cl/config:platform"],
-)
-
-platform(
-    name = "rbe_windows_msvc_cl_platform",
-    parents = ["//toolchains/configs/windows/msvc-cl/config:platform"],
-)
