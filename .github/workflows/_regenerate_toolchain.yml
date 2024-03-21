@@ -35,7 +35,7 @@ jobs:
         key: ${{ secrets.bot_key }}
         app_id: ${{ secrets.bot_id }}
     - name: 'Checkout Repository'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
         token: ${{ steps.appauth.outputs.token }}
