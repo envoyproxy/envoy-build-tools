@@ -49,7 +49,7 @@ jobs:
     - uses: envoyproxy/toolshed/gh-actions/diskspace@actions-v0.0.17
       name: 'Free disk space'
     - name: 'Checkout repository'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - run: |
         CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "./docker")
         echo "tag=${CONTAINER_TAG}" >> "$GITHUB_OUTPUT"
