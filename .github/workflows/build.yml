@@ -31,12 +31,6 @@ jobs:
         - target: centos
           name: Linux Centos
           gcr_push: false
-        - target: windows2019
-          name: Windows 2019
-          gcr_push: true
-          gcr_name: envoy-build-windows
-          host_platform: windows-2019
-          os_family: windows
     name: Build (${{ matrix.name || matrix.target }})
     uses: ./.github/workflows/_build_image.yml
     with:
@@ -59,22 +53,6 @@ jobs:
     if: ${{ github.event_name != 'pull_request' }}
     needs:
     - build_image
-    secrets:
-      bot_key: ${{ secrets.ENVOY_CI_UPDATE_BOT_KEY }}
-      bot_id: ${{ secrets.ENVOY_CI_UPDATE_APP_ID }}
-
-  regenerate_windows:
-    permissions:
-      contents: write
-    name: Regenerate toolchains (Windows)
-    uses: ./.github/workflows/_regenerate_toolchain.yml
-    if: ${{ github.event_name != 'pull_request' }}
-    needs:
-    - regenerate_linux
-    with:
-      gcr_name: envoy-build-windows
-      os_family: windows
-      host_platform: windows-2019
     secrets:
       bot_key: ${{ secrets.ENVOY_CI_UPDATE_BOT_KEY }}
       bot_id: ${{ secrets.ENVOY_CI_UPDATE_APP_ID }}
