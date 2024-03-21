@@ -11,3 +11,4 @@ declared action inputs or the action commandline changes.
 /usr/include/c++/11
 /usr/include/x86_64-linux-gnu/c++/11
 /usr/include/c++/11/backward
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
