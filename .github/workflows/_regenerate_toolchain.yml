@@ -52,5 +52,3 @@ jobs:
         GCR_IMAGE_NAME: ${{ inputs.gcr_name }}
         OS_FAMILY: ${{ inputs.os_family }}
         SOURCE_BRANCH: ${{ github.ref }}
-        # TODO(phlax): remove when 1.26 goes EOL
-        CONTAINER_PREFIX: "${{ inputs.distro == 'ubuntu' && 'cmake-' || '' }}"

@@ -2,7 +2,7 @@
 
 set -o pipefail
 
-UBUNTU_DOCKER_VARIANTS=("ci" "mobile" "cmake" "test")
+UBUNTU_DOCKER_VARIANTS=("ci" "mobile" "test")
 IMAGE_TAGS=${IMAGE_TAGS:-}
 
 
@@ -43,7 +43,7 @@ build_and_push_variants () {
             push_arg+=(--push)
         fi
 
-        if [[ "$variant" == "test" || "$variant" == "cmake" || "$variant" == "ci" ]]; then
+        if [[ "$variant" == "test" || "$variant" == "ci" ]]; then
             platform="linux/amd64,linux/arm64"
         else
             # Only build variants for linux/amd64
