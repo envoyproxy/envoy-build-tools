@@ -36,7 +36,7 @@ install_llvm_bins () {
     download_and_check "${LLVM_RELEASE}.tar.xz" "${LLVM_DOWNLOAD_PREFIX}${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz" "${LLVM_SHA256SUM}"
     mkdir /opt/llvm
     tar Jxf "${LLVM_RELEASE}.tar.xz" --strip-components=1 -C /opt/llvm
-    find /opt/llvm
+    ls -alh /opt/llvm
     chown -R root:root /opt/llvm
     rm "./${LLVM_RELEASE}.tar.xz"
     LLVM_HOST_TARGET="$(/opt/llvm/bin/llvm-config --host-target)"
