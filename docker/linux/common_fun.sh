@@ -41,6 +41,10 @@ install_llvm_bins () {
 }
 
 install_libcxx () {
+    echo "BUILDING libxx: ${1} ..."
+
+    apt search lld | grep lld
+
     local LLVM_USE_SANITIZER=$1
     local LIBCXX_PATH=$2
     pushd llvm-project-llvmorg-${LLVM_VERSION}
