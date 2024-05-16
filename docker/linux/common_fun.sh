@@ -44,6 +44,8 @@ install_llvm_bins () {
 install_libcxx () {
     local LLVM_USE_SANITIZER=$1
     local LIBCXX_PATH=$2
+    export LLVM_DIR=/opt/llvm/lib/cmake
+    export CLANG_DIR=/opt/llvm/lib/cmake
     pushd llvm-project-llvmorg-${LLVM_VERSION}
     cmake -GNinja \
           -B "${LIBCXX_PATH}" \
