@@ -22,24 +22,6 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
 
-cc_library(name = "empty_lib")
-
-# Label flag for extra libraries to be linked into every binary.
-# TODO(bazel-team): Support passing flag multiple times to build a list.
-label_flag(
-    name = "link_extra_libs",
-    build_setting_default = ":empty_lib",
-)
-
-# The final extra library to be linked into every binary target. This collects
-# the above flag, but may also include more libraries depending on config.
-cc_library(
-    name = "link_extra_lib",
-    deps = [
-        ":link_extra_libs",
-    ],
-)
-
 cc_library(
     name = "malloc",
 )
@@ -107,8 +89,7 @@ cc_toolchain_config(
     "/usr/include/x86_64-linux-gnu/c++/11",
     "/usr/include/c++/11/backward",
     "/opt/llvm/include/x86_64-unknown-linux-gnu/c++/v1",
-    "/opt/llvm/include/c++/v1",
-    "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"],
+    "/opt/llvm/include/c++/v1"],
     tool_paths = {"ar": "/usr/bin/ar",
         "ld": "/usr/bin/ld",
         "llvm-cov": "/opt/llvm/bin/llvm-cov",
@@ -136,12 +117,11 @@ cc_toolchain_config(
     "-ffunction-sections",
     "-fdata-sections"],
     dbg_compile_flags = ["-g"],
-    conly_flags = [],
-    cxx_flags = ["-std=c++14"],
+    cxx_flags = ["-std=c++0x"],
     link_flags = ["-fuse-ld=/opt/llvm/bin/ld.lld",
-    "-B/opt/llvm/bin",
     "-Wl,-no-as-needed",
     "-Wl,-z,relro,-z,now",
+    "-B/opt/llvm/bin",
     "-lm",
     "-fuse-ld=lld"],
     link_libs = ["-l:libstdc++.a"],

@@ -11,4 +11,3 @@ declared action inputs or the action commandline changes.
 /opt/llvm/lib/clang/16/share
 /opt/llvm/include/x86_64-unknown-linux-gnu/c++/v1
 /opt/llvm/include/c++/v1
-/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
