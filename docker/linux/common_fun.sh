@@ -30,13 +30,10 @@ download_and_check () {
 
 install_llvm_bins () {
     LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-${LLVM_DISTRO}"
-    echo "INSTALLING LLVM ..." >&2
-    echo ${LLVM_DOWNLOAD_PREFIX}${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz
-    echo "${LLVM_SHA256SUM}" >&2
     download_and_check "${LLVM_RELEASE}.tar.xz" "${LLVM_DOWNLOAD_PREFIX}${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz" "${LLVM_SHA256SUM}"
     mkdir /opt/llvm
     tar Jxf "${LLVM_RELEASE}.tar.xz" --strip-components=1 -C /opt/llvm
-    ls -alh /opt/llvm >&2
+    ls -alh /opt/llvm/bin >&2
     chown -R root:root /opt/llvm
     rm "./${LLVM_RELEASE}.tar.xz"
     LLVM_HOST_TARGET="$(/opt/llvm/bin/llvm-config --host-target)"
