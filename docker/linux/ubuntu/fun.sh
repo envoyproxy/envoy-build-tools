@@ -147,7 +147,10 @@ mobile_install_android () {
     mkdir -p sdk/cmdline-tools/latest
     mv cmdline-tools/* sdk/cmdline-tools/latest
     sdkmanager="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
-    echo "y" | $sdkmanager --install "ndk;${ANDROID_NDK_VERSION}" | grep -v = || true
+    (yes || :) | $sdkmanager --licenses
+    # TODO(phlax): revert to using ANDROID_NDK_VERSION for non-beta
+    # $sdkmanager --install "ndk;${ANDROID_NDK_VERSION}"
+    $sdkmanager --install "ndk;27.0.11718014" | (grep -v = || :)
     $sdkmanager --install "platforms;android-30" | grep -v = || true
     $sdkmanager --install "build-tools;30.0.2" | grep -v = || true
 }
