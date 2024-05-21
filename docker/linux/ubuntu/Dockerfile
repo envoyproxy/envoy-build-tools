@@ -78,7 +78,7 @@ COPY \
 # mobile
 FROM full as mobile
 ENV ANDROID_HOME=/.android/sdk \
-    ANDROID_NDK_HOME=/.android/sdk/ndk/27.0.11718014-beta1 \
+    ANDROID_NDK_HOME=/.android/sdk/ndk/27.0.11718014 \
     ANDROID_NDK_VERSION=27.0.11718014-beta1 \
     ANDROID_SDK_INSTALL_TARGET=/.android \
     ANDROID_SDK_ROOT=/.android/sdk
