@@ -36,20 +36,7 @@ jobs:
       gcr_name: ${{ matrix.gcr_name != '' && matrix.gcr_name || 'envoy-build' }}
       os_family: ${{ matrix.os_family != '' && matrix.os_family || 'linux' }}
       host_platform: ${{ matrix.host_platform != '' && matrix.host_platform || 'ubuntu-22.04' }}
-      test_toolchain: ${{ github.event_name == 'pull_request' && matrix.target != 'centos' }}
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
       gcp_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-
-  regenerate_linux:
-    permissions:
-      contents: write
-    name: Regenerate toolchains (Linux)
-    uses: ./.github/workflows/_regenerate_toolchain.yml
-    if: ${{ github.event_name != 'pull_request' }}
-    needs:
-    - build_image
-    secrets:
-      bot_key: ${{ secrets.ENVOY_CI_UPDATE_BOT_KEY }}
-      bot_id: ${{ secrets.ENVOY_CI_UPDATE_APP_ID }}
