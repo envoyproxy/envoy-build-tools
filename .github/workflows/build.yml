@@ -28,9 +28,6 @@ jobs:
         - target: ubuntu
           name: Linux Ubuntu
           gcr_push: true
-        - target: centos
-          name: Linux Centos
-          gcr_push: false
     name: Build (${{ matrix.name || matrix.target }})
     uses: ./.github/workflows/_build_image.yml
     with:
