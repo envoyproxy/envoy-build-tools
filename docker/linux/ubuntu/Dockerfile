@@ -1,4 +1,4 @@
-FROM ubuntu:focal@sha256:fa17826afb526a9fc7250e0fbcbfd18d03fe7a54849472f86879d8bf562c629e as env
+FROM ubuntu:focal@sha256:fa17826afb526a9fc7250e0fbcbfd18d03fe7a54849472f86879d8bf562c629e AS env
 ARG ANDROID_CLI_TOOLS=https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip \
     APT_KEY_TOOLCHAIN=60C317803A41BA51845E371A1E9377A2BA9EF27F \
     APT_KEY_AZUL=0xB1998361219BD9C9 \
@@ -33,7 +33,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     && install_base
 
 
-FROM env as llvm
+FROM env AS llvm
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
@@ -42,7 +42,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     && install_llvm
 
 
-FROM env as ci
+FROM env AS ci
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
@@ -51,7 +51,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     && install_ci
 
 
-FROM ci as full
+FROM ci AS full
 COPY --from=llvm /opt /opt
 COPY --from=llvm \
     /usr/local/bin/gn \
@@ -64,7 +64,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     && install
 
 
-FROM full as test
+FROM full AS test
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/ubuntu/test.sh,target=/ubuntu/test.sh \
@@ -76,7 +76,7 @@ COPY \
 
 
 # mobile
-FROM full as mobile
+FROM full AS mobile
 ENV ANDROID_HOME=/.android/sdk \
     ANDROID_NDK_HOME=/.android/sdk/ndk/21.4.7075529 \
     ANDROID_NDK_VERSION=21.4.7075529 \
