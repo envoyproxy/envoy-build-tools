@@ -22,9 +22,6 @@ on:
       distro:
         type: string
         required: true
-      test_toolchain:
-        type: boolean
-        default: false
 
       host_platform:
         type: string
@@ -72,23 +69,3 @@ jobs:
         PUSH_GCR_IMAGE: ${{ inputs.gcr_push }}
         GCR_IMAGE_NAME: ${{ inputs.gcr_name }}
         LOAD_IMAGE: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      if: ${{ inputs.test_toolchain }}
-      with:
-        go-version: ${{ inputs.go_version }}
-        cache: false
-    - uses: envoyproxy/toolshed/gh-actions/docker/registry@actions-v0.2.29
-      if: ${{ inputs.test_toolchain && inputs.os_family }}
-      name: 'Start and load Docker registry'
-      with:
-        load: envoyproxy/envoy-build-ubuntu:${{ steps.container.outputs.tag }}
-    - run: |
-        toolchains/regenerate.sh
-      if: ${{ inputs.test_toolchain }}
-      shell: bash
-      env:
-        OS_FAMILY: ${{ inputs.os_family }}
-        SOURCE_BRANCH: ${{ github.ref }}
-        NO_PULL_IMAGE: true
-        DOCKER_IMAGE: localhost:5000/envoy-build-${{ inputs.distro }}
