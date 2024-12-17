@@ -78,8 +78,8 @@ COPY \
 # mobile
 FROM full AS mobile
 ENV ANDROID_HOME=/.android/sdk \
-    ANDROID_NDK_HOME=/.android/sdk/ndk/22.1.7171670 \
-    ANDROID_NDK_VERSION=22.1.7171670 \
+    ANDROID_NDK_HOME=/.android/sdk/ndk/26.3.11579264 \
+    ANDROID_NDK_VERSION=26.3.11579264 \
     ANDROID_SDK_INSTALL_TARGET=/.android \
     ANDROID_SDK_ROOT=/.android/sdk
 RUN --mount=type=tmpfs,target=/var/cache/apt \
