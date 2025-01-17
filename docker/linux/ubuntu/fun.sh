@@ -171,9 +171,6 @@ mobile_install () {
 }
 
 install () {
-    if [[ "$ARCH" == "ppc64le" ]]; then
-        install_ppc64le_bazel
-    fi
     add_apt_key "${APT_KEY_DOCKER}"
     add_apt_k8s_key "${APT_KEY_K8S}"
     add_apt_repos "${APT_REPOS[@]}"
