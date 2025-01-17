@@ -6,10 +6,6 @@ ARCH="$(uname -m)"
 
 DEB_ARCH=amd64
 case $ARCH in
-    'ppc64le' )
-        LLVM_DISTRO="$LLVM_DISTRO_PPC64LE"
-        LLVM_SHA256SUM="$LLVM_SHA256SUM_PPC64LE"
-        ;;
     'aarch64' )
         DEB_ARCH=arm64
         BAZELISK_SHA256SUM="$BAZELISK_SHA256SUM_ARM64"
@@ -129,13 +125,4 @@ setup_tcpdump () {
     chgrp pcap /usr/sbin/tcpdump
     chmod 750 /usr/sbin/tcpdump
     setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
-}
-
-## PPCLE64 FUN
-install_ppc64le_bazel () {
-    BAZEL_LATEST="$(curl https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_16.04/latest/ 2>&1 \
-          | sed -n 's/.*href="\([^"]*\).*/\1/p' | grep '^bazel' | head -n 1)"
-    curl -fSL "https://oplab9.parqtec.unicamp.br/pub/ppc64el/bazel/ubuntu_16.04/latest/${BAZEL_LATEST}" \
-         -o /usr/local/bin/bazel
-    chmod +x /usr/local/bin/bazel
 }
