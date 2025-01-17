@@ -131,8 +131,8 @@ AddToPath C:\tools\ninja
 
 # LLVM to ensure a 64-bit build of the tool (VS BuildTools ships a 32-bit build)
 DownloadAndCheck $env:TEMP\LLVM-win64.exe `
-                 https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.0/LLVM-16.0.0-win64.exe `
-                 e41295133d6d24cc8133702768ddb4e3bffd9f9b4a9b2faf9cd0a045cfc90abc
+                 https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/LLVM-18.1.8-win64.exe `
+                 94af030060d88cc17e9f00ef1663ebdc1126b35e16bebdfa1e807984b70abd8f
 RunAndCheckError $env:TEMP\LLVM-win64.exe @("/S") $true
 AddToPath $env:ProgramFiles\LLVM\bin
 
