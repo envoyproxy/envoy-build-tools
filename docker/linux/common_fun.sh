@@ -43,7 +43,7 @@ install_libcxx () {
     cmake -GNinja \
           -B "${LIBCXX_PATH}" \
           -S "runtimes" \
-          -DLLVM_ENABLE_RUNTIMES="libcxxabi;libcxx;libunwind" \
+          -DLLVM_ENABLE_RUNTIMES="libcxxabi;libcxx" \
           -DLLVM_USE_LINKER=lld \
           -DLLVM_USE_SANITIZER="${LLVM_USE_SANITIZER}" \
           -DCMAKE_BUILD_TYPE=RelWithDebInfo \
