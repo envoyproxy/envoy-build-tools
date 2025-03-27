@@ -67,6 +67,7 @@ UBUNTU_PACKAGES=(
     expect
     gdb
     graphviz
+    libdatetime-perl
     libffi-dev
     libncurses-dev
     libssl-dev
