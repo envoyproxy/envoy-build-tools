@@ -204,3 +204,24 @@ install_llvm () {
     install_san
     install_gn
 }
+
+install_openssl () {
+    local version=$1
+    local sha256sum=$2
+    local major_minor_version="${version%.*}"
+    local openssl_dir="/opt/openssl${major_minor_version}"
+    local source_dir="${openssl_dir}/src"
+
+    download_and_check openssl.tar.gz "https://github.com/openssl/openssl/releases/download/openssl-${version}/openssl-${version}.tar.gz" "${sha256sum}"
+    mkdir -p "${source_dir}"
+    tar zxf openssl.tar.gz --strip-components=1 -C "${source_dir}"
+    rm openssl.tar.gz
+
+    pushd "${source_dir}"
+    ./config -d --prefix="${openssl_dir}" --openssldir="${openssl_dir}"
+    make -j && make install_sw
+    popd
+    rm -rf "${source_dir}"
+
+    chown -R root:root "${openssl_dir}"
+}
