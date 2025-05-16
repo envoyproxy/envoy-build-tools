@@ -2,7 +2,7 @@
 
 set -o pipefail
 
-UBUNTU_DOCKER_VARIANTS=("ci" "mobile" "test")
+UBUNTU_DOCKER_VARIANTS=("ci" "mobile" "test" "openssl")
 IMAGE_TAGS=${IMAGE_TAGS:-}
 
 
@@ -64,6 +64,7 @@ if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
     # variants are only pushed for the dockerhub image (not other `IMAGE_TAGS`)
     build_and_push_variants
 fi
+
 
 if [[ -n "${IMAGE_TAGS}" ]]; then
     for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do

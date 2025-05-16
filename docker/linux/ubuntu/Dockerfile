@@ -88,4 +88,13 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     && mobile_install
 
 
+# OpenSSL
+FROM full AS openssl
+RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/ubuntu/fun.sh,target=/ubuntu/fun.sh \
+    . ./ubuntu/fun.sh \
+    && install_openssl 3.0.16 57e03c50feab5d31b152af2b764f10379aecd8ee92f16c985983ce4a99f7ef86 \
+    && install_openssl 3.2.4 b23ad7fd9f73e43ad1767e636040e88ba7c9e5775bfa5618436a0dd2c17c3716
+
+
 FROM full
