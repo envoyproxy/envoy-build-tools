@@ -5,6 +5,8 @@
 set -e
 
 IMAGE_PREFIX="${IMAGE_PREFIX:-envoyproxy/envoy-build-}"
+OS_FAMILY="${OS_FAMILY:-linux}"
+OS_DISTRO="${OS_DISTRO:-ubuntu}"
 GCR_IMAGE_PREFIX=gcr.io/envoy-ci/
 # Enable docker experimental
 export DOCKER_CLI_EXPERIMENTAL=enabled
