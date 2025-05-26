@@ -18,8 +18,6 @@ fi
 LSB_RELEASE="$(lsb_release -cs)"
 APT_KEYS_ENV=(
     "${APT_KEY_TOOLCHAIN}")
-APT_REPOS_LLVM=(
-    "https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main")
 APT_KEYS_MOBILE=(
     "$APT_KEY_AZUL")
 APT_REPOS_ENV=(
@@ -49,11 +47,6 @@ CI_PACKAGES=(
     tcpdump
     time
     sudo)
-LLVM_PACKAGES=(
-    cmake
-    cmake-data
-    ninja-build
-    python3)
 UBUNTU_PACKAGES=(
     automake
     bc
@@ -196,11 +189,6 @@ install_ci () {
 }
 
 install_llvm () {
-    add_apt_key "${APT_KEY_KITWARE}"
-    add_apt_repos "${APT_REPOS_LLVM[@]}"
-    apt-get -qq update -y
-    apt-get -qq install -y --no-install-recommends "${LLVM_PACKAGES[@]}"
     install_llvm_bins
-    install_san
     install_gn
 }

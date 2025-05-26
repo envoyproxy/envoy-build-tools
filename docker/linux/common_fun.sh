@@ -36,46 +36,6 @@ install_llvm_bins () {
     ldconfig
 }
 
-install_libcxx () {
-    local LLVM_USE_SANITIZER=$1
-    local LIBCXX_PATH=$2
-    pushd llvm-project-llvmorg-${LLVM_VERSION}
-    cmake -GNinja \
-          -B "${LIBCXX_PATH}" \
-          -S "runtimes" \
-          -DLLVM_ENABLE_RUNTIMES="libcxxabi;libcxx;libunwind" \
-          -DLLVM_USE_LINKER=lld \
-          -DLLVM_USE_SANITIZER="${LLVM_USE_SANITIZER}" \
-          -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-          -DCMAKE_C_COMPILER=clang \
-          -DCMAKE_CXX_COMPILER=clang++ \
-          -DCMAKE_INSTALL_PREFIX="/opt/libcxx_${LIBCXX_PATH}" \
-          -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-    ninja -C "${LIBCXX_PATH}" install-cxx install-cxxabi
-    if [[ -n "$(diff --exclude=module.modulemap --exclude=__config_site -r "/opt/libcxx_${LIBCXX_PATH}/include/c++" /opt/llvm/include/c++)" ]]; then
-        echo "Different libc++ is installed"
-        exit 1
-    fi
-    rm -rf "/opt/libcxx_${LIBCXX_PATH}/include"
-    popd
-}
-
-install_san () {
-    # Install sanitizer instrumented libc++, skipping for architectures other than x86_64 for now.
-    if [[ "$(uname -m)" != "x86_64" ]]; then
-        mkdir /opt/libcxx_msan
-        mkdir /opt/libcxx_tsan
-        return 0
-    fi
-    export PATH="/opt/llvm/bin:${PATH}"
-    WORKDIR=$(mktemp -d)
-    pushd "${WORKDIR}"
-    wget -q -O -  "https://github.com/llvm/llvm-project/archive/llvmorg-${LLVM_VERSION}.tar.gz" | tar zx
-    install_libcxx MemoryWithOrigins msan
-    install_libcxx Thread tsan
-    popd
-}
-
 ## Build install fun
 install_build_tools () {
     # bazelisk
