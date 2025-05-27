@@ -51,9 +51,6 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
 
 FROM ci AS full
 COPY --from=llvm /opt /opt
-COPY --from=llvm \
-    /usr/local/bin/gn \
-    /usr/local/bin/gn
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \

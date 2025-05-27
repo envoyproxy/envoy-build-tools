@@ -126,15 +126,6 @@ install_base () {
     ensure_stdlibcc
 }
 
-install_gn (){
-    # Install gn tools which will be used for building wee8
-    wget -q -O gntool.zip "https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-${DEB_ARCH}/+/latest"
-    unzip -q gntool.zip -d gntool
-    cp gntool/gn /usr/local/bin/gn
-    chmod +x /usr/local/bin/gn
-    rm -rf gntool*
-}
-
 mobile_install_android () {
     mkdir -p "$ANDROID_HOME"
     cd "$ANDROID_SDK_INSTALL_TARGET"
@@ -190,5 +181,4 @@ install_ci () {
 
 install_llvm () {
     install_llvm_bins
-    install_gn
 }
