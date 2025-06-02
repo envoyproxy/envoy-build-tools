@@ -46,14 +46,6 @@ install_build_tools () {
     chmod +x /usr/local/bin/bazel
 }
 
-install_lcov () {
-    download_and_check "lcov-${LCOV_VERSION}.tar.gz" "https://github.com/linux-test-project/lcov/releases/download/v${LCOV_VERSION}/lcov-${LCOV_VERSION}.tar.gz" \
-                       "${LCOV_SHA256SUM}"
-    tar zxf "lcov-${LCOV_VERSION}.tar.gz"
-    make -C "lcov-${LCOV_VERSION}" install
-    rm -rf "lcov-${LCOV_VERSION}" "./lcov-${LCOV_VERSION}.tar.gz"
-}
-
 install_clang_tools () {
     if [[ -z "$CLANG_TOOLS_SHA256SUM" ]]; then
         return
@@ -73,7 +65,6 @@ install_build () {
     setup_tcpdump
     install_build_tools
     install_clang_tools
-    install_lcov
     git config --global --add safe.directory /source
     mv ~/.gitconfig /etc/gitconfig
     export PATH="/opt/llvm/bin:${PATH}"

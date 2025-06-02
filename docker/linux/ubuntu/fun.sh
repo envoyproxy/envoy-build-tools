@@ -60,10 +60,6 @@ UBUNTU_PACKAGES=(
     expect
     gdb
     graphviz
-    libcapture-tiny-perl
-    libdatetime-format-strptime-perl
-    libdatetime-perl
-    libperlio-gzip-perl
     libffi-dev
     libncurses-dev
     libssl-dev
