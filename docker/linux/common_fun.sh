@@ -9,8 +9,6 @@ case $ARCH in
     'aarch64' )
         DEB_ARCH=arm64
         BAZELISK_SHA256SUM="$BAZELISK_SHA256SUM_ARM64"
-        LLVM_DISTRO="$LLVM_DISTRO_ARM64"
-        LLVM_SHA256SUM="$LLVM_SHA256SUM_ARM64"
         ;;
 esac
 
@@ -24,18 +22,6 @@ download_and_check () {
     echo "${sha256}  ${to}" | sha256sum --check
 }
 
-install_llvm_bins () {
-    LLVM_RELEASE="clang+llvm-${LLVM_VERSION}-${LLVM_DISTRO}"
-    download_and_check "${LLVM_RELEASE}.tar.xz" "${LLVM_DOWNLOAD_PREFIX}${LLVM_VERSION}/${LLVM_RELEASE}.tar.xz" "${LLVM_SHA256SUM}"
-    mkdir /opt/llvm
-    tar Jxf "${LLVM_RELEASE}.tar.xz" --strip-components=1 -C /opt/llvm
-    chown -R root:root /opt/llvm
-    rm "./${LLVM_RELEASE}.tar.xz"
-    LLVM_HOST_TARGET="$(/opt/llvm/bin/llvm-config --host-target)"
-    echo "/opt/llvm/lib/${LLVM_HOST_TARGET}" > /etc/ld.so.conf.d/llvm.conf
-    ldconfig
-}
-
 ## Build install fun
 install_build_tools () {
     # bazelisk
@@ -46,28 +32,11 @@ install_build_tools () {
     chmod +x /usr/local/bin/bazel
 }
 
-install_clang_tools () {
-    if [[ -z "$CLANG_TOOLS_SHA256SUM" ]]; then
-        return
-    fi
-    # Pick `run-clang-tidy.py` from `clang-tools-extra` and place in filepath expected by Envoy CI.
-    # Only required for more recent LLVM/Clang versions
-    ENVOY_CLANG_TIDY_PATH=/opt/llvm/share/clang/run-clang-tidy.py
-    CLANG_TOOLS_SRC="clang-tools-extra-${LLVM_VERSION}.src"
-    CLANG_TOOLS_TARBALL="${CLANG_TOOLS_SRC}.tar.xz"
-    download_and_check "./${CLANG_TOOLS_TARBALL}" "${LLVM_DOWNLOAD_PREFIX}${LLVM_VERSION}/${CLANG_TOOLS_TARBALL}" "$CLANG_TOOLS_SHA256SUM"
-    mkdir -p /opt/llvm/share/clang/
-    tar JxfO "./${CLANG_TOOLS_TARBALL}" "${CLANG_TOOLS_SRC}/clang-tidy/tool/run-clang-tidy.py" > "$ENVOY_CLANG_TIDY_PATH"
-    rm "./${CLANG_TOOLS_TARBALL}"
-}
-
 install_build () {
     setup_tcpdump
     install_build_tools
-    install_clang_tools
     git config --global --add safe.directory /source
     mv ~/.gitconfig /etc/gitconfig
-    export PATH="/opt/llvm/bin:${PATH}"
 }
 
 setup_tcpdump () {

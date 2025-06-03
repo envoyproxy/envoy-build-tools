@@ -12,12 +12,6 @@ ARG ANDROID_CLI_TOOLS=https://dl.google.com/android/repository/commandlinetools-
     DEBIAN_FRONTEND=noninteractive \
     LANG=en_US.utf8 \
     LIBSTDCXX_EXPECTED_VERSION=13.1 \
-    LLVM_DISTRO=x86_64-linux-gnu-ubuntu-18.04 \
-    LLVM_DISTRO_ARM64=aarch64-linux-gnu \
-    LLVM_DOWNLOAD_PREFIX=https://github.com/llvm/llvm-project/releases/download/llvmorg- \
-    LLVM_SHA256SUM=54ec30358afcc9fb8aa74307db3046f5187f9fb89fb37064cdde906e062ebf36 \
-    LLVM_SHA256SUM_ARM64=dcaa1bebbfbb86953fdfbdc7f938800229f75ad26c5c9375ef242edad737d999 \
-    LLVM_VERSION=18.1.8 \
     ZULU_INSTALL_DEB=https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
 ENV LANG=$LANG
 SHELL ["/bin/bash", "-ec"]
@@ -27,15 +21,6 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=bind,source=/ubuntu/fun.sh,target=/ubuntu/fun.sh \
     . ./ubuntu/fun.sh \
     && install_base
-
-
-FROM env AS llvm
-RUN --mount=type=tmpfs,target=/var/cache/apt \
-    --mount=type=tmpfs,target=/var/lib/apt/lists \
-    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
-    --mount=type=bind,source=/ubuntu/fun.sh,target=/ubuntu/fun.sh \
-    . ./ubuntu/fun.sh \
-    && install_llvm
 
 
 FROM env AS ci
@@ -48,7 +33,6 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
 
 
 FROM ci AS full
-COPY --from=llvm /opt /opt
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
