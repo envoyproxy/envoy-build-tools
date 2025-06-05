@@ -22,9 +22,7 @@ download_and_check () {
     echo "${sha256}  ${to}" | sha256sum --check
 }
 
-## Build install fun
 install_build_tools () {
-    # bazelisk
     download_and_check \
         /usr/local/bin/bazel \
         "https://github.com/bazelbuild/bazelisk/releases/download/v${BAZELISK_VERSION}/bazelisk-linux-${DEB_ARCH}" \
@@ -40,9 +38,18 @@ install_build () {
 }
 
 setup_tcpdump () {
-    # Setup tcpdump for non-root.
-    groupadd -r pcap
-    chgrp pcap /usr/sbin/tcpdump
-    chmod 750 /usr/sbin/tcpdump
-    setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
+    # Setup tcpdump for non-root - find tcpdump location dynamically
+    local tcpdump_path
+    tcpdump_path=$(which tcpdump 2>/dev/null || echo "")
+
+    if [ -n "$tcpdump_path" ] && [ -f "$tcpdump_path" ]; then
+        echo "Setting up tcpdump at $tcpdump_path for non-root access..."
+        groupadd -r pcap
+        chgrp pcap "$tcpdump_path"
+        chmod 750 "$tcpdump_path"
+        setcap cap_net_raw,cap_net_admin=eip "$tcpdump_path"
+    else
+        echo "ERROR: tcpdump not found in PATH after installation"
+        exit 1
+    fi
 }

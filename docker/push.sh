@@ -49,14 +49,23 @@ if [[ "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
     if [[ "${PUSH_GCR_IMAGE}" == "true" ]]; then
         echo ${GCP_SERVICE_ACCOUNT_KEY} | base64 --decode | gcloud auth activate-service-account --key-file=-
         gcloud auth configure-docker --quiet
-        IMAGE_TAGS+=("${GCR_IMAGE_PREFIX}${GCR_IMAGE_NAME}:${CONTAINER_SHA}${TAG_SUFFIX}")
+        if [[ "${OS_DISTRO}" == "debian" ]]; then
+            IMAGE_TAGS+=("${GCR_IMAGE_PREFIX}${GCR_IMAGE_NAME}:ci-${CONTAINER_SHA}${TAG_SUFFIX}")
+        else
+            IMAGE_TAGS+=("${GCR_IMAGE_PREFIX}${GCR_IMAGE_NAME}:${CONTAINER_SHA}${TAG_SUFFIX}")
+        fi
     fi
     ci_log_run_end
 fi
 
 cd "${OS_FAMILY}" || exit 1
 
-source "./build.sh"
+# Use distro-specific build script if available
+if [[ "${OS_DISTRO}" == "debian" && -f "./debian_build.sh" ]]; then
+    source "./debian_build.sh"
+else
+    source "./build.sh"
+fi
 
 ci_log_run docker images
 

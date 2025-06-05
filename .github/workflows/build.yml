@@ -9,10 +9,6 @@ on:
     - main
   pull_request:
 
-concurrency:
-  group: ${{ github.event.inputs.head_ref || github.run_id }}-${{ github.workflow }}
-  cancel-in-progress: true
-
 
 jobs:
   build_image:
@@ -27,6 +23,9 @@ jobs:
         include:
         - target: ubuntu
           name: Linux Ubuntu
+          gcr_push: true
+        - target: debian
+          name: Linux Debian
           gcr_push: true
     name: Build (${{ matrix.name || matrix.target }})
     uses: ./.github/workflows/_build_image.yml

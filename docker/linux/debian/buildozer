@@ -1,0 +1,9 @@
+#!/bin/bash -e
+
+set -o pipefail
+
+ENVOY_SRCDIR="${ENVOY_SRCDIR:-/source}"
+
+
+cd "${ENVOY_SRCDIR}" || exit 1
+bazel run @com_github_bazelbuild_buildtools//buildozer -- "$@"
