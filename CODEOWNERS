@@ -1,5 +1,2 @@
 # By default, @envoyproxy/build-tools-maintainers own everything.
 * @envoyproxy/build-tools-maintainers @envoyproxy/dependency-shepherds
-
-# Windows build container config
-/docker/*windows* @envoyproxy/windows-dev
