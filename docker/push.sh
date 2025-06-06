@@ -30,9 +30,16 @@ ci_log_run_end () {
 }
 
 pull_image () {
-    ci_log_run echo "Building ${IMAGE_PREFIX}${OS_DISTRO}:${CONTAINER_SHA}"
-    if curl -sSLf "https://index.docker.io/v1/repositories/${IMAGE_PREFIX}${OS_DISTRO}/tags/${CONTAINER_SHA}" &> /dev/null; then
-        echo "${IMAGE_PREFIX}${OS_DISTRO}:${CONTAINER_SHA} exists."
+    if [[ "$OS_DISTRO" == "debian" ]]; then
+        # temp hack to get containers building
+        container_name="envoy-build"
+    else
+        container_name="${IMAGE_PREFIX}${OS_DISTRO}"
+    fi
+    ci_log_run echo "Building ${container_name}:${CONTAINER_SHA}"
+    container_url="https://index.docker.io/v1/repositories/${container_name}/tags/${CONTAINER_SHA}"
+    if curl -sSLf "$container_url" &> /dev/null; then
+        echo "${container_name}:${CONTAINER_SHA} exists."
         ci_log_run_end
         exit 0
     fi
