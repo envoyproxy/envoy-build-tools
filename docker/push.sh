@@ -51,7 +51,11 @@ pull_image
 if [[ "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
     LOG_CONTINUE=1
     ci_log_run docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
-    IMAGE_TAGS+=("${IMAGE_PREFIX}${OS_DISTRO}:${CONTAINER_SHA}")
+    if [[ "$OS_DISTRO" == "debian" ]]; then
+        IMAGE_TAGS+=("envoyproxy/envoy-build:${CONTAINER_SHA}")
+    else
+        IMAGE_TAGS+=("${IMAGE_PREFIX}${OS_DISTRO}:${CONTAINER_SHA}")
+    fi
 
     if [[ "${PUSH_GCR_IMAGE}" == "true" ]]; then
         echo ${GCP_SERVICE_ACCOUNT_KEY} | base64 --decode | gcloud auth activate-service-account --key-file=-
