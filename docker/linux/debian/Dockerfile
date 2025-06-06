@@ -19,7 +19,16 @@ RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
     && install_bazelisk
 
 
-FROM env AS ci
+FROM env AS worker
+RUN --mount=type=tmpfs,target=/var/cache/apt \
+    --mount=type=tmpfs,target=/var/lib/apt/lists \
+    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    . ./debian/fun.sh \
+    && install_worker
+
+
+FROM worker AS ci
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \

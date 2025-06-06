@@ -61,7 +61,7 @@ if [[ "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
         echo ${GCP_SERVICE_ACCOUNT_KEY} | base64 --decode | gcloud auth activate-service-account --key-file=-
         gcloud auth configure-docker --quiet
         if [[ "${OS_DISTRO}" == "debian" ]]; then
-            IMAGE_TAGS+=("${GCR_IMAGE_PREFIX}${GCR_IMAGE_NAME}:ci-${CONTAINER_SHA}${TAG_SUFFIX}")
+            IMAGE_TAGS+=("${GCR_IMAGE_PREFIX}${GCR_IMAGE_NAME}:worker-${CONTAINER_SHA}${TAG_SUFFIX}")
         else
             IMAGE_TAGS+=("${GCR_IMAGE_PREFIX}${GCR_IMAGE_NAME}:${CONTAINER_SHA}${TAG_SUFFIX}")
         fi

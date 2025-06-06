@@ -3,7 +3,7 @@
 set -o pipefail
 
 # Debian-specific build configuration
-DEBIAN_DOCKER_VARIANTS=("ci" "devtools" "mobile" "test")
+DEBIAN_DOCKER_VARIANTS=("worker" "ci" "devtools" "mobile" "test")
 IMAGE_TAGS=${IMAGE_TAGS:-}
 OS_DISTRO="debian"
 
@@ -38,8 +38,8 @@ build_and_push_variants () {
             push_arg+=(--push)
         fi
 
-        # Platform logic: ci and test get multi-arch, others get amd64 only
-        if [[ "$variant" == "test" || "$variant" == "ci" ]]; then
+        # Platform logic: worker, ci and test get multi-arch, others get amd64 only
+        if [[ "$variant" == "test" || "$variant" == "ci" || "$variant" == "worker" ]]; then
             platform="linux/amd64,linux/arm64"
         else
             # devtools and mobile are amd64 only (matching original behavior for full/mobile)
@@ -55,7 +55,7 @@ build_and_push_variants () {
     done
 }
 
-# Default target for Debian is 'ci' (not 'full' like Ubuntu)
+# Default target for Debian is 'ci' (includes bazel for builds)
 ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target ci --platform "${BUILD_TOOLS_PLATFORMS}"
 
 if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
@@ -69,7 +69,7 @@ if [[ -n "${IMAGE_TAGS}" ]]; then
             IFS="|" read -ra parts <<< "$IMAGE_TAG"
             ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${parts[0]}" --target "${parts[1]}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
         else
-            # Default target for Debian is 'ci'
+            # Default target for Debian is 'ci' (includes bazel for builds)
             ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_TAG}" --target ci --platform "${BUILD_TOOLS_PLATFORMS}" --push
         fi
     done

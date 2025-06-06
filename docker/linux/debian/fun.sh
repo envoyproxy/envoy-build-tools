@@ -13,7 +13,7 @@ COMMON_PACKAGES=(
     apt-transport-https
     ca-certificates)
 DEV_PACKAGES=()
-CI_PACKAGES=(libtinfo5)
+CI_PACKAGES=()
 DEBIAN_PACKAGES=(
     aspell
     aspell-en
@@ -160,6 +160,11 @@ install_devel () {
 install () {
     apt-get -qq update -y
     apt-get -qq install -y --no-install-recommends "${CI_PACKAGES[@]}"
+}
+
+install_worker () {
+    apt-get -qq update -y
+    apt-get -qq install -y --no-install-recommends libtinfo5
 }
 
 install_bazelisk() {
