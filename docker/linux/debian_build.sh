@@ -3,7 +3,7 @@
 set -o pipefail
 
 # Debian-specific build configuration
-DEBIAN_DOCKER_VARIANTS=("ci" "devel" "mobile" "test")
+DEBIAN_DOCKER_VARIANTS=("ci" "devtools" "mobile" "test")
 IMAGE_TAGS=${IMAGE_TAGS:-}
 OS_DISTRO="debian"
 
@@ -42,7 +42,7 @@ build_and_push_variants () {
         if [[ "$variant" == "test" || "$variant" == "ci" ]]; then
             platform="linux/amd64,linux/arm64"
         else
-            # devel and mobile are amd64 only (matching original behavior for full/mobile)
+            # devtools and mobile are amd64 only (matching original behavior for full/mobile)
             platform="linux/amd64"
         fi
         
