@@ -49,7 +49,6 @@ CI_PACKAGES=(
     sudo)
 UBUNTU_PACKAGES=(
     automake
-    bc
     byobu
     bzip2
     curl
