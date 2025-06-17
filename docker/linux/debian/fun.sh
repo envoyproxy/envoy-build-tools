@@ -11,13 +11,15 @@ APT_KEYS_MOBILE=(
     "$APT_KEY_AZUL")
 COMMON_PACKAGES=(
     apt-transport-https
-    ca-certificates)
+    ca-certificates
+    libperl5.32
+    libtinfo5
+    patch)
 DEV_PACKAGES=()
 CI_PACKAGES=()
 DEBIAN_PACKAGES=(
     aspell
     aspell-en
-    automake
     byobu
     bzip2
     curl
@@ -34,8 +36,6 @@ DEBIAN_PACKAGES=(
     libffi-dev
     libncurses-dev
     libssl-dev
-    make
-    patch
     rpm
     rsync
     skopeo
@@ -140,7 +140,7 @@ install_devel () {
     LSB_RELEASE="$(lsb_release -cs)"
     APT_REPOS=(
         "[arch=${DEB_ARCH}] https://download.docker.com/linux/debian ${LSB_RELEASE} stable"
-        "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_12/ /")
+        "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_11/ /")
 
     apt-get -qq install -y --no-install-recommends wget gnupg2 gpg-agent software-properties-common
     add_apt_key "${APT_KEY_DOCKER}"
@@ -159,11 +159,6 @@ install_devel () {
 install () {
     apt-get -qq update -y
     apt-get -qq install -y --no-install-recommends "${CI_PACKAGES[@]}"
-}
-
-install_worker () {
-    apt-get -qq update -y
-    apt-get -qq install -y --no-install-recommends libtinfo5
 }
 
 install_bazelisk() {

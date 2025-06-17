@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim@sha256:90522eeb7e5923ee2b871c639059537b30521272f10ca86fdbbbb2b75a8c40cd AS env
+FROM debian:bullseye-slim@sha256:779034981fec838da124ff6ab9211499ba5d4e769dabdfd6c42c6ae2553b9a3b AS worker
 ARG DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-ec"]
 RUN --mount=type=tmpfs,target=/var/cache/apt \
@@ -9,7 +9,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     && install_base
 
 
-FROM env AS bazelisk
+FROM worker AS bazelisk
 ARG BAZELISK_SHA256SUM=ce52caa51ef9e509fb6b7e5ad892e5cf10feb0794b0aed4d2f36adb00a1a2779 \
     BAZELISK_SHA256SUM_ARM64=6070bf70915e92b3a5ce8eee6f4a8a0968bb350be2a98b80b0fd2fc13ce8a254 \
     BAZELISK_VERSION=1.18.0
@@ -17,15 +17,6 @@ RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
     --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
     . ./debian/fun.sh \
     && install_bazelisk
-
-
-FROM env AS worker
-RUN --mount=type=tmpfs,target=/var/cache/apt \
-    --mount=type=tmpfs,target=/var/lib/apt/lists \
-    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
-    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
-    . ./debian/fun.sh \
-    && install_worker
 
 
 FROM worker AS ci
