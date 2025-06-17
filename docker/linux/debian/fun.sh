@@ -18,7 +18,6 @@ DEBIAN_PACKAGES=(
     aspell
     aspell-en
     automake
-    bc
     byobu
     bzip2
     curl
