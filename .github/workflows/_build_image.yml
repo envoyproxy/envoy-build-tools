@@ -47,7 +47,7 @@ jobs:
     runs-on: ${{ inputs.host_platform }}
     name: Build and test Docker image
     steps:
-    - uses: envoyproxy/toolshed/gh-actions/diskspace@actions-v0.3.17
+    - uses: envoyproxy/toolshed/gh-actions/diskspace@actions-v0.3.18
       name: 'Free disk space'
     - name: 'Checkout repository'
       uses: actions/checkout@v4
