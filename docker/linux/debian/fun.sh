@@ -12,7 +12,6 @@ APT_KEYS_MOBILE=(
 COMMON_PACKAGES=(
     apt-transport-https
     ca-certificates
-    libperl5.32
     libtinfo5
     patch)
 DEV_PACKAGES=()
