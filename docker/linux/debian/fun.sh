@@ -161,6 +161,7 @@ install_devel () {
 install () {
     apt-get -qq update -y
     apt-get -qq install -y --no-install-recommends "${CI_PACKAGES[@]}"
+    create_user
 }
 
 install_bazelisk() {
@@ -177,9 +178,4 @@ create_user() {
         -m -d "/home/$USER_NAME" \
         -s /bin/bash \
         "$USER_NAME"
-}
-
-install_worker() {
-    install_bazelisk
-    create_user
 }
