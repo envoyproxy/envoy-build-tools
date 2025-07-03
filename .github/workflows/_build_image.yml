@@ -23,9 +23,15 @@ on:
         type: string
         required: true
 
-      host_platform:
+      host-platform:
         type: string
-        default: ubuntu-22.04
+        required: true
+      target-platforms:
+        type: string
+        required: true
+      runs-on:
+        type: string
+        required: true
 
       go_version:
         type: string
@@ -38,14 +44,16 @@ on:
         type: string
         default:
 
+
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.distro }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ inputs.distro }}-${{ inputs.host-platform }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
   image:
-    runs-on: ${{ inputs.host_platform }}
-    name: Build and test Docker image
+    name: |
+      [${{ inputs.host-platform }}] Build and test Docker image
+    runs-on: ${{ inputs.runs-on }}
     steps:
     - uses: envoyproxy/toolshed/gh-actions/diskspace@actions-v0.3.22
       name: 'Free disk space'
@@ -63,6 +71,7 @@ jobs:
       name: Build (${{ inputs.image_prefix }}${{ inputs.distro }}@${{ steps.container.outputs.tag }})
       shell: bash
       env:
+        BUILD_TOOLS_PLATFORMS: ${{ inputs.target-platforms  }}
         OS_FAMILY: ${{ inputs.os_family }}
         SOURCE_BRANCH: ${{ github.ref }}
         DOCKERHUB_USERNAME: ${{ secrets.dockerhub_username }}

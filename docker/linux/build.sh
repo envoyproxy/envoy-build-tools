@@ -6,16 +6,6 @@ UBUNTU_DOCKER_VARIANTS=("ci" "mobile" "test")
 IMAGE_TAGS=${IMAGE_TAGS:-}
 
 
-# Setting environments for buildx tools
-config_env() {
-    # Install QEMU emulators
-    docker run --rm --privileged tonistiigi/binfmt --install all
-
-    # Remove older build instance
-    docker buildx rm envoy-build-tools-builder &> /dev/null || :
-    docker buildx create --use --name envoy-build-tools-builder --platform "${BUILD_TOOLS_PLATFORMS}"
-}
-
 [[ -z "${OS_DISTRO}" ]] && OS_DISTRO="ubuntu"
 [[ -z "${IMAGE_NAME}" ]] && IMAGE_NAME="envoyproxy/envoy-build-${OS_DISTRO}"
 
@@ -27,7 +17,28 @@ if [[ -z "${BUILD_TOOLS_PLATFORMS}" ]]; then
     fi
 fi
 
-ci_log_run config_env
+HOST_ARCH="$(uname -m)"
+MULTI_ARCH=
+CROSS_ARCH=
+
+if [[ "$BUILD_TOOLS_PLATFORMS" == *","* ]]; then
+    MULTI_ARCH=true
+elif [[ "$HOST_ARCH" == "x86_64" && "$BUILD_TOOLS_PLATFORMS" != "linux/amd64" ]]; then
+    CROSS_ARCH=true
+elif [[ "$HOST_ARCH" == "aarch64" && "$BUILD_TOOLS_PLATFORMS" != "linux/arm64" ]]; then
+    CROSS_ARCH=true
+fi
+
+# Setting environments for buildx tools
+config_env() {
+    if [[ -n "$MULTI_ARCH" || -n "$CROSS_ARCH" ]]; then
+        # Install QEMU emulators
+        docker run --rm --privileged tonistiigi/binfmt --install all
+    fi
+    # Remove older build instance
+    docker buildx rm envoy-build-tools-builder &> /dev/null || :
+    docker buildx create --use --name envoy-build-tools-builder --platform "${BUILD_TOOLS_PLATFORMS}"
+}
 
 # TODO(phlax): add (json) build images config
 build_and_push_variants () {
@@ -44,10 +55,12 @@ build_and_push_variants () {
         fi
 
         if [[ "$variant" == "test" || "$variant" == "ci" ]]; then
-            platform="linux/amd64,linux/arm64"
-        else
-            # Only build variants for linux/amd64
+            platform="$BUILD_TOOLS_PLATFORMS"
+        elif [[ "$BUILD_TOOLS_PLATFORMS" == *"linux/amd64"* ]]; then
+            # devtools and mobile are amd64 only (matching original behavior for full/mobile)
             platform="linux/amd64"
+        else
+            continue
         fi
         ci_log_run docker buildx build . \
                    -f "${OS_DISTRO}/Dockerfile" \
@@ -57,6 +70,8 @@ build_and_push_variants () {
                    "${push_arg[@]}"
     done
 }
+
+ci_log_run config_env
 
 ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target full --platform "${BUILD_TOOLS_PLATFORMS}"
 
@@ -76,7 +91,7 @@ if [[ -n "${IMAGE_TAGS}" ]]; then
     done
 fi
 
-if [[ "$LOAD_IMAGE" == "true" ]]; then
+if [[ "$LOAD_IMAGE" == "true" && "$BUILD_TOOLS_PLATFORMS" == *"linux/amd64"*  ]]; then
     # Testing after push to save CI time because this invalidates arm64 cache
     ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --platform "linux/amd64" --load
 fi
