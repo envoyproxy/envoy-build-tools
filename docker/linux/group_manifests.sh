@@ -30,14 +30,16 @@ append_variant () {
 
 for repo in "${IMAGE_REPOS[@]}"; do
     for variant in "${VARIANTS[@]}"; do
-        vflags=()
+        tags=()
         for arch in "${ARCHES[@]}"; do
             while read -r tag; do
                 if [[ -n "$tag" ]]; then
-                    vflags+=("$tag")
+                    tags+=("$tag")
                 fi
             done < <(append_variant "$repo" "$variant" "$arch")
         done
-        docker buildx imagetools create --tag "${repo}:${variant}-${TAG_SHA}" "${vflags[@]}"
+        if [[ "${#tags[@]}" -gt 0 ]]; then
+            docker buildx imagetools create --tag "${repo}:${variant}-${TAG_SHA}" "${tags[@]}"
+        fi
     done
 done
