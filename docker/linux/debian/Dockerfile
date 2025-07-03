@@ -12,11 +12,14 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
 FROM worker AS bazelisk
 ARG BAZELISK_SHA256SUM=ce52caa51ef9e509fb6b7e5ad892e5cf10feb0794b0aed4d2f36adb00a1a2779 \
     BAZELISK_SHA256SUM_ARM64=6070bf70915e92b3a5ce8eee6f4a8a0968bb350be2a98b80b0fd2fc13ce8a254 \
-    BAZELISK_VERSION=1.18.0
+    BAZELISK_VERSION=1.18.0 \
+    USER_NAME \
+    USER_ID \
+    GROUP_ID
 RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
     --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
     . ./debian/fun.sh \
-    && install_bazelisk
+    && install_worker
 
 
 FROM worker AS ci

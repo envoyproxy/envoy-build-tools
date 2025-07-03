@@ -48,6 +48,9 @@ DEBIAN_PACKAGES=(
     unzip
     xz-utils
     zip)
+GROUP_ID="${GROUP_ID:-${USER_ID:-1000}}"
+USER_ID="${USER_ID:-1000}"
+USER_NAME="${USER_NAME:-envoybuild}"
 
 
 # This is used for mobile installs - we need to add the key properly
@@ -165,4 +168,19 @@ install_bazelisk() {
     apt-get -qq update
     apt-get -qq install -y --no-install-recommends wget
     install_build_tools
+}
+
+create_user() {
+    groupadd -g "$GROUP_ID" "$USER_NAME"
+    useradd \
+        -u "$USER_ID" \
+        -g "$GROUP_ID" \
+        -m -d "/home/$USER_NAME" \
+        -s /bin/bash \
+        "$USER_NAME"
+}
+
+install_worker() {
+    install_bazelisk
+    create_user
 }
