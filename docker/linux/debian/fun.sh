@@ -50,7 +50,7 @@ DEBIAN_PACKAGES=(
 GROUP_ID="${GROUP_ID:-${USER_ID:-1000}}"
 USER_ID="${USER_ID:-1000}"
 USER_NAME="${USER_NAME:-envoybuild}"
-
+WORKER_PACKAGES=(autoconf automake libtool m4)
 
 # This is used for mobile installs - we need to add the key properly
 add_ubuntu_keys () {
@@ -91,6 +91,8 @@ install_base () {
     # Install base packages first
     echo "Installing common packages..."
     apt_install "${COMMON_PACKAGES[@]}"
+
+    apt_install "${WORKER_PACKAGES[@]}"
 
     # Note: No development tools installed in base layer
     # GCC, git, build-essential now installed in devel layer
