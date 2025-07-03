@@ -20,10 +20,14 @@ CROSS_ARCH=
 
 if [[ "$BUILD_TOOLS_PLATFORMS" == *","* ]]; then
     MULTI_ARCH=true
-elif [[ "$HOST_ARCH" == "x86_64" && "$BUILD_TOOLS_PLATFORMS" != "linux/amd64" ]]; then
-    CROSS_ARCH=true
-elif [[ "$HOST_ARCH" == "aarch64" && "$BUILD_TOOLS_PLATFORMS" != "linux/arm64" ]]; then
-    CROSS_ARCH=true
+else
+    ARCH_NAME="$(echo "${BUILD_TOOLS_PLATFORMS}" | cut -d/ -f1)"
+    ARCH_SUFFIX="-$ARCH_NAME"
+    if [[ "$HOST_ARCH" == "x86_64" && "$BUILD_TOOLS_PLATFORMS" != "linux/amd64" ]]; then
+        CROSS_ARCH=true
+    elif [[ "$HOST_ARCH" == "aarch64" && "$BUILD_TOOLS_PLATFORMS" != "linux/arm64" ]]; then
+        CROSS_ARCH=true
+    fi
 fi
 
 # Setting environments for buildx tools
@@ -61,7 +65,7 @@ build_and_push_variants () {
         fi
         ci_log_run docker buildx build . \
                    -f "${OS_DISTRO}/Dockerfile" \
-                   -t "${IMAGE_NAME}:${variant}-${CONTAINER_TAG}" \
+                   -t "${IMAGE_NAME}:${variant}-${CONTAINER_TAG}${ARCH_SUFFIX}" \
                    --target "${variant}" \
                    --platform "$platform" \
                    "${push_arg[@]}"
@@ -72,7 +76,7 @@ build_and_push_variants () {
 ci_log_run config_env
 
 # Default target for Debian is 'ci' (includes bazel for builds)
-ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target ci --platform "${BUILD_TOOLS_PLATFORMS}"
+ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}${ARCH_SUFFIX}" --target ci --platform "${BUILD_TOOLS_PLATFORMS}"
 
 if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
     # variants are only pushed for the dockerhub image (not other `IMAGE_TAGS`)
@@ -83,14 +87,14 @@ if [[ -n "${IMAGE_TAGS}" ]]; then
     for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
         if [[ "$IMAGE_TAG" == *"|"* ]]; then
             IFS="|" read -ra parts <<< "$IMAGE_TAG"
-            ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${parts[0]}" --target "${parts[1]}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
+            ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${parts[0]}${ARCH_SUFFIX}" --target "${parts[1]}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
         else
             # Default target for Debian is 'ci' (includes bazel for builds)
-            ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_TAG}" --target ci --platform "${BUILD_TOOLS_PLATFORMS}" --push
+            ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_TAG}${ARCH_SUFFIX}" --target ci --platform "${BUILD_TOOLS_PLATFORMS}" --push
         fi
     done
 fi
 
 if [[ "$LOAD_IMAGE" == "true" && "$BUILD_TOOLS_PLATFORMS" == *"linux/amd64"*  ]]; then
-    ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target ci --platform "linux/amd64" --load
+    ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}${ARCH_SUFFIX}" --target ci --platform "linux/amd64" --load
 fi
