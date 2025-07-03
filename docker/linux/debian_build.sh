@@ -7,16 +7,6 @@ DEBIAN_DOCKER_VARIANTS=("worker" "ci" "devtools" "mobile" "test")
 IMAGE_TAGS=${IMAGE_TAGS:-}
 OS_DISTRO="debian"
 
-# Setting environments for buildx tools
-config_env() {
-    # Install QEMU emulators
-    docker run --rm --privileged tonistiigi/binfmt --install all
-
-    # Remove older build instance
-    docker buildx rm envoy-build-tools-builder &> /dev/null || :
-    docker buildx create --use --name envoy-build-tools-builder --platform "${BUILD_TOOLS_PLATFORMS}"
-}
-
 [[ -z "${IMAGE_NAME}" ]] && IMAGE_NAME="envoyproxy/envoy-build"
 
 # Debian uses multi-arch builds
@@ -24,12 +14,34 @@ if [[ -z "${BUILD_TOOLS_PLATFORMS}" ]]; then
     export BUILD_TOOLS_PLATFORMS=linux/arm64,linux/amd64
 fi
 
-ci_log_run config_env
+HOST_ARCH="$(uname -m)"
+MULTI_ARCH=
+CROSS_ARCH=
+
+if [[ "$BUILD_TOOLS_PLATFORMS" == *","* ]]; then
+    MULTI_ARCH=true
+elif [[ "$HOST_ARCH" == "x86_64" && "$BUILD_TOOLS_PLATFORMS" != "linux/amd64" ]]; then
+    CROSS_ARCH=true
+elif [[ "$HOST_ARCH" == "aarch64" && "$BUILD_TOOLS_PLATFORMS" != "linux/arm64" ]]; then
+    CROSS_ARCH=true
+fi
+
+# Setting environments for buildx tools
+config_env() {
+    if [[ -n "$MULTI_ARCH" || -n "$CROSS_ARCH" ]]; then
+        # Install QEMU emulators
+        docker run --rm --privileged tonistiigi/binfmt --install all
+    fi
+
+    # Remove older build instance
+    docker buildx rm envoy-build-tools-builder &> /dev/null || :
+    docker buildx create --use --name envoy-build-tools-builder --platform "${BUILD_TOOLS_PLATFORMS}"
+}
 
 # Build Debian variants with specific platform logic
 build_and_push_variants () {
     local variant="" platform push_arg
-    
+
     for variant in "${DEBIAN_DOCKER_VARIANTS[@]}"; do
         push_arg=()
         if [[ -n "${IMAGE_TAGS}" && "$variant" != "test" ]]; then
@@ -40,12 +52,13 @@ build_and_push_variants () {
 
         # Platform logic: worker, ci and test get multi-arch, others get amd64 only
         if [[ "$variant" == "test" || "$variant" == "ci" || "$variant" == "worker" ]]; then
-            platform="linux/amd64,linux/arm64"
-        else
+            platform="${BUILD_TOOLS_PLATFORMS}"
+        elif [[ "$BUILD_TOOLS_PLATFORMS" == *"linux/amd64"* ]]; then
             # devtools and mobile are amd64 only (matching original behavior for full/mobile)
             platform="linux/amd64"
+        else
+            continue
         fi
-        
         ci_log_run docker buildx build . \
                    -f "${OS_DISTRO}/Dockerfile" \
                    -t "${IMAGE_NAME}:${variant}-${CONTAINER_TAG}" \
@@ -54,6 +67,9 @@ build_and_push_variants () {
                    "${push_arg[@]}"
     done
 }
+
+
+ci_log_run config_env
 
 # Default target for Debian is 'ci' (includes bazel for builds)
 ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target ci --platform "${BUILD_TOOLS_PLATFORMS}"
@@ -75,7 +91,6 @@ if [[ -n "${IMAGE_TAGS}" ]]; then
     done
 fi
 
-if [[ "$LOAD_IMAGE" == "true" ]]; then
-    # Testing after push to save CI time because this invalidates arm64 cache
+if [[ "$LOAD_IMAGE" == "true" && "$BUILD_TOOLS_PLATFORMS" == *"linux/amd64"*  ]]; then
     ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}" --target ci --platform "linux/amd64" --load
 fi
