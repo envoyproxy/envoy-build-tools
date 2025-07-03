@@ -21,7 +21,7 @@ CROSS_ARCH=
 if [[ "$BUILD_TOOLS_PLATFORMS" == *","* ]]; then
     MULTI_ARCH=true
 else
-    ARCH_NAME="$(echo "${BUILD_TOOLS_PLATFORMS}" | cut -d/ -f1)"
+    ARCH_NAME="$(echo "${BUILD_TOOLS_PLATFORMS}" | cut -d/ -f2)"
     ARCH_SUFFIX="-$ARCH_NAME"
     if [[ "$HOST_ARCH" == "x86_64" && "$BUILD_TOOLS_PLATFORMS" != "linux/amd64" ]]; then
         CROSS_ARCH=true
