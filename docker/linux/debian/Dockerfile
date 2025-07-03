@@ -12,17 +12,17 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
 FROM worker AS bazelisk
 ARG BAZELISK_SHA256SUM=6539c12842ad76966f3d493e8f80d67caa84ec4a000e220d5459833c967c12bc \
     BAZELISK_SHA256SUM_ARM64=54f85ef4c23393f835252cc882e5fea596e8ef3c4c2056b059f8067cd19f0351 \
-    BAZELISK_VERSION=1.26.0 \
-    USER_NAME \
-    USER_ID \
-    GROUP_ID
+    BAZELISK_VERSION=1.26.0
 RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
     --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
     . ./debian/fun.sh \
-    && install_worker
+    && install_bazelisk
 
 
 FROM worker AS ci
+ARG USER_NAME \
+    USER_ID \
+    GROUP_ID
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
@@ -33,9 +33,9 @@ COPY --from=bazelisk /usr/local/bin/bazel /usr/local/bin/bazel
 
 
 FROM ci AS devtools
-ARG BAZELISK_SHA256SUM=ce52caa51ef9e509fb6b7e5ad892e5cf10feb0794b0aed4d2f36adb00a1a2779 \
-    BAZELISK_SHA256SUM_ARM64=6070bf70915e92b3a5ce8eee6f4a8a0968bb350be2a98b80b0fd2fc13ce8a254 \
-    BAZELISK_VERSION=1.18.0 \
+ARG BAZELISK_SHA256SUM=6539c12842ad76966f3d493e8f80d67caa84ec4a000e220d5459833c967c12bc \
+    BAZELISK_SHA256SUM_ARM64=54f85ef4c23393f835252cc882e5fea596e8ef3c4c2056b059f8067cd19f0351 \
+    BAZELISK_VERSION=1.26.0 \
     APT_KEY_K8S=https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/Debian_12/Release.key \
     APT_KEY_DOCKER=https://download.docker.com/linux/debian/gpg
 RUN --mount=type=tmpfs,target=/var/cache/apt \
