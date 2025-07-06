@@ -48,11 +48,14 @@ DEBIAN_PACKAGES=(
     xz-utils
     zip)
 DOCKER_PACKAGES=(
+    containerd.io
     curl
     expect
     docker-buildx-plugin
+    docker-ce
     docker-ce-cli
     docker-compose-plugin
+    fuse-overlayfs
     skopeo)
 GROUP_ID="${GROUP_ID:-${USER_ID:-1000}}"
 USER_ID="${USER_ID:-1000}"
