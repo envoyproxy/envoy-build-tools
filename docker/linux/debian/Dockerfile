@@ -30,6 +30,8 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     . ./debian/fun.sh \
     && install
 COPY --from=bazelisk /usr/local/bin/bazel /usr/local/bin/bazel
+COPY debian/entrypoint.sh /entrypoint.sh
+ENTRYPOINT /entrypoint.sh
 
 
 FROM ci AS devtools

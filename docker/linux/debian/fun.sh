@@ -15,7 +15,7 @@ COMMON_PACKAGES=(
     libtinfo5
     patch)
 DEV_PACKAGES=()
-CI_PACKAGES=(git)
+CI_PACKAGES=(git gosu)
 DEBIAN_PACKAGES=(
     aspell
     aspell-en
