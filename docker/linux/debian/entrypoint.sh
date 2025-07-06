@@ -4,8 +4,9 @@ set -e -o pipefail
 
 usermod -u "${BUILD_UID}" envoybuild
 chown envoybuild:envoybuild /home/envoybuild
-chown envoybuild:envoybuild /home/envoybuild/.cache
-
+if [[ -e /home/envoybuild/.cache ]]; then
+    chown envoybuild:envoybuild /home/envoybuild/.cache
+fi
 if [[ -f /entrypoint-extra.sh ]]; then
     . /entrypoint-extra.sh
 fi
