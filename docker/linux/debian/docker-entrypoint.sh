@@ -13,7 +13,7 @@ echo "Docker socket found with GID: $DOCKER_GID (group: $DOCKER_GROUP)"
 EXISTING_GROUP=$(getent group $DOCKER_GID | cut -d: -f1)
 
 mkdir -p /home/envoybuild/.docker
-usermod -u "${BUILD_UID}" envoybuild
+usermod -u "${BUILD_UID}" envoybuild &> /dev/null
 chown envoybuild:envoybuild /home/envoybuild
 if [[ -e /home/envoybuild/.cache ]]; then
     chown envoybuild:envoybuild /home/envoybuild/.cache
