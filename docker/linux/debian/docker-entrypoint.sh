@@ -15,7 +15,9 @@ EXISTING_GROUP=$(getent group $DOCKER_GID | cut -d: -f1)
 mkdir -p /home/envoybuild/.docker
 usermod -u "${BUILD_UID}" envoybuild
 chown envoybuild:envoybuild /home/envoybuild
-chown envoybuild:envoybuild /home/envoybuild/.cache
+if [[ -e /home/envoybuild/.cache ]]; then
+    chown envoybuild:envoybuild /home/envoybuild/.cache
+fi
 chown envoybuild:envoybuild /home/envoybuild/.docker
 
 if [ -z "$EXISTING_GROUP" ]; then
