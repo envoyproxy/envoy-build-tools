@@ -60,6 +60,18 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
 COPY debian/docker-entrypoint.sh /entrypoint.sh
 
 
+FROM ci AS llvm
+ARG LLVM_VERSION=18.1.8 \
+    LLVM_DISTRO=ubuntu-18.04
+RUN --mount=type=tmpfs,target=/var/cache/apt \
+    --mount=type=tmpfs,target=/var/lib/apt/lists \
+    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    . ./debian/fun.sh \
+    && install_llvm
+COPY debian/llvm-entrypoint.sh /entrypoint.sh
+
+
 FROM devtools AS test
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
