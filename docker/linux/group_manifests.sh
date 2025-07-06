@@ -8,7 +8,7 @@ if [[ -z "$TAG_SHA" ]]; then
     TAG_SHA="$(git log -1 --pretty=format:"%H" .)"
 fi
 
-VARIANTS=(ci worker devtools mobile test)
+VARIANTS=(ci worker devtools docker mobile test)
 ARCHES=(amd64 arm64)
 
 exists () {
