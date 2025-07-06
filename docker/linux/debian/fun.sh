@@ -47,6 +47,13 @@ DEBIAN_PACKAGES=(
     unzip
     xz-utils
     zip)
+DOCKER_PACKAGES=(
+    curl
+    expect
+    docker-buildx-plugin
+    docker-ce-cli
+    docker-compose-plugin
+    skopeo)
 GROUP_ID="${GROUP_ID:-${USER_ID:-1000}}"
 USER_ID="${USER_ID:-1000}"
 USER_NAME="${USER_NAME:-envoybuild}"
@@ -170,6 +177,26 @@ install_bazelisk() {
     apt-get -qq update
     apt-get -qq install -y --no-install-recommends wget
     install_build_tools
+}
+
+install_docker() {
+    apt-get -qq update -y
+    apt-get -qq install -y --no-install-recommends locales lsb-release
+    if ! locale -a | grep -q en_US.utf8; then
+        localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+    fi
+    LSB_RELEASE="$(lsb_release -cs)"
+    APT_REPOS=(
+        "[arch=${DEB_ARCH}] https://download.docker.com/linux/debian ${LSB_RELEASE} stable"
+        "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_11/ /")
+    apt-get -qq install -y --no-install-recommends wget gnupg2 gpg-agent software-properties-common
+    add_apt_key "${APT_KEY_DOCKER}"
+    add_apt_k8s_key "${APT_KEY_K8S}"
+    add_apt_repos "${APT_REPOS[@]}"
+    apt-get -qq update
+    apt-get -qq install -y --no-install-recommends "${DOCKER_PACKAGES[@]}"
+    apt-get -qq update
+    apt-get -qq upgrade -y
 }
 
 create_user() {

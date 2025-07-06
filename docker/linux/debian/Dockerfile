@@ -48,6 +48,18 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     && install_devel
 
 
+FROM ci AS docker
+ARG APT_KEY_K8S=https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/Debian_12/Release.key \
+    APT_KEY_DOCKER=https://download.docker.com/linux/debian/gpg
+RUN --mount=type=tmpfs,target=/var/cache/apt \
+    --mount=type=tmpfs,target=/var/lib/apt/lists \
+    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    . ./debian/fun.sh \
+    && install_docker
+COPY debian/docker-entrypoint.sh /entrypoint.sh
+
+
 FROM devtools AS test
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
