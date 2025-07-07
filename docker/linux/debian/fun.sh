@@ -50,13 +50,17 @@ DEBIAN_PACKAGES=(
 DOCKER_PACKAGES=(
     containerd.io
     curl
-    expect
     docker-buildx-plugin
     docker-ce
     docker-ce-cli
     docker-compose-plugin
+    expect
     fuse-overlayfs
-    skopeo)
+    gettext
+    jq
+    netcat-openbsd
+    skopeo
+    whois)
 GROUP_ID="${GROUP_ID:-${USER_ID:-1000}}"
 USER_ID="${USER_ID:-1000}"
 USER_NAME="${USER_NAME:-envoybuild}"
@@ -190,6 +194,7 @@ install_docker () {
     fi
     LSB_RELEASE="$(lsb_release -cs)"
     APT_REPOS=(
+        "http://deb.debian.org/debian bullseye-backports main"
         "[arch=${DEB_ARCH}] https://download.docker.com/linux/debian ${LSB_RELEASE} stable"
         "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_11/ /")
     apt-get -qq install -y --no-install-recommends wget gnupg2 gpg-agent software-properties-common
@@ -198,6 +203,7 @@ install_docker () {
     add_apt_repos "${APT_REPOS[@]}"
     apt-get -qq update
     apt-get -qq install -y --no-install-recommends "${DOCKER_PACKAGES[@]}"
+    apt-get -qq install -y --no-install-recommends -t bullseye-backports yq
     apt-get -qq update
     apt-get -qq upgrade -y
 }
