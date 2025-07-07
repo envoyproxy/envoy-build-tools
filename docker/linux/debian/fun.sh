@@ -49,7 +49,6 @@ DEBIAN_PACKAGES=(
     zip)
 DOCKER_PACKAGES=(
     containerd.io
-    curl
     docker-buildx-plugin
     docker-ce
     docker-ce-cli
@@ -203,7 +202,7 @@ install_docker () {
     add_apt_repos "${APT_REPOS[@]}"
     apt-get -qq update
     apt-get -qq install -y --no-install-recommends "${DOCKER_PACKAGES[@]}"
-    apt-get -qq install -y --no-install-recommends -t bullseye-backports yq
+    apt-get -qq install -y --no-install-recommends -t bullseye-backports curl yq
     apt-get -qq update
     apt-get -qq upgrade -y
 }
