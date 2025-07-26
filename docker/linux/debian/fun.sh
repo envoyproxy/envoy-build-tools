@@ -193,7 +193,7 @@ install_docker () {
     fi
     LSB_RELEASE="$(lsb_release -cs)"
     APT_REPOS=(
-        "http://deb.debian.org/debian bullseye-backports main"
+        "http://archive.debian.org/debian bullseye-backports main"
         "[arch=${DEB_ARCH}] https://download.docker.com/linux/debian ${LSB_RELEASE} stable"
         "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_11/ /")
     apt-get -qq install -y --no-install-recommends wget gnupg2 gpg-agent software-properties-common
