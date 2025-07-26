@@ -24,7 +24,7 @@ CROSS_ARCH=
 if [[ "$BUILD_TOOLS_PLATFORMS" == *","* ]]; then
     MULTI_ARCH=true
 else
-    ARCH_NAME="$(echo "${BUILD_TOOLS_PLATFORMS}" | cut -d/ -f1)"
+    ARCH_NAME="$(echo "${BUILD_TOOLS_PLATFORMS}" | cut -d/ -f2)"
     ARCH_SUFFIX="-$ARCH_NAME"
     if [[ "$HOST_ARCH" == "x86_64" && "$BUILD_TOOLS_PLATFORMS" != "linux/amd64" ]]; then
         CROSS_ARCH=true
@@ -52,7 +52,10 @@ build_and_push_variants () {
     local variant="" platform push_arg
     for variant in "${UBUNTU_DOCKER_VARIANTS[@]}"; do
         push_arg=()
-        if [[ -n "${IMAGE_TAGS}" && "$variant" != "test" ]]; then
+        if [[ "${SAVE_OCI}" == "true" ]]; then
+            # Save to OCI format
+            push_arg+=(--output "type=oci,dest=${OCI_OUTPUT_DIR}/${OS_DISTRO}-${variant}-${CONTAINER_TAG}${ARCH_SUFFIX}.tar")
+        elif [[ -n "${IMAGE_TAGS}" && "$variant" != "test" ]]; then
             # Variants are only pushed to dockerhub currently, so if we are pushing images
             # just push the variants immediately.
             push_arg+=(--push)
@@ -77,14 +80,21 @@ build_and_push_variants () {
 
 ci_log_run config_env
 
-ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}${ARCH_SUFFIX}" --target full --platform "${BUILD_TOOLS_PLATFORMS}"
+# Build the full/main image first
+if [[ "${SAVE_OCI}" == "true" ]]; then
+    echo "Building OCI artifact to: ${OCI_OUTPUT_DIR}/${OS_DISTRO}-full-${CONTAINER_TAG}${ARCH_SUFFIX}.tar"
+    ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}${ARCH_SUFFIX}" --target full --platform "${BUILD_TOOLS_PLATFORMS}" \
+        --output "type=oci,dest=${OCI_OUTPUT_DIR}/${OS_DISTRO}-full-${CONTAINER_TAG}${ARCH_SUFFIX}.tar"
+else
+    ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}${ARCH_SUFFIX}" --target full --platform "${BUILD_TOOLS_PLATFORMS}"
+fi
 
 if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
     # variants are only pushed for the dockerhub image (not other `IMAGE_TAGS`)
     build_and_push_variants
 fi
 
-if [[ -n "${IMAGE_TAGS}" ]]; then
+if [[ "${SAVE_OCI}" != "true" ]] && [[ -n "${IMAGE_TAGS}" ]]; then
     for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
         if [[ "$IMAGE_TAG" == *"|"* ]]; then
             IFS="|" read -ra parts <<< "$IMAGE_TAG"
