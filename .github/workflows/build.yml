@@ -41,27 +41,70 @@ jobs:
     steps:
     - name: 'Checkout repository'
       uses: actions/checkout@v4
-    - uses: docker/login-action@v3
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
-    - name: 'Login to GCR'
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    - name: Get docker SHA
+      id: docker-sha
+      shell: bash
       run: |
-        echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" | base64 --decode | gcloud auth activate-service-account --key-file=-
-        gcloud auth configure-docker --quiet
-    - uses: docker/setup-buildx-action@v3
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
+        TAG_SHA=$(git log -1 --pretty=format:"%H" ./docker)
+        echo "sha=${TAG_SHA}" >> $GITHUB_OUTPUT
+
+    - name: Generate manifest configuration
+      id: config
+      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
       with:
-        path: ./oci-images
-    - name: Load images and create manifests
-      run: |
-        chmod +x ./docker/linux/load_and_push_manifests.sh
-        ./docker/linux/load_and_push_manifests.sh
-      env:
-        OCI_IMAGES_PATH: ./oci-images
-        PUSH_GCR_IMAGE: true
-        GCR_IMAGE_NAME: ${{ vars.GCR_IMAGE_NAME || 'envoy-build' }}
-        DRY_RUN: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
+        input: |
+          tag_sha: ${{ steps.docker-sha.outputs.sha }}
+          gcr_image_name: ${{ vars.GCR_IMAGE_NAME || 'envoy-build' }}
+          debian_variants: ["ci", "worker", "devtools", "docker", "llvm", "mobile", "test"]
+          ubuntu_variants: ["ci", "mobile", "test", "full"]
+        input-format: yaml
+        filter: |
+          .tag_sha as $tag_sha
+          | .gcr_image_name as $gcr_image_name
+          | {
+              manifests: (
+                # Debian manifests
+                [.debian_variants[] | {
+                  name: "envoy-build",
+                  tag: "\(.)-\($tag_sha)",
+                  registry: "docker.io/envoyproxy",
+                  architectures: ["amd64", "arm64"],
+                  "artifact-pattern": "oci-debian-{arch}/debian-\(.)-\($tag_sha)-{arch}.tar",
+                  "additional-tags": (if . == "ci" then [$tag_sha] else null end)
+                }] +
+                # Ubuntu manifests
+                [.ubuntu_variants[] | {
+                  name: "envoy-build-ubuntu",
+                  tag: "\(.)-\($tag_sha)",
+                  registry: "docker.io/envoyproxy",
+                  architectures: ["amd64", "arm64"],
+                  "artifact-pattern": "oci-ubuntu-{arch}/ubuntu-\(.)-\($tag_sha)-{arch}.tar",
+                  "additional-tags": (if . == "full" then [$tag_sha] else null end)
+                }] +
+                # GCR manifest (Ubuntu full only)
+                [{
+                  name: $gcr_image_name,
+                  tag: $tag_sha,
+                  registry: "gcr.io/envoy-ci",
+                  architectures: ["amd64", "arm64"],
+                  "artifact-pattern": "oci-ubuntu-{arch}/ubuntu-full-\($tag_sha)-{arch}.tar"
+                }]
+              ) | map(if ."additional-tags" == null then del(."additional-tags") else . end)
+            }
+        options: -c
+
+    - name: Display configuration
+      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
+      with:
+        input: ${{ steps.config.outputs.value }}
+        filter: .
+        print-output: true
+
+    - name: Collect and push OCI artifacts
+      uses: ./.github/actions/oci-collector
+      with:
+        manifest-config: ${{ steps.config.outputs.value }}
+        dry-run: ${{ github.event_name == 'pull_request' }}
+        dockerhub-username: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.DOCKERHUB_USERNAME || '' }}
+        dockerhub-password: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.DOCKERHUB_PASSWORD || '' }}
+        gcr-service-account-key: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.GCP_SERVICE_ACCOUNT_KEY || '' }}
