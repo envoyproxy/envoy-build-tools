@@ -54,6 +54,20 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    - name: Debug operations input
+      shell: bash
+      run: |
+        echo "::group::Operations to execute"
+        echo '${{ inputs.operations }}' | jq .
+        echo "::endgroup::"
+
+    - name: Initialize results file
+      shell: bash
+      run: |
+        echo '[]' > /tmp/regctl_results.json
+        echo "Results file initialized at: $(date)"
+        ls -la /tmp/regctl_results.json
+
     - name: Execute regctl operations
       uses: envoyproxy/toolshed/gh-actions/bson@actions-v0.3.23
       id: execute
@@ -91,62 +105,88 @@ runs:
             (if .type == "image-import" then
               "echo \"::group::Import \(.tag)\"\n" +
               "if [[ '\($dry_run)' == 'true' ]]; then\n" +
-              "    echo '[DRY RUN] Would import OCI archive '\(.source | @sh)' as '\(.tag | @sh)\n" +
+              "    echo '[DRY RUN] Would import OCI archive '\(.source | @sh)' as '\(.tag | @sh)'\n" +
               "    add_result 'image-import' '\(.tag)' true '[DRY RUN] Would import'\n" +
               "else\n" +
-              "    echo 'Importing OCI archive '\(.source | @sh)' as '\(.tag | @sh)\n" +
-              "    if regctl image import '\(.tag)' '\(.source)'; then\n" +
-              "        add_result 'image-import' '\(.tag)' true 'Successfully imported'\n" +
+              "    echo 'Importing OCI archive '\(.source | @sh)' to local OCI directory'\n" +
+              "    # Import to local ocidir:// instead of pushing to registry\n" +
+              "    LOCAL_TAG=$(echo '\(.tag)' | tr ':/' '__')\n" +
+              "    rm -rf \"/tmp/ocidir/${LOCAL_TAG}\" 2>/dev/null || true\n" +
+              "    mkdir -p \"/tmp/ocidir\"\n" +
+              "    if regctl image import \"ocidir:///tmp/ocidir:${LOCAL_TAG}\" '\(.source)'; then\n" +
+              "        add_result 'image-import' '\(.tag)' true 'Successfully imported to local OCI directory'\n" +
               "    else\n" +
-              "        add_result 'image-import' '\(.tag)' false 'Failed to import'\n" +
+              "        echo \"::error::Failed to import \(.source)\"\n" +
+              "        add_result 'image-import' '\(.tag)' false 'Failed to import - see logs above'\n" +
               (if $continue_on_error then "" else "        exit 1\n" end) +
               "    fi\n" +
               "fi\n" +
               "echo '::endgroup::'\n"
+            else empty end) +
 
             # Handle manifest-put
-            elif .type == "manifest-put" then
+            (if .type == "manifest-put" then
               "echo \"::group::Create manifest \(.tag)\"\n" +
               "if [[ '\($dry_run)' == 'true' ]]; then\n" +
-              "    echo '[DRY RUN] Would create manifest '\(.tag | @sh)' from: '\(.sources | join(" ") | @sh)\n" +
+              "    echo '[DRY RUN] Would create manifest '\(.tag | @sh)' from: '\(.sources | join(" ") | @sh)'\n" +
               "    add_result 'manifest-put' '\(.tag)' true '[DRY RUN] Would create manifest'\n" +
               "else\n" +
-              "    echo 'Creating manifest '\(.tag | @sh)' from: '\(.sources | join(" ") | @sh)\n" +
-              "    sources=(" + (.sources | map("'\(.)'" ) | join(" ")) + ")\n" +
-              "    if regctl manifest put '\(.tag)' ${sources[@]}; then\n" +
-              "        add_result 'manifest-put' '\(.tag)' true 'Successfully created manifest'\n" +
+              "    echo 'Creating manifest '\(.tag | @sh)' from local OCI references'\n" +
+              "    # Build list of local ocidir:// references\n" +
+              "    LOCAL_REFS=()\n" +
+              (.sources[] as $source |
+                "    LOCAL_TAG=$(echo '\($source)' | tr ':/' '__')\n" +
+                "    if [[ -d \"/tmp/ocidir/${LOCAL_TAG}\" ]]; then\n" +
+                "        LOCAL_REFS+=(\"ocidir:///tmp/ocidir:${LOCAL_TAG}\")\n" +
+                "        echo \"  Adding local reference: ocidir:///tmp/ocidir:${LOCAL_TAG}\"\n" +
+                "    else\n" +
+                "        echo \"  WARNING: No local OCI directory found for \($source)\"\n" +
+                "    fi\n"
+              ) +
+              "    if [[ ${#LOCAL_REFS[@]} -gt 0 ]]; then\n" +
+              "        echo 'Creating and pushing manifest with '${#LOCAL_REFS[@]}' architectures'\n" +
+              "        if regctl manifest put '\(.tag)' ${LOCAL_REFS[@]}; then\n" +
+              "            add_result 'manifest-put' '\(.tag)' true 'Successfully created and pushed manifest'\n" +
+              "        else\n" +
+              "            echo \"::error::Failed to create manifest \(.tag)\"\n" +
+              "            add_result 'manifest-put' '\(.tag)' false 'Failed to create manifest - see logs above'\n" +
+              (if $continue_on_error then "" else "            exit 1\n" end) +
+              "        fi\n" +
               "    else\n" +
-              "        add_result 'manifest-put' '\(.tag)' false 'Failed to create manifest'\n" +
+              "        add_result 'manifest-put' '\(.tag)' false 'No local references found'\n" +
               (if $continue_on_error then "" else "        exit 1\n" end) +
               "    fi\n" +
               "fi\n" +
               "echo '::endgroup::'\n"
+            else empty end) +
 
             # Handle image-copy
-            elif .type == "image-copy" then
+            (if .type == "image-copy" then
               "echo \"::group::Copy \(.source) to \(.destination)\"\n" +
               "if [[ '\($dry_run)' == 'true' ]]; then\n" +
-              "    echo '[DRY RUN] Would copy '\(.source | @sh)' to '\(.destination | @sh)\n" +
+              "    echo '[DRY RUN] Would copy '\(.source | @sh)' to '\(.destination | @sh)'\n" +
               "    add_result 'image-copy' '\(.destination)' true '[DRY RUN] Would copy'\n" +
               "else\n" +
-              "    echo 'Copying '\(.source | @sh)' to '\(.destination | @sh)\n" +
+              "    echo 'Copying '\(.source | @sh)' to '\(.destination | @sh)'\n" +
               "    if regctl image copy '\(.source)' '\(.destination)'; then\n" +
               "        add_result 'image-copy' '\(.destination)' true 'Successfully copied'\n" +
               "    else\n" +
-              "        add_result 'image-copy' '\(.destination)' false 'Failed to copy'\n" +
+              "        echo \"::error::Failed to copy \(.source) to \(.destination)\"\n" +
+              "        add_result 'image-copy' '\(.destination)' false 'Failed to copy - see logs above'\n" +
               (if $continue_on_error then "" else "        exit 1\n" end) +
               "    fi\n" +
               "fi\n" +
               "echo '::endgroup::'\n"
+            else empty end) +
 
             # Handle tag-delete
-            elif .type == "tag-delete" then
+            (if .type == "tag-delete" then
               "echo \"::group::Delete tag \(.tag)\"\n" +
               "if [[ '\($dry_run)' == 'true' ]]; then\n" +
-              "    echo '[DRY RUN] Would delete tag '\(.tag | @sh)\n" +
+              "    echo '[DRY RUN] Would delete tag '\(.tag | @sh)'\n" +
               "    add_result 'tag-delete' '\(.tag)' true '[DRY RUN] Would delete'\n" +
               "else\n" +
-              "    echo 'Deleting tag '\(.tag | @sh)\n" +
+              "    echo 'Deleting tag '\(.tag | @sh)'\n" +
               "    if regctl tag delete '\(.tag)' || true; then\n" +
               "        add_result 'tag-delete' '\(.tag)' true 'Successfully deleted or already gone'\n" +
               "    else\n" +
@@ -162,7 +202,22 @@ runs:
           ) +
 
           "\n# Output results\n" +
-          "cat \"$RESULTS_FILE\"\n"
+          "echo 'Operations completed. Results file contents:'\n" +
+          "if [[ -f \"$RESULTS_FILE\" ]]; then\n" +
+          "    cat \"$RESULTS_FILE\"\n" +
+          "else\n" +
+          "    echo 'ERROR: Results file not found!'\n" +
+          "    echo '[]' > \"$RESULTS_FILE\"\n" +
+          "    cat \"$RESULTS_FILE\"\n" +
+          "fi\n"
+
+    - name: Run operations script
+      shell: bash
+      run: |
+        # Execute the generated script
+        cat << 'EOF' | bash -ex
+        ${{ steps.execute.outputs.value }}
+        EOF
 
     - name: Read results
       id: results
@@ -192,3 +247,28 @@ runs:
         echo "success=$SUCCESS" >> $GITHUB_OUTPUT
         echo "failure=$FAILURE" >> $GITHUB_OUTPUT
       id: summary
+
+    - name: Display error summary
+      if: steps.summary.outputs.failure != '0'
+      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
+      with:
+        input: ${{ steps.results.outputs.value }}
+        filter: |
+          "::error::Operation failures detected!\n" +
+          "\n=== FAILED OPERATIONS ===\n" +
+          (map(select(.success | not) |
+            "  \(.type) \(.tag): \(.message)")
+          | join("\n")) +
+          "\n\n=== SUMMARY ===\n" +
+          "Total operations: " + (length | tostring) + "\n" +
+          "Successful: " + (map(select(.success)) | length | tostring) + "\n" +
+          "Failed: " + (map(select(.success | not)) | length | tostring)
+        options: -r
+        print-output: true
+
+    - name: Fail if any operations failed
+      if: steps.summary.outputs.failure != '0'
+      shell: bash
+      run: |
+        echo "::error::${{ steps.summary.outputs.failure }} operations failed"
+        exit 1
