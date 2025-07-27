@@ -7,12 +7,10 @@ inputs:
     description: 'Pattern to match artifact names (e.g., "oci-*")'
     required: false
     default: 'oci-*'
-
   artifacts-path:
     description: 'Path to download artifacts to'
     required: false
     default: './oci-images'
-
   manifest-config:
     description: |
       JSON configuration for manifests to create. Format:
@@ -29,22 +27,18 @@ inputs:
         ]
       }
     required: true
-
   dry-run:
     description: 'Run without actually pushing images'
     required: false
     default: 'false'
-
   dockerhub-username:
     description: 'Docker Hub username'
     required: false
     default: ''
-
   dockerhub-password:
     description: 'Docker Hub password'
     required: false
     default: ''
-
   gcr-service-account-key:
     description: 'GCP service account key (base64 encoded)'
     required: false
@@ -54,213 +48,188 @@ outputs:
   pushed-manifests:
     description: 'JSON array of pushed manifest tags'
     value: ${{ steps.final-pushed.outputs.value }}
-
   manifest-details:
     description: 'JSON object with detailed manifest information'
     value: ${{ steps.final-details.outputs.value }}
 
+
 runs:
   using: 'composite'
   steps:
-    - name: Install dependencies
-      shell: bash
-      run: |
-        # Install regctl
-        # Using fixed version 0.8.3 for compatibility with pre-built x86 binaries
-        echo "Installing regctl v0.8.3..."
-        curl -L https://github.com/regclient/regclient/releases/download/v0.8.3/regctl-linux-amd64 -o /tmp/regctl
-        chmod +x /tmp/regctl
-        sudo mv /tmp/regctl /usr/local/bin/regctl
-        regctl version
+  - name: Install regctl
+    uses: envoyproxy/toolshed/gh-actions/regctl/install@88e79ab6754da224a2b60f4dcad7c3cd10bec6d6
+  - name: Download OCI artifacts
+    uses: actions/download-artifact@v4
+    with:
+      pattern: ${{ inputs.artifacts-pattern }}
+      path: ${{ inputs.artifacts-path }}
+  - name: Authenticate regctl
+    uses: envoyproxy/toolshed/gh-actions/regctl/auth@dfe34f8e6900faae9e22f4ec37f12eb721cf93b2
+    with:
+      dockerhub-username: ${{ inputs.dockerhub-username }}
+      dockerhub-password: ${{ inputs.dockerhub-password }}
+      gcr-service-account-key: ${{ inputs.gcr-service-account-key }}
 
-    - name: Download OCI artifacts
-      uses: actions/download-artifact@v4
-      with:
-        pattern: ${{ inputs.artifacts-pattern }}
-        path: ${{ inputs.artifacts-path }}
+  - name: Initialize result files
+    shell: bash
+    run: |
+      touch /tmp/pushed_manifests.txt
+      touch /tmp/manifest_details.txt
 
-    - name: Setup Docker Hub authentication
-      if: inputs.dockerhub-username != '' && inputs.dockerhub-password != '' && inputs.dry-run != 'true'
-      shell: bash
-      run: |
-        echo "Logging in to Docker Hub..."
-        echo "${{ inputs.dockerhub-password }}" | regctl registry login docker.io -u "${{ inputs.dockerhub-username }}" --pass-stdin
+  - name: Process manifests
+    uses: envoyproxy/toolshed/gh-actions/bson@actions-v0.3.23
+    id: process
+    with:
+      title: Process OCI manifests
+      input: |
+        config: ${{ inputs.manifest-config }}
+        artifacts_path: ${{ inputs.artifacts-path }}
+        dry_run: ${{ inputs.dry-run }}
+      input-format: yaml
+      filter: |
+        .artifacts_path as $artifacts_path |
+        .dry_run as $dry_run |
+        .config.manifests[] |
+        . as $manifest |
+        .registry as $registry |
+        .name as $name |
+        .tag as $tag |
+        "\(.registry)/\(.name):\(.tag)" as $manifest_tag |
+        (.push // true) as $push |
+        ."artifact-pattern" as $pattern |
+        (.["additional-tags"] // []) as $additional_tags |
 
-    - name: Setup GCR authentication
-      if: inputs.gcr-service-account-key != '' && inputs.dry-run != 'true'
-      shell: bash
-      run: |
-        echo "Setting up GCR authentication..."
-        # Check if gcloud is available
-        if ! command -v gcloud &> /dev/null; then
-            echo "::error::gcloud CLI is not available. Please ensure the runner has gcloud installed."
-            exit 1
-        fi
-        echo "${{ inputs.gcr-service-account-key }}" | base64 --decode | gcloud auth activate-service-account --key-file=-
-        gcloud auth configure-docker gcr.io --quiet
-        # Configure regctl to use gcloud auth helper
-        regctl registry set gcr.io --auth-helper gcloud
+        "echo '::group::Processing \($name):\($tag)'\n" +
+        "echo 'Manifest tag: \($manifest_tag)'\n" +
+        "FOUND_ARCHS=''\n" +
+        "rm -f /tmp/arch_tags_current.txt\n" +
 
-    - name: Initialize result files
-      shell: bash
-      run: |
-        touch /tmp/pushed_manifests.txt
-        touch /tmp/manifest_details.txt
-
-    - name: Process manifests
-      uses: envoyproxy/toolshed/gh-actions/bson@actions-v0.3.23
-      id: process
-      with:
-        title: Process OCI manifests
-        input: |
-          config: ${{ inputs.manifest-config }}
-          artifacts_path: ${{ inputs.artifacts-path }}
-          dry_run: ${{ inputs.dry-run }}
-        input-format: yaml
-        filter: |
-          .artifacts_path as $artifacts_path |
-          .dry_run as $dry_run |
-          .config.manifests[] |
-          . as $manifest |
-          .registry as $registry |
-          .name as $name |
-          .tag as $tag |
-          "\(.registry)/\(.name):\(.tag)" as $manifest_tag |
-          (.push // true) as $push |
-          ."artifact-pattern" as $pattern |
-          (.["additional-tags"] // []) as $additional_tags |
-
-          "echo '::group::Processing \($name):\($tag)'\n" +
-          "echo 'Manifest tag: \($manifest_tag)'\n" +
-          "FOUND_ARCHS=''\n" +
-          "rm -f /tmp/arch_tags_current.txt\n" +
-
-          (.architectures[] as $arch |
-            "arch='\($arch)'\n" +
-            "artifact_file='\($pattern | gsub("{arch}"; $arch))'\n" +
-            "artifact_file=\"\($artifacts_path)/${artifact_file}\"\n" +
-            "for file in $artifact_file; do\n" +
-            "    if [[ -f \"$file\" ]]; then\n" +
-            "        arch_tag='\($manifest_tag)-\($arch)'\n" +
-            "        if [[ '\($dry_run)' != 'true' ]]; then\n" +
-            "            echo '  Importing \($arch) architecture from '$file\n" +
-            "            regctl image import \"$arch_tag\" \"$file\"\n" +
-            "        else\n" +
-            "            echo '  [DRY RUN] Would import \($arch) architecture from '$file' as '$arch_tag\n" +
-            "        fi\n" +
-            "        echo \"$arch_tag\" >> /tmp/arch_tags_current.txt\n" +
-            "        FOUND_ARCHS=\"${FOUND_ARCHS}\($arch) \"\n" +
-            "        break\n" +
-            "    fi\n" +
-            "done\n"
-          ) +
-
-          "if [[ -z \"$FOUND_ARCHS\" ]]; then\n" +
-          "    echo '  No artifacts found for manifest: \($manifest_tag)'\n" +
-          "    echo '::endgroup::'\n" +
-          "else\n" +
-          "    if [[ '\($push)' == 'true' ]]; then\n" +
-          "        if [[ -f /tmp/arch_tags_current.txt ]]; then\n" +
-          "            mapfile -t ARCH_TAGS < /tmp/arch_tags_current.txt\n" +
-          "            if [[ '\($dry_run)' == 'true' ]]; then\n" +
-          "                echo '  [DRY RUN] Would create manifest list: \($manifest_tag)'\n" +
-          "                echo '  [DRY RUN] Would include: '${ARCH_TAGS[*]}\n" +
-          "            else\n" +
-          "                echo '  Creating manifest list: \($manifest_tag)'\n" +
-          "                regctl manifest put '\($manifest_tag)' \"${ARCH_TAGS[@]}\"\n" +
-          "                for arch_tag in \"${ARCH_TAGS[@]}\"; do\n" +
-          "                    echo '  Cleaning up temporary tag: '$arch_tag\n" +
-          "                    regctl tag delete \"$arch_tag\" || true\n" +
-          "                done\n" +
-          "            fi\n" +
+        (.architectures[] as $arch |
+          "arch='\($arch)'\n" +
+          "artifact_file='\($pattern | gsub("{arch}"; $arch))'\n" +
+          "artifact_file=\"\($artifacts_path)/${artifact_file}\"\n" +
+          "for file in $artifact_file; do\n" +
+          "    if [[ -f \"$file\" ]]; then\n" +
+          "        arch_tag='\($manifest_tag)-\($arch)'\n" +
+          "        if [[ '\($dry_run)' != 'true' ]]; then\n" +
+          "            echo '  Importing \($arch) architecture from '$file\n" +
+          "            regctl image import \"$arch_tag\" \"$file\"\n" +
+          "        else\n" +
+          "            echo '  [DRY RUN] Would import \($arch) architecture from '$file' as '$arch_tag\n" +
           "        fi\n" +
-          "        echo '\($manifest_tag)' >> /tmp/pushed_manifests.txt\n" +
-
-          (if ($additional_tags | length) > 0 then
-            ($additional_tags[] as $tag |
-              "        add_tag='\($registry)/\($name):\($tag)'\n" +
-              "        if [[ '\($dry_run)' == 'true' ]]; then\n" +
-              "            echo '  [DRY RUN] Would also tag as: '$add_tag\n" +
-              "        else\n" +
-              "            echo '  Creating additional tag: '$add_tag\n" +
-              "            regctl image copy '\($manifest_tag)' \"$add_tag\"\n" +
-              "        fi\n" +
-              "        echo \"$add_tag\" >> /tmp/pushed_manifests.txt\n"
-            )
-          else
-            ""
-          end) +
-
+          "        echo \"$arch_tag\" >> /tmp/arch_tags_current.txt\n" +
+          "        FOUND_ARCHS=\"${FOUND_ARCHS}\($arch) \"\n" +
+          "        break\n" +
           "    fi\n" +
-          "    echo '\($name):\($tag)|\($manifest_tag)|'$FOUND_ARCHS'|\($push)' >> /tmp/manifest_details.txt\n" +
-          "    echo '::endgroup::'\n" +
-          "fi\n"
+          "done\n"
+        ) +
 
-    - name: Collect pushed manifests
-      id: pushed-list
-      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
-      with:
-        input-format: string-path
-        input: /tmp/pushed_manifests.txt
-        filter: |
-          split("\n") | map(select(. != "")) | unique
-        options: -Rs
-        output-path: /tmp/pushed_manifests.json
+        "if [[ -z \"$FOUND_ARCHS\" ]]; then\n" +
+        "    echo '  No artifacts found for manifest: \($manifest_tag)'\n" +
+        "    echo '::endgroup::'\n" +
+        "else\n" +
+        "    if [[ '\($push)' == 'true' ]]; then\n" +
+        "        if [[ -f /tmp/arch_tags_current.txt ]]; then\n" +
+        "            mapfile -t ARCH_TAGS < /tmp/arch_tags_current.txt\n" +
+        "            if [[ '\($dry_run)' == 'true' ]]; then\n" +
+        "                echo '  [DRY RUN] Would create manifest list: \($manifest_tag)'\n" +
+        "                echo '  [DRY RUN] Would include: '${ARCH_TAGS[*]}\n" +
+        "            else\n" +
+        "                echo '  Creating manifest list: \($manifest_tag)'\n" +
+        "                regctl manifest put '\($manifest_tag)' \"${ARCH_TAGS[@]}\"\n" +
+        "                for arch_tag in \"${ARCH_TAGS[@]}\"; do\n" +
+        "                    echo '  Cleaning up temporary tag: '$arch_tag\n" +
+        "                    regctl tag delete \"$arch_tag\" || true\n" +
+        "                done\n" +
+        "            fi\n" +
+        "        fi\n" +
+        "        echo '\($manifest_tag)' >> /tmp/pushed_manifests.txt\n" +
 
-    - name: Build manifest details
-      id: details-builder
-      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
-      with:
-        input-format: string-path
-        input: /tmp/manifest_details.txt
-        filter: |
-          split("\n")
-          | map(select(. != ""))
-          | map(split("|"))
-          | map({
-              key: .[0],
-              value: {
-                tag: .[1],
-                architectures: (.[2] | split(" ") | map(select(. != ""))),
-                pushed: (.[3] == "true")
-              }
-            })
-          | from_entries
-        options: -Rs
-        output-path: /tmp/manifest_details.json
+        (if ($additional_tags | length) > 0 then
+          ($additional_tags[] as $tag |
+            "        add_tag='\($registry)/\($name):\($tag)'\n" +
+            "        if [[ '\($dry_run)' == 'true' ]]; then\n" +
+            "            echo '  [DRY RUN] Would also tag as: '$add_tag\n" +
+            "        else\n" +
+            "            echo '  Creating additional tag: '$add_tag\n" +
+            "            regctl image copy '\($manifest_tag)' \"$add_tag\"\n" +
+            "        fi\n" +
+            "        echo \"$add_tag\" >> /tmp/pushed_manifests.txt\n"
+          )
+        else
+          ""
+        end) +
 
-    - name: Final pushed manifests
-      id: final-pushed
-      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
-      with:
-        input-format: json-path
-        input: /tmp/pushed_manifests.json
-        filter: |
-          .
+        "    fi\n" +
+        "    echo '\($name):\($tag)|\($manifest_tag)|'$FOUND_ARCHS'|\($push)' >> /tmp/manifest_details.txt\n" +
+        "    echo '::endgroup::'\n" +
+        "fi\n"
 
-    - name: Final manifest details
-      id: final-details
-      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
-      with:
-        input-format: json-path
-        input: /tmp/manifest_details.json
-        filter: |
-          .
+  - name: Collect pushed manifests
+    id: pushed-list
+    uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
+    with:
+      input-format: string-path
+      input: /tmp/pushed_manifests.txt
+      filter: |
+        split("\n") | map(select(. != "")) | unique
+      options: -Rs
+      output-path: /tmp/pushed_manifests.json
 
-    - name: Summary
-      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
-      with:
-        input: |
-          pushed: ${{ steps.final-pushed.outputs.value }}
-          details: ${{ steps.final-details.outputs.value }}
-        input-format: yaml
-        filter: |
-          "Manifest collection complete!" as $title
-          | "\nPushed manifests:" as $pushed_title
-          | (.pushed | tojson) as $pushed_json
-          | "\nManifest details:" as $details_title
-          | (.details | tojson) as $details_json
-          | [$title, $pushed_title, $pushed_json, $details_title, $details_json]
-          | join("\n")
-        options: -r
-        print-output: true
+  - name: Build manifest details
+    id: details-builder
+    uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
+    with:
+      input-format: string-path
+      input: /tmp/manifest_details.txt
+      filter: |
+        split("\n")
+        | map(select(. != ""))
+        | map(split("|"))
+        | map({
+            key: .[0],
+            value: {
+              tag: .[1],
+              architectures: (.[2] | split(" ") | map(select(. != ""))),
+              pushed: (.[3] == "true")
+            }
+          })
+        | from_entries
+      options: -Rs
+      output-path: /tmp/manifest_details.json
+
+  - name: Final pushed manifests
+    id: final-pushed
+    uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
+    with:
+      input-format: json-path
+      input: /tmp/pushed_manifests.json
+      filter: |
+        .
+
+  - name: Final manifest details
+    id: final-details
+    uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
+    with:
+      input-format: json-path
+      input: /tmp/manifest_details.json
+      filter: |
+        .
+
+  - name: Summary
+    uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
+    with:
+      input: |
+        pushed: ${{ steps.final-pushed.outputs.value }}
+        details: ${{ steps.final-details.outputs.value }}
+      input-format: yaml
+      filter: |
+        "Manifest collection complete!" as $title
+        | "\nPushed manifests:" as $pushed_title
+        | (.pushed | tojson) as $pushed_json
+        | "\nManifest details:" as $details_title
+        | (.details | tojson) as $details_json
+        | [$title, $pushed_title, $pushed_json, $details_title, $details_json]
+        | join("\n")
+      options: -r
+      print-output: true

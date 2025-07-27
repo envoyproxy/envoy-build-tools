@@ -1,0 +1,39 @@
+name: Authenticate regctl
+
+inputs:
+  dockerhub-username:
+    description: 'Docker Hub username'
+    required: false
+    default: ''
+  dockerhub-password:
+    description: 'Docker Hub password'
+    required: false
+    default: ''
+  gcr-service-account-key:
+    description: 'GCP service account key (base64 encoded)'
+    required: false
+    default: ''
+
+
+runs:
+  using: 'composite'
+  - name: Setup Docker Hub authentication
+    if: inputs.dockerhub-username != '' && inputs.dockerhub-password != '' && inputs.dry-run != 'true'
+    shell: bash
+    run: |
+      echo "Logging in to Docker Hub..."
+      echo "${{ inputs.dockerhub-password }}" | regctl registry login docker.io -u "${{ inputs.dockerhub-username }}" --pass-stdin
+
+  - name: Setup GCR authentication
+    if: inputs.gcr-service-account-key != '' && inputs.dry-run != 'true'
+    shell: bash
+    run: |
+      echo "Setting up GCR authentication..."
+      # Check if gcloud is available
+      if ! command -v gcloud &> /dev/null; then
+          echo "::error::gcloud CLI is not available. Please ensure the runner has gcloud installed."
+          exit 1
+      fi
+      echo "${{ inputs.gcr-service-account-key }}" | base64 --decode | gcloud auth activate-service-account --key-file=-
+      gcloud auth configure-docker gcr.io --quiet
+      regctl registry config gcr.io || echo "Note: Registry config may not exist yet"
