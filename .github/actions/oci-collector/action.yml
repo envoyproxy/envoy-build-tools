@@ -73,130 +73,137 @@ runs:
   - name: Initialize result files
     shell: bash
     run: |
-      touch /tmp/pushed_manifests.txt
-      touch /tmp/manifest_details.txt
+      echo '[]' > /tmp/regctl_operations.json
+      echo '[]' > /tmp/pushed_manifests.json
+      echo '{}' > /tmp/manifest_details.json
 
-  - name: Process manifests
-    uses: envoyproxy/toolshed/gh-actions/bson@actions-v0.3.23
-    id: process
+  - name: Build regctl operations
+    uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
+    id: operations
     with:
-      title: Process OCI manifests
       input: |
         config: ${{ inputs.manifest-config }}
         artifacts_path: ${{ inputs.artifacts-path }}
-        dry_run: ${{ inputs.dry-run }}
       input-format: yaml
       filter: |
         .artifacts_path as $artifacts_path |
-        .dry_run as $dry_run |
-        .config.manifests[] |
-        . as $manifest |
-        .registry as $registry |
-        .name as $name |
-        .tag as $tag |
-        "\(.registry)/\(.name):\(.tag)" as $manifest_tag |
-        (.push // true) as $push |
-        ."artifact-pattern" as $pattern |
-        (.["additional-tags"] // []) as $additional_tags |
+        [
+          .config.manifests[] |
+          . as $manifest |
+          .registry as $registry |
+          .name as $name |
+          .tag as $tag |
+          "\(.registry)/\(.name):\(.tag)" as $manifest_tag |
+          (.push // true) as $push |
+          ."artifact-pattern" as $pattern |
+          (.["additional-tags"] // []) as $additional_tags |
 
-        "echo '::group::Processing \($name):\($tag)'\n" +
-        "echo 'Manifest tag: \($manifest_tag)'\n" +
-        "FOUND_ARCHS=''\n" +
-        "rm -f /tmp/arch_tags_current.txt\n" +
-
-        (.architectures[] as $arch |
-          "arch='\($arch)'\n" +
-          "artifact_file='\($pattern | gsub("{arch}"; $arch))'\n" +
-          "artifact_file=\"\($artifacts_path)/${artifact_file}\"\n" +
-          "for file in $artifact_file; do\n" +
-          "    if [[ -f \"$file\" ]]; then\n" +
-          "        arch_tag='\($manifest_tag)-\($arch)'\n" +
-          "        if [[ '\($dry_run)' != 'true' ]]; then\n" +
-          "            echo '  Importing \($arch) architecture from '$file\n" +
-          "            regctl image import \"$arch_tag\" \"$file\"\n" +
-          "        else\n" +
-          "            echo '  [DRY RUN] Would import \($arch) architecture from '$file' as '$arch_tag\n" +
-          "        fi\n" +
-          "        echo \"$arch_tag\" >> /tmp/arch_tags_current.txt\n" +
-          "        FOUND_ARCHS=\"${FOUND_ARCHS}\($arch) \"\n" +
-          "        break\n" +
-          "    fi\n" +
-          "done\n"
-        ) +
-
-        "if [[ -z \"$FOUND_ARCHS\" ]]; then\n" +
-        "    echo '  No artifacts found for manifest: \($manifest_tag)'\n" +
-        "    echo '::endgroup::'\n" +
-        "else\n" +
-        "    if [[ '\($push)' == 'true' ]]; then\n" +
-        "        if [[ -f /tmp/arch_tags_current.txt ]]; then\n" +
-        "            mapfile -t ARCH_TAGS < /tmp/arch_tags_current.txt\n" +
-        "            if [[ '\($dry_run)' == 'true' ]]; then\n" +
-        "                echo '  [DRY RUN] Would create manifest list: \($manifest_tag)'\n" +
-        "                echo '  [DRY RUN] Would include: '${ARCH_TAGS[*]}\n" +
-        "            else\n" +
-        "                echo '  Creating manifest list: \($manifest_tag)'\n" +
-        "                regctl manifest put '\($manifest_tag)' \"${ARCH_TAGS[@]}\"\n" +
-        "                for arch_tag in \"${ARCH_TAGS[@]}\"; do\n" +
-        "                    echo '  Cleaning up temporary tag: '$arch_tag\n" +
-        "                    regctl tag delete \"$arch_tag\" || true\n" +
-        "                done\n" +
-        "            fi\n" +
-        "        fi\n" +
-        "        echo '\($manifest_tag)' >> /tmp/pushed_manifests.txt\n" +
-
-        (if ($additional_tags | length) > 0 then
-          ($additional_tags[] as $tag |
-            "        add_tag='\($registry)/\($name):\($tag)'\n" +
-            "        if [[ '\($dry_run)' == 'true' ]]; then\n" +
-            "            echo '  [DRY RUN] Would also tag as: '$add_tag\n" +
-            "        else\n" +
-            "            echo '  Creating additional tag: '$add_tag\n" +
-            "            regctl image copy '\($manifest_tag)' \"$add_tag\"\n" +
-            "        fi\n" +
-            "        echo \"$add_tag\" >> /tmp/pushed_manifests.txt\n"
-          )
-        else
-          ""
-        end) +
-
-        "    fi\n" +
-        "    echo '\($name):\($tag)|\($manifest_tag)|'$FOUND_ARCHS'|\($push)' >> /tmp/manifest_details.txt\n" +
-        "    echo '::endgroup::'\n" +
-        "fi\n"
-
-  - name: Collect pushed manifests
-    id: pushed-list
-    uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
-    with:
-      input-format: string-path
-      input: /tmp/pushed_manifests.txt
-      filter: |
-        split("\n") | map(select(. != "")) | unique
-      options: -Rs
-      output-path: /tmp/pushed_manifests.json
-
-  - name: Build manifest details
-    id: details-builder
-    uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
-    with:
-      input-format: string-path
-      input: /tmp/manifest_details.txt
-      filter: |
-        split("\n")
-        | map(select(. != ""))
-        | map(split("|"))
-        | map({
-            key: .[0],
-            value: {
-              tag: .[1],
-              architectures: (.[2] | split(" ") | map(select(. != ""))),
-              pushed: (.[3] == "true")
+          # Generate import operations for each architecture
+          (.architectures[] as $arch |
+            {
+              type: "image-import",
+              tag: "\($manifest_tag)-\($arch)",
+              source: "\($artifacts_path)/\($pattern | gsub("{arch}"; $arch))",
+              metadata: {
+                manifest: $name,
+                manifest_tag: $manifest_tag,
+                arch: $arch,
+                push: $push
+              }
             }
-          })
-        | from_entries
-      options: -Rs
-      output-path: /tmp/manifest_details.json
+          ),
+
+          # Generate manifest-put operation if push is true
+          (if $push then
+            {
+              type: "manifest-put",
+              tag: $manifest_tag,
+              sources: [.architectures[] as $arch | "\($manifest_tag)-\($arch)"],
+              metadata: {
+                manifest: $name,
+                architectures: .architectures
+              }
+            }
+          else empty end),
+
+          # Generate cleanup operations for arch tags
+          (if $push then
+            (.architectures[] as $arch |
+              {
+                type: "tag-delete",
+                tag: "\($manifest_tag)-\($arch)",
+                metadata: {
+                  cleanup: true
+                }
+              }
+            )
+          else empty end),
+
+          # Generate copy operations for additional tags
+          (if $push and (($additional_tags | length) > 0) then
+            ($additional_tags[] as $tag |
+              {
+                type: "image-copy",
+                source: $manifest_tag,
+                destination: "\($registry)/\($name):\($tag)",
+                metadata: {
+                  additional_tag: true
+                }
+              }
+            )
+          else empty end)
+        ]
+      output-path: /tmp/regctl_operations.json
+
+  - name: Execute regctl operations
+    uses: ./.github/actions/regctl-run
+    id: regctl
+    with:
+      operations: ${{ steps.operations.outputs.value }}
+      dry-run: ${{ inputs.dry-run }}
+      continue-on-error: 'true'
+
+  - name: Process results
+    uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
+    id: process-results
+    with:
+      input: |
+        operations: ${{ steps.operations.outputs.value }}
+        results: ${{ steps.regctl.outputs.results }}
+      input-format: yaml
+      filter: |
+        # Build lookup of results by tag
+        (.results | map({key: .tag, value: .}) | from_entries) as $results |
+
+        # Process operations to build outputs
+        .operations |
+        reduce .[] as $op (
+          {pushed: [], details: {}};
+
+          # Track successful manifest-put operations
+          if $op.type == "manifest-put" and $results[$op.tag].success then
+            .pushed += [$op.tag]
+          else . end |
+
+          # Track successful image-copy operations (additional tags)
+          if $op.type == "image-copy" and $op.metadata.additional_tag and $results[$op.destination].success then
+            .pushed += [$op.destination]
+          else . end |
+
+          # Build manifest details from manifest-put operations
+          if $op.type == "manifest-put" then
+            .details[$op.metadata.manifest + ":" + ($op.tag | split(":")[-1])] = {
+              tag: $op.tag,
+              architectures: $op.metadata.architectures,
+              pushed: $results[$op.tag].success
+            }
+          else . end
+        ) |
+        {
+          pushed_manifests: (.pushed | unique),
+          manifest_details: .details
+        }
+      output-path: /tmp/final_results.json
 
   - name: Final pushed manifests
     id: final-pushed
