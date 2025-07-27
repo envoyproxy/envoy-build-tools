@@ -22,22 +22,17 @@ jobs:
       matrix:
         target: [ubuntu, debian]
         arch: [amd64, arm64]
-    name: Build (${{ matrix.name || matrix.target }})
+    name: Build (${{ matrix.target }}-${{ matrix.arch }})
     uses: ./.github/workflows/_build_image.yml
     with:
       distro: ${{ matrix.target }}
-      gcr_push: true
-      gcr_name: ${{ matrix.gcr_name != '' && matrix.gcr_name || 'envoy-build' }}
       os_family: ${{ matrix.os_family != '' && matrix.os_family || 'linux' }}
       host-platform: ${{ matrix.arch }}
       runs-on: ${{ matrix.arch == 'amd64' && 'ubuntu-22.04' || 'ubuntu-22.04-arm' }}
       target-platforms: ${{ matrix.arch == 'amd64' && 'linux/amd64' || 'linux/arm64' }}
-    secrets:
-      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-      dockerhub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
-      gcp_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
-  merge-manifests:
+  push-manifests:
+    name: Create manifests (${{ github.event_name == 'pull_request' && 'dry run' || 'push' }})
     runs-on: ubuntu-latest
     needs: [build_image]
     permissions:
@@ -47,10 +42,26 @@ jobs:
     - name: 'Checkout repository'
       uses: actions/checkout@v4
     - uses: docker/login-action@v3
-      if: ${{ github.event_name != 'pull_request' }}
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    - name: 'Login to GCR'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" | base64 --decode | gcloud auth activate-service-account --key-file=-
+        gcloud auth configure-docker --quiet
     - uses: docker/setup-buildx-action@v3
-    - run: |
-        ./docker/linux/group_manifests.sh
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./oci-images
+    - name: Load images and create manifests
+      run: |
+        chmod +x ./docker/linux/load_and_push_manifests.sh
+        ./docker/linux/load_and_push_manifests.sh
+      env:
+        OCI_IMAGES_PATH: ./oci-images
+        PUSH_GCR_IMAGE: true
+        GCR_IMAGE_NAME: ${{ vars.GCR_IMAGE_NAME || 'envoy-build' }}
+        DRY_RUN: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}

@@ -48,7 +48,10 @@ build_and_push_variants () {
 
     for variant in "${DEBIAN_DOCKER_VARIANTS[@]}"; do
         push_arg=()
-        if [[ -n "${IMAGE_TAGS}" && "$variant" != "test" ]]; then
+        if [[ "${SAVE_OCI}" == "true" ]]; then
+            # Save to OCI format
+            push_arg+=(--output "type=oci,dest=${OCI_OUTPUT_DIR}/${OS_DISTRO}-${variant}-${CONTAINER_TAG}${ARCH_SUFFIX}.tar")
+        elif [[ -n "${IMAGE_TAGS}" && "$variant" != "test" ]]; then
             # Variants are only pushed to dockerhub currently, so if we are pushing images
             # just push the variants immediately.
             push_arg+=(--push)
@@ -76,14 +79,20 @@ build_and_push_variants () {
 ci_log_run config_env
 
 # Default target for Debian is 'ci' (includes bazel for builds)
-ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}${ARCH_SUFFIX}" --target ci --platform "${BUILD_TOOLS_PLATFORMS}"
+if [[ "${SAVE_OCI}" == "true" ]]; then
+    echo "Building OCI artifact to: ${OCI_OUTPUT_DIR}/${OS_DISTRO}-ci-${CONTAINER_TAG}${ARCH_SUFFIX}.tar"
+    ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}${ARCH_SUFFIX}" --target ci --platform "${BUILD_TOOLS_PLATFORMS}" \
+        --output "type=oci,dest=${OCI_OUTPUT_DIR}/${OS_DISTRO}-ci-${CONTAINER_TAG}${ARCH_SUFFIX}.tar"
+else
+    ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}${ARCH_SUFFIX}" --target ci --platform "${BUILD_TOOLS_PLATFORMS}"
+fi
 
 if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
     # variants are only pushed for the dockerhub image (not other `IMAGE_TAGS`)
     build_and_push_variants
 fi
 
-if [[ -n "${IMAGE_TAGS}" ]]; then
+if [[ "${SAVE_OCI}" != "true" ]] && [[ -n "${IMAGE_TAGS}" ]]; then
     for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
         if [[ "$IMAGE_TAG" == *"|"* ]]; then
             IFS="|" read -ra parts <<< "$IMAGE_TAG"
