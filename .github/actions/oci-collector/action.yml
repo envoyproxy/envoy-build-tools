@@ -30,7 +30,7 @@ inputs:
   dry-run:
     description: 'Run without actually pushing images'
     required: false
-    default: 'false'
+    default: false
   dockerhub-username:
     description: 'Docker Hub username'
     required: false
@@ -126,18 +126,7 @@ runs:
             }
           else empty end),
 
-          # Generate cleanup operations for arch tags
-          (if $push then
-            (.architectures[] as $arch |
-              {
-                type: "tag-delete",
-                tag: "\($manifest_tag)-\($arch)",
-                metadata: {
-                  cleanup: true
-                }
-              }
-            )
-          else empty end),
+          # No cleanup needed - arch tags are never pushed to registry
 
           # Generate copy operations for additional tags
           (if $push and (($additional_tags | length) > 0) then
