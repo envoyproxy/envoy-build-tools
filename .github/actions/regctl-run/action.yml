@@ -111,9 +111,16 @@ runs:
               "    echo 'Importing OCI archive '\(.source | @sh)' to local OCI directory'\n" +
               "    # Import to local ocidir:// instead of pushing to registry\n" +
               "    LOCAL_TAG=$(echo '\(.tag)' | tr ':/' '__')\n" +
-              "    rm -rf \"/tmp/ocidir/${LOCAL_TAG}\" 2>/dev/null || true\n" +
-              "    mkdir -p \"/tmp/ocidir\"\n" +
-              "    if regctl image import \"ocidir:///tmp/ocidir:${LOCAL_TAG}\" '\(.source)'; then\n" +
+              "    LOCAL_DIR=\"/tmp/ocidir/${LOCAL_TAG}\"\n" +
+              "    rm -rf \"${LOCAL_DIR}\" 2>/dev/null || true\n" +
+              "    mkdir -p \"${LOCAL_DIR}\"\n" +
+              "    echo \"  Local directory: ${LOCAL_DIR}\"\n" +
+              "    if regctl image import \"ocidir://${LOCAL_DIR}\" '\(.source)'; then\n" +
+              "        echo \"  Successfully imported to ocidir://${LOCAL_DIR}\"\n" +
+              "        # Verify the import\n" +
+              "        echo \"  Verifying import - checking directory contents:\"\n" +
+              "        ls -la \"${LOCAL_DIR}/\" | head -10\n" +
+              "        regctl manifest get \"ocidir://${LOCAL_DIR}\" --format '{{.MediaType}}' || echo \"  Warning: Could not verify imported manifest\"\n" +
               "        add_result 'image-import' '\(.tag)' true 'Successfully imported to local OCI directory'\n" +
               "    else\n" +
               "        echo \"::error::Failed to import \(.source)\"\n" +
@@ -134,19 +141,39 @@ runs:
               "    echo 'Creating manifest '\(.tag | @sh)' from local OCI references'\n" +
               "    # Build list of local ocidir:// references\n" +
               "    LOCAL_REFS=()\n" +
+              "    echo \"  Looking for local references for manifest \(.tag):\"\n" +
               (.sources[] as $source |
                 "    LOCAL_TAG=$(echo '\($source)' | tr ':/' '__')\n" +
-                "    if [[ -d \"/tmp/ocidir/${LOCAL_TAG}\" ]]; then\n" +
-                "        LOCAL_REFS+=(\"ocidir:///tmp/ocidir:${LOCAL_TAG}\")\n" +
-                "        echo \"  Adding local reference: ocidir:///tmp/ocidir:${LOCAL_TAG}\"\n" +
+                "    LOCAL_DIR=\"/tmp/ocidir/${LOCAL_TAG}\"\n" +
+                "    echo \"    Checking for ${LOCAL_DIR}\"\n" +
+                "    if [[ -d \"${LOCAL_DIR}\" ]]; then\n" +
+                "        LOCAL_REFS+=(\"ocidir://${LOCAL_DIR}\")\n" +
+                "        echo \"    ✓ Found: ocidir://${LOCAL_DIR}\"\n" +
                 "    else\n" +
-                "        echo \"  WARNING: No local OCI directory found for \($source)\"\n" +
+                "        echo \"    ✗ NOT FOUND: ${LOCAL_DIR}\"\n" +
+                "        echo \"    Available directories in /tmp/ocidir:\"\n" +
+                "        ls -la /tmp/ocidir/ 2>/dev/null | grep '^d' || echo \"      No directories found\"\n" +
                 "    fi\n"
               ) +
               "    if [[ ${#LOCAL_REFS[@]} -gt 0 ]]; then\n" +
-              "        echo 'Creating and pushing manifest with '${#LOCAL_REFS[@]}' architectures'\n" +
-              "        if regctl manifest put '\(.tag)' ${LOCAL_REFS[@]}; then\n" +
-              "            add_result 'manifest-put' '\(.tag)' true 'Successfully created and pushed manifest'\n" +
+              "        echo 'Creating manifest list from '${#LOCAL_REFS[@]}' architectures'\n" +
+              "        # First create the manifest locally\n" +
+              "        LOCAL_MANIFEST_TAG=$(echo '\(.tag)' | tr ':/' '__')\n" +
+              "        LOCAL_MANIFEST_DIR=\"/tmp/ocidir/manifest_${LOCAL_MANIFEST_TAG}\"\n" +
+              "        rm -rf \"${LOCAL_MANIFEST_DIR}\" 2>/dev/null || true\n" +
+              "        mkdir -p \"${LOCAL_MANIFEST_DIR}\"\n" +
+              "        echo \"  Creating local manifest at ocidir://${LOCAL_MANIFEST_DIR}\"\n" +
+              "        if regctl manifest put \"ocidir://${LOCAL_MANIFEST_DIR}\" ${LOCAL_REFS[@]}; then\n" +
+              "            echo '  Local manifest created successfully'\n" +
+              "            # Now copy the manifest to the registry\n" +
+              "            echo \"  Copying manifest to registry: \(.tag)\"\n" +
+              "            if regctl image copy \"ocidir://${LOCAL_MANIFEST_DIR}\" '\(.tag)'; then\n" +
+              "                echo '  Manifest pushed to registry successfully'\n" +
+              "                add_result 'manifest-put' '\(.tag)' true 'Successfully created and pushed manifest'\n" +
+              "            else\n" +
+              "                echo \"::error::Failed to push manifest to registry\"\n" +
+              "                add_result 'manifest-put' '\(.tag)' false 'Created locally but failed to push to registry'\n" +
+              "            fi\n" +
               "        else\n" +
               "            echo \"::error::Failed to create manifest \(.tag)\"\n" +
               "            add_result 'manifest-put' '\(.tag)' false 'Failed to create manifest - see logs above'\n" +
