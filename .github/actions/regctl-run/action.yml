@@ -1,0 +1,194 @@
+name: Run regctl commands
+description: Execute regctl commands from structured configuration
+
+inputs:
+  operations:
+    description: |
+      JSON/YAML array of regctl operations. Format:
+      [
+        {
+          "type": "image-import",
+          "tag": "registry/image:tag",
+          "source": "path/to/oci.tar"
+        },
+        {
+          "type": "manifest-put",
+          "tag": "registry/image:tag",
+          "sources": ["registry/image:tag-amd64", "registry/image:tag-arm64"]
+        },
+        {
+          "type": "image-copy",
+          "source": "registry/image:tag",
+          "destination": "registry/image:newtag"
+        },
+        {
+          "type": "tag-delete",
+          "tag": "registry/image:tag"
+        }
+      ]
+    required: true
+
+  dry-run:
+    description: 'Run in dry-run mode (only print commands)'
+    required: false
+    default: 'false'
+
+  continue-on-error:
+    description: 'Continue processing operations even if one fails'
+    required: false
+    default: 'false'
+
+outputs:
+  results:
+    description: 'JSON array of operation results'
+    value: ${{ steps.results.outputs.value }}
+
+  success-count:
+    description: 'Number of successful operations'
+    value: ${{ steps.summary.outputs.success }}
+
+  failure-count:
+    description: 'Number of failed operations'
+    value: ${{ steps.summary.outputs.failure }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Execute regctl operations
+      uses: envoyproxy/toolshed/gh-actions/bson@actions-v0.3.23
+      id: execute
+      with:
+        title: Execute regctl operations
+        input: |
+          operations: ${{ inputs.operations }}
+          dry_run: ${{ inputs.dry-run }}
+          continue_on_error: ${{ inputs.continue-on-error }}
+        input-format: yaml
+        catch-errors: ${{ inputs.continue-on-error }}
+        filter: |
+          .dry_run as $dry_run |
+          .continue_on_error as $continue_on_error |
+
+          "# Initialize results\n" +
+          "RESULTS_FILE=/tmp/regctl_results.json\n" +
+          "echo '[]' > \"$RESULTS_FILE\"\n\n" +
+
+          "# Function to add result\n" +
+          "add_result() {\n" +
+          "    local type=\"$1\"\n" +
+          "    local tag=\"$2\"\n" +
+          "    local success=\"$3\"\n" +
+          "    local message=\"$4\"\n" +
+          "    jq --arg type \"$type\" --arg tag \"$tag\" --arg success \"$success\" --arg msg \"$message\" \\\n" +
+          "       '. += [{type: $type, tag: $tag, success: ($success == \"true\"), message: $msg}]' \\\n" +
+          "       \"$RESULTS_FILE\" > \"${RESULTS_FILE}.tmp\" && mv \"${RESULTS_FILE}.tmp\" \"$RESULTS_FILE\"\n" +
+          "}\n\n" +
+
+          (.operations[] |
+            . as $op |
+
+            # Handle image-import
+            (if .type == "image-import" then
+              "echo \"::group::Import \(.tag)\"\n" +
+              "if [[ '\($dry_run)' == 'true' ]]; then\n" +
+              "    echo '[DRY RUN] Would import OCI archive '\(.source | @sh)' as '\(.tag | @sh)\n" +
+              "    add_result 'image-import' '\(.tag)' true '[DRY RUN] Would import'\n" +
+              "else\n" +
+              "    echo 'Importing OCI archive '\(.source | @sh)' as '\(.tag | @sh)\n" +
+              "    if regctl image import '\(.tag)' '\(.source)'; then\n" +
+              "        add_result 'image-import' '\(.tag)' true 'Successfully imported'\n" +
+              "    else\n" +
+              "        add_result 'image-import' '\(.tag)' false 'Failed to import'\n" +
+              (if $continue_on_error then "" else "        exit 1\n" end) +
+              "    fi\n" +
+              "fi\n" +
+              "echo '::endgroup::'\n"
+
+            # Handle manifest-put
+            elif .type == "manifest-put" then
+              "echo \"::group::Create manifest \(.tag)\"\n" +
+              "if [[ '\($dry_run)' == 'true' ]]; then\n" +
+              "    echo '[DRY RUN] Would create manifest '\(.tag | @sh)' from: '\(.sources | join(" ") | @sh)\n" +
+              "    add_result 'manifest-put' '\(.tag)' true '[DRY RUN] Would create manifest'\n" +
+              "else\n" +
+              "    echo 'Creating manifest '\(.tag | @sh)' from: '\(.sources | join(" ") | @sh)\n" +
+              "    sources=(" + (.sources | map("'\(.)'" ) | join(" ")) + ")\n" +
+              "    if regctl manifest put '\(.tag)' ${sources[@]}; then\n" +
+              "        add_result 'manifest-put' '\(.tag)' true 'Successfully created manifest'\n" +
+              "    else\n" +
+              "        add_result 'manifest-put' '\(.tag)' false 'Failed to create manifest'\n" +
+              (if $continue_on_error then "" else "        exit 1\n" end) +
+              "    fi\n" +
+              "fi\n" +
+              "echo '::endgroup::'\n"
+
+            # Handle image-copy
+            elif .type == "image-copy" then
+              "echo \"::group::Copy \(.source) to \(.destination)\"\n" +
+              "if [[ '\($dry_run)' == 'true' ]]; then\n" +
+              "    echo '[DRY RUN] Would copy '\(.source | @sh)' to '\(.destination | @sh)\n" +
+              "    add_result 'image-copy' '\(.destination)' true '[DRY RUN] Would copy'\n" +
+              "else\n" +
+              "    echo 'Copying '\(.source | @sh)' to '\(.destination | @sh)\n" +
+              "    if regctl image copy '\(.source)' '\(.destination)'; then\n" +
+              "        add_result 'image-copy' '\(.destination)' true 'Successfully copied'\n" +
+              "    else\n" +
+              "        add_result 'image-copy' '\(.destination)' false 'Failed to copy'\n" +
+              (if $continue_on_error then "" else "        exit 1\n" end) +
+              "    fi\n" +
+              "fi\n" +
+              "echo '::endgroup::'\n"
+
+            # Handle tag-delete
+            elif .type == "tag-delete" then
+              "echo \"::group::Delete tag \(.tag)\"\n" +
+              "if [[ '\($dry_run)' == 'true' ]]; then\n" +
+              "    echo '[DRY RUN] Would delete tag '\(.tag | @sh)\n" +
+              "    add_result 'tag-delete' '\(.tag)' true '[DRY RUN] Would delete'\n" +
+              "else\n" +
+              "    echo 'Deleting tag '\(.tag | @sh)\n" +
+              "    if regctl tag delete '\(.tag)' || true; then\n" +
+              "        add_result 'tag-delete' '\(.tag)' true 'Successfully deleted or already gone'\n" +
+              "    else\n" +
+              "        add_result 'tag-delete' '\(.tag)' false 'Failed to delete'\n" +
+              (if $continue_on_error then "" else "        exit 1\n" end) +
+              "    fi\n" +
+              "fi\n" +
+              "echo '::endgroup::'\n"
+
+            else
+              "echo \"::warning::Unknown operation type: \(.type)\"\n"
+            end)
+          ) +
+
+          "\n# Output results\n" +
+          "cat \"$RESULTS_FILE\"\n"
+
+    - name: Read results
+      id: results
+      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
+      with:
+        input-format: json-path
+        input: /tmp/regctl_results.json
+        filter: .
+
+    - name: Calculate summary
+      id: calc-summary
+      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
+      with:
+        input: ${{ steps.results.outputs.value }}
+        filter: |
+          {
+            success: (map(select(.success)) | length),
+            failure: (map(select(.success | not)) | length)
+          }
+        output-path: /tmp/regctl_summary.json
+
+    - name: Extract counts
+      shell: bash
+      run: |
+        SUCCESS=$(jq -r '.success' /tmp/regctl_summary.json)
+        FAILURE=$(jq -r '.failure' /tmp/regctl_summary.json)
+        echo "success=$SUCCESS" >> $GITHUB_OUTPUT
+        echo "failure=$FAILURE" >> $GITHUB_OUTPUT
+      id: summary
