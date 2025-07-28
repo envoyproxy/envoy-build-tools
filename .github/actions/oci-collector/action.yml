@@ -64,6 +64,7 @@ runs:
       pattern: ${{ inputs.artifacts-pattern }}
       path: ${{ inputs.artifacts-path }}
   - name: Authenticate regctl
+    if: ${{ inputs.dry-run != 'true' }}
     uses: envoyproxy/toolshed/gh-actions/regctl/auth@dfe34f8e6900faae9e22f4ec37f12eb721cf93b2
     with:
       dockerhub-username: ${{ inputs.dockerhub-username }}
@@ -159,10 +160,12 @@ runs:
       input: |
         operations: ${{ steps.operations.outputs.value }}
         results: ${{ steps.regctl.outputs.results }}
+        dry_run: ${{ inputs.dry-run }}
       input-format: yaml
       filter: |
         # Build lookup of results by tag
         (.results | map({key: .tag, value: .}) | from_entries) as $results |
+        .dry_run as $dry_run |
 
         # Process operations to build outputs
         .operations |
@@ -184,7 +187,8 @@ runs:
             .details[$op.metadata.manifest + ":" + ($op.tag | split(":")[-1])] = {
               tag: $op.tag,
               architectures: $op.metadata.architectures,
-              pushed: $results[$op.tag].success
+              pushed: $results[$op.tag].success,
+              dry_run: ($dry_run == "true")
             }
           else . end
         ) |
@@ -192,7 +196,16 @@ runs:
           pushed_manifests: (.pushed | unique),
           manifest_details: .details
         }
-      output-path: /tmp/final_results.json
+
+  - name: Write pushed manifests
+    shell: bash
+    run: |
+      echo '${{ steps.process-results.outputs.value }}' | jq '.pushed_manifests' > /tmp/pushed_manifests.json
+
+  - name: Write manifest details
+    shell: bash  
+    run: |
+      echo '${{ steps.process-results.outputs.value }}' | jq '.manifest_details' > /tmp/manifest_details.json
 
   - name: Final pushed manifests
     id: final-pushed
