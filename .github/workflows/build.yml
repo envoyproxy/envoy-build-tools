@@ -52,53 +52,99 @@ jobs:
       id: config
       uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
       with:
-        input: |
-          tag_sha: ${{ steps.docker-sha.outputs.sha }}
-          gcr_image_name: ${{ vars.GCR_IMAGE_NAME || 'envoy-build' }}
-          debian_variants: ["ci", "worker", "devtools", "docker", "llvm", "mobile", "test"]
-          ubuntu_variants: ["ci", "mobile", "test", "full"]
         input-format: yaml
-        filter: |
-          .tag_sha as $tag_sha
-          | .gcr_image_name as $gcr_image_name
-          | {
-              manifests: (
-                # Debian manifests
-                [.debian_variants[] | {
-                  name: "envoy-build",
-                  tag: "\(.)-\($tag_sha)",
-                  registry: "docker.io/envoyproxy",
-                  architectures: ["amd64", "arm64"],
-                  "artifact-pattern": "oci-debian-{arch}/debian-\(.)-\($tag_sha)-{arch}.tar",
-                  "additional-tags": (if . == "ci" then [$tag_sha] else null end)
-                }] +
-                # Ubuntu manifests
-                [.ubuntu_variants[] | {
-                  name: "envoy-build-ubuntu",
-                  tag: "\(.)-\($tag_sha)",
-                  registry: "docker.io/envoyproxy",
-                  architectures: ["amd64", "arm64"],
-                  "artifact-pattern": "oci-ubuntu-{arch}/ubuntu-\(.)-\($tag_sha)-{arch}.tar",
-                  "additional-tags": (if . == "full" then [$tag_sha] else null end)
-                }] +
-                # GCR manifest (Ubuntu full only)
-                [{
-                  name: $gcr_image_name,
-                  tag: $tag_sha,
-                  registry: "gcr.io/envoy-ci",
-                  architectures: ["amd64", "arm64"],
-                  "artifact-pattern": "oci-ubuntu-{arch}/ubuntu-full-\($tag_sha)-{arch}.tar"
-                }]
-              ) | map(if ."additional-tags" == null then del(."additional-tags") else . end)
-            }
-        options: -c
+        filter: >-
+          {manifests: .}
+        input: |
+          ## debian
+          # devtools
+          - name: envoy-build
+            tag: devtools-${{ steps.docker-sha.outputs.sha }}
+            registry: docker.io/envoyproxy
+            architectures:
+            - amd64
+            - arm64
+            artifact-pattern: oci-debian-{arch}/debian-devtools-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+          # ci
+          - name: envoy-build
+            tag: ci-${{ steps.docker-sha.outputs.sha }}
+            registry: docker.io/envoyproxy
+            architectures:
+            - amd64
+            - arm64
+            artifact-pattern: oci-debian-{arch}/debian-ci-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+          # worker
+          - name: envoy-build
+            tag: worker-${{ steps.docker-sha.outputs.sha }}
+            registry: docker.io/envoyproxy
+            architectures:
+            - amd64
+            - arm64
+            artifact-pattern: oci-debian-{arch}/debian-worker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+          # worker
+          - name: envoy-build
+            tag: ${{ steps.docker-sha.outputs.sha }}
+            registry: gcr.io/envoy-ci
+            architectures:
+            - amd64
+            - arm64
+            artifact-pattern: oci-debian-{arch}/debian-worker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+          # docker
+          - name: envoy-build
+            tag: docker-${{ steps.docker-sha.outputs.sha }}
+            registry: docker.io/envoyproxy
+            architectures:
+            - amd64
+            - arm64
+            artifact-pattern: oci-debian-{arch}/debian-docker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+          # test
+          - name: envoy-build
+            tag: test-${{ steps.docker-sha.outputs.sha }}
+            registry: test.io/envoyproxy
+            architectures:
+            - amd64
+            - arm64
+            artifact-pattern: oci-debian-{arch}/debian-test-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+          # llvm
+          - name: envoy-build
+            tag: llvm-${{ steps.docker-sha.outputs.sha }}
+            registry: docker.io/envoyproxy
+            architectures:
+            - amd64
+            artifact-pattern: oci-debian-{arch}/debian-llvm-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+          # mobile
+          - name: envoy-build
+            tag: mobile-${{ steps.docker-sha.outputs.sha }}
+            registry: docker.io/envoyproxy
+            architectures:
+            - amd64
+            artifact-pattern: oci-debian-{arch}/debian-mobile-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
 
-    - name: Display configuration
-      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
-      with:
-        input: ${{ steps.config.outputs.value }}
-        filter: .
-        print-output: true
+          ## ubuntu
+          # mobile
+          - name: envoy-build-ubuntu
+            tag: mobile-${{ steps.docker-sha.outputs.sha }}
+            registry: docker.io/envoyproxy
+            architectures:
+            - amd64
+            artifact-pattern: oci-ubuntu-{arch}/ubuntu-mobile-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+          # test
+          - name: envoy-build-ubuntu
+            tag: test-${{ steps.docker-sha.outputs.sha }}
+            registry: docker.io/envoyproxy
+            architectures:
+            - amd64
+            artifact-pattern: oci-ubuntu-{arch}/ubuntu-test-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+          # full
+          - name: envoy-build-ubuntu
+            tag: full-f8d1fd9bdac3a7843d1e69816456648989d238be
+            registry: docker.io/envoyproxy
+            architectures:
+            - amd64
+            - arm64
+            artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+            additional-tags:
+            - ${{ steps.docker-sha.outputs.sha }}
 
     - name: Collect and push OCI artifacts
       uses: ./.github/actions/oci-collector

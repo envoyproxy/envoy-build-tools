@@ -36,11 +36,11 @@ inputs:
     required: false
     default: ''
   dockerhub-password:
-    description: 'Docker Hub password'
+    description: 'Docker Hub token/password'
     required: false
     default: ''
-  gcr-service-account-key:
-    description: 'GCP service account key (base64 encoded)'
+  gcr-key:
+    description: 'GCR service account JSON'
     required: false
     default: ''
 
@@ -56,189 +56,86 @@ outputs:
 runs:
   using: 'composite'
   steps:
-  - name: Install regctl
-    uses: envoyproxy/toolshed/gh-actions/regctl/install@88e79ab6754da224a2b60f4dcad7c3cd10bec6d6
   - name: Download OCI artifacts
     uses: actions/download-artifact@v4
     with:
       pattern: ${{ inputs.artifacts-pattern }}
       path: ${{ inputs.artifacts-path }}
-  - name: Authenticate regctl
-    if: ${{ inputs.dry-run != 'true' }}
-    uses: envoyproxy/toolshed/gh-actions/regctl/auth@dfe34f8e6900faae9e22f4ec37f12eb721cf93b2
-    with:
-      dockerhub-username: ${{ inputs.dockerhub-username }}
-      dockerhub-password: ${{ inputs.dockerhub-password }}
-      gcr-service-account-key: ${{ inputs.gcr-service-account-key }}
 
-  - name: Initialize result files
+  - name: Extract OCI archives
     shell: bash
     run: |
-      echo '[]' > /tmp/regctl_operations.json
-      echo '[]' > /tmp/pushed_manifests.json
-      echo '{}' > /tmp/manifest_details.json
+      echo "::group::Finding tar files"
+      find ${{ inputs.artifacts-path }} -name "*.tar" -type f | sort
+      echo "::endgroup::"
+      echo "::group::Extracting OCI archives"
+      mkdir -p /tmp/oci
+      for tar_file in $(find ${{ inputs.artifacts-path }} -name "*.tar" -type f); do
+          echo "Processing: ${tar_file}"
+          dir_name=$(basename "${tar_file}" .tar)
+          extract_dir="/tmp/oci/${dir_name}"
+          echo "  Basename: ${dir_name}"
+          echo "  Extract to: ${extract_dir}"
+          mkdir -p "${extract_dir}"
+          tar -xf "${tar_file}" -C "${extract_dir}"
+          echo "  ✓ Extracted successfully"
+      done
+      echo "::endgroup::"
 
-  - name: Build regctl operations
+      echo "::group::Extracted OCI directories"
+      ls -la /tmp/oci/
+      echo "::endgroup::"
+
+  - name: Build buildah operations
     uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
     id: operations
     with:
       input: |
         config: ${{ inputs.manifest-config }}
-        artifacts_path: ${{ inputs.artifacts-path }}
       input-format: yaml
       filter: |
-        .artifacts_path as $artifacts_path |
         [
-          .config.manifests[] |
-          . as $manifest |
-          .registry as $registry |
-          .name as $name |
-          .tag as $tag |
-          "\(.registry)/\(.name):\(.tag)" as $manifest_tag |
-          (.push // true) as $push |
-          ."artifact-pattern" as $pattern |
-          (.["additional-tags"] // []) as $additional_tags |
-
-          # Generate import operations for each architecture
-          (.architectures[] as $arch |
-            {
-              type: "image-import",
-              tag: "\($manifest_tag)-\($arch)",
-              source: "\($artifacts_path)/\($pattern | gsub("{arch}"; $arch))",
-              metadata: {
-                manifest: $name,
-                manifest_tag: $manifest_tag,
-                arch: $arch,
-                push: $push
-              }
-            }
-          ),
-
-          # Generate manifest-put operation if push is true
-          (if $push then
-            {
-              type: "manifest-put",
-              tag: $manifest_tag,
-              sources: [.architectures[] as $arch | "\($manifest_tag)-\($arch)"],
-              metadata: {
-                manifest: $name,
-                architectures: .architectures
-              }
-            }
-          else empty end),
-
-          # No cleanup needed - arch tags are never pushed to registry
-
-          # Generate copy operations for additional tags
-          (if $push and (($additional_tags | length) > 0) then
-            ($additional_tags[] as $tag |
+          .config.manifests[]
+          | . as $manifest
+          | .registry as $registry
+          | .name as $name
+          | .tag as $tag
+          | "\(.registry)/\(.name):\(.tag)" as $manifest_tag
+          | (.push // true) as $push
+          | ."artifact-pattern" as $pattern
+          | (.["additional-tags"] // []) as $additional_tags
+          | ("manifest-\($manifest_tag | gsub("[:/]"; "_"))") as $manifest_name
+          | ([.architectures[] as $arch
+              | ($pattern | gsub("{arch}"; $arch) | gsub("{name}"; $name) | gsub("{tag}"; $tag)) as $tar_file
+              | ($tar_file | gsub(".*/"; "") | gsub("\\.tar$"; "")) as $basename
+              | "/tmp/oci/\($basename)"
+            ]) as $sources
+          | (if $push then
               {
-                type: "image-copy",
-                source: $manifest_tag,
-                destination: "\($registry)/\($name):\($tag)",
-                metadata: {
-                  additional_tag: true
-                }
+                command: "manifest",
+                args: ["create", $manifest_name],
+                metadata: { tag: $manifest_tag }
+              },
+              ($sources[]
+               | {
+                  command: "manifest",
+                  args: ["add", $manifest_name, "oci:\(.)"],
+                  metadata: { tag: $manifest_tag }
+                }),
+              {
+                command: "manifest",
+                args: ["push", "--all", $manifest_name, "docker://\($manifest_tag)"],
+                metadata: { tag: $manifest_tag }
               }
-            )
-          else empty end)
+            else empty end)
         ]
-      output-path: /tmp/regctl_operations.json
 
-  - name: Execute regctl operations
-    uses: ./.github/actions/regctl-run
-    id: regctl
+  - name: Execute buildah operations
+    uses: envoyproxy/toolshed/gh-actions/buildah@0a35e73988ced481f7b786b9a404f4d4cbf3a2ea
+    id: buildah
     with:
       operations: ${{ steps.operations.outputs.value }}
       dry-run: ${{ inputs.dry-run }}
-      continue-on-error: 'true'
-
-  - name: Process results
-    uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
-    id: process-results
-    with:
-      input: |
-        operations: ${{ steps.operations.outputs.value }}
-        results: ${{ steps.regctl.outputs.results }}
-        dry_run: ${{ inputs.dry-run }}
-      input-format: yaml
-      filter: |
-        # Build lookup of results by tag
-        (.results | map({key: .tag, value: .}) | from_entries) as $results |
-        .dry_run as $dry_run |
-
-        # Process operations to build outputs
-        .operations |
-        reduce .[] as $op (
-          {pushed: [], details: {}};
-
-          # Track successful manifest-put operations
-          if $op.type == "manifest-put" and $results[$op.tag].success then
-            .pushed += [$op.tag]
-          else . end |
-
-          # Track successful image-copy operations (additional tags)
-          if $op.type == "image-copy" and $op.metadata.additional_tag and $results[$op.destination].success then
-            .pushed += [$op.destination]
-          else . end |
-
-          # Build manifest details from manifest-put operations
-          if $op.type == "manifest-put" then
-            .details[$op.metadata.manifest + ":" + ($op.tag | split(":")[-1])] = {
-              tag: $op.tag,
-              architectures: $op.metadata.architectures,
-              pushed: $results[$op.tag].success,
-              dry_run: ($dry_run == "true")
-            }
-          else . end
-        ) |
-        {
-          pushed_manifests: (.pushed | unique),
-          manifest_details: .details
-        }
-
-  - name: Write pushed manifests
-    shell: bash
-    run: |
-      echo '${{ steps.process-results.outputs.value }}' | jq '.pushed_manifests' > /tmp/pushed_manifests.json
-
-  - name: Write manifest details
-    shell: bash  
-    run: |
-      echo '${{ steps.process-results.outputs.value }}' | jq '.manifest_details' > /tmp/manifest_details.json
-
-  - name: Final pushed manifests
-    id: final-pushed
-    uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
-    with:
-      input-format: json-path
-      input: /tmp/pushed_manifests.json
-      filter: |
-        .
-
-  - name: Final manifest details
-    id: final-details
-    uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
-    with:
-      input-format: json-path
-      input: /tmp/manifest_details.json
-      filter: |
-        .
-
-  - name: Summary
-    uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
-    with:
-      input: |
-        pushed: ${{ steps.final-pushed.outputs.value }}
-        details: ${{ steps.final-details.outputs.value }}
-      input-format: yaml
-      filter: |
-        "Manifest collection complete!" as $title
-        | "\nPushed manifests:" as $pushed_title
-        | (.pushed | tojson) as $pushed_json
-        | "\nManifest details:" as $details_title
-        | (.details | tojson) as $details_json
-        | [$title, $pushed_title, $pushed_json, $details_title, $details_json]
-        | join("\n")
-      options: -r
-      print-output: true
+      dockerhub-username: ${{ inputs.dry-run != true && inputs.dockerhub-username || '' }}
+      dockerhub-password: ${{ inputs.dry-run != true && inputs.dockerhub-password || '' }}
+      gcr-key: ${{ inputs.dry-run != true && inputs.gcr-key || '' }}
