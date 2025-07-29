@@ -47,7 +47,6 @@ jobs:
       run: |
         TAG_SHA=$(git log -1 --pretty=format:"%H" ./docker)
         echo "sha=${TAG_SHA}" >> $GITHUB_OUTPUT
-
     - name: Generate manifest configuration
       id: config
       uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.23
@@ -77,14 +76,6 @@ jobs:
           - name: envoy-build
             tag: worker-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
-            architectures:
-            - amd64
-            - arm64
-            artifact-pattern: oci-debian-{arch}/debian-worker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # worker
-          - name: envoy-build
-            tag: ${{ steps.docker-sha.outputs.sha }}
-            registry: gcr.io/envoy-ci
             architectures:
             - amd64
             - arm64
@@ -121,6 +112,14 @@ jobs:
             artifact-pattern: oci-debian-{arch}/debian-mobile-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
 
           ## ubuntu
+          # ci
+          - name: envoy-build-ubuntu
+            tag: ci-${{ steps.docker-sha.outputs.sha }}
+            registry: docker.io/envoyproxy
+            architectures:
+            - arm64
+            - amd64
+            artifact-pattern: oci-ubuntu-{arch}/ubuntu-ci-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
           # mobile
           - name: envoy-build-ubuntu
             tag: mobile-${{ steps.docker-sha.outputs.sha }}
@@ -145,9 +144,16 @@ jobs:
             artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
             additional-tags:
             - ${{ steps.docker-sha.outputs.sha }}
-
+          # full (gcr)
+          - name: envoy-build
+            tag: ${{ steps.docker-sha.outputs.sha }}
+            registry: gcr.io/envoy-ci
+            architectures:
+            - amd64
+            - arm64
+            artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
     - name: Collect and push OCI artifacts
-      uses: ./.github/actions/oci-collector
+      uses: envoyproxy/toolshed/gh-actions/oci/collector@9cf0adee54e23911d1274688cdc7712ec820351d
       with:
         manifest-config: ${{ steps.config.outputs.value }}
         dry-run: ${{ github.event_name == 'pull_request' }}
