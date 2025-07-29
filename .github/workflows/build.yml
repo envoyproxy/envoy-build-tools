@@ -100,7 +100,7 @@ jobs:
           # test
           - name: envoy-build
             tag: test-${{ steps.docker-sha.outputs.sha }}
-            registry: test.io/envoyproxy
+            registry: docker.io/envoyproxy
             architectures:
             - amd64
             - arm64
