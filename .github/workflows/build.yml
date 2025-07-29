@@ -153,4 +153,4 @@ jobs:
         dry-run: ${{ github.event_name == 'pull_request' }}
         dockerhub-username: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.DOCKERHUB_USERNAME || '' }}
         dockerhub-password: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.DOCKERHUB_PASSWORD || '' }}
-        gcr-service-account-key: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.GCP_SERVICE_ACCOUNT_KEY || '' }}
+        gcr-key: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.GCP_SERVICE_ACCOUNT_KEY || '' }}
