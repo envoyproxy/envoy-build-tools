@@ -57,8 +57,8 @@ build_and_push_variants () {
             push_arg+=(--push)
         fi
 
-        # Platform logic: worker, ci, docker and test get multi-arch, others get amd64 only
-        if [[ "$variant" == "test" || "$variant" == "ci" || "$variant" == "docker" || "$variant" == "worker" ]]; then
+        # Platform logic: worker, ci, devtools, docker and test get multi-arch, others get amd64 only
+        if [[ "$variant" == "test" || "$variant" == "ci" || "$variant" == "docker" || "$variant" == "worker" || "$variant" == "devtools" ]]; then
             platform="${BUILD_TOOLS_PLATFORMS}"
         elif [[ "$BUILD_TOOLS_PLATFORMS" == *"linux/amd64"* ]]; then
             # devtools and mobile are amd64 only (matching original behavior for full/mobile)
