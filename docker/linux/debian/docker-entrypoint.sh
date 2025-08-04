@@ -3,8 +3,8 @@
 set -e -o pipefail
 
 
-if [[ -z "${BUILD_UID}" ]]; then
-    echo "BUILD_UID must be set" >&2
+if [[ -z "${USER_UID}" ]]; then
+    echo "USER_UID must be set" >&2
 fi
 
 start_docker () {
@@ -26,7 +26,7 @@ get_docker_info () {
 
 set_user_permissions () {
     mkdir -p /home/envoybuild/.docker
-    usermod -u "${BUILD_UID}" envoybuild &> /dev/null
+    usermod -u "${USER_UID}" envoybuild &> /dev/null
     chown envoybuild:envoybuild /home/envoybuild
     if [[ -e /home/envoybuild/.cache ]]; then
         chown envoybuild:envoybuild /home/envoybuild/.cache
