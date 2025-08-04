@@ -2,7 +2,7 @@
 
 set -e -o pipefail
 
-usermod -u "${BUILD_UID}" envoybuild &> /dev/null
+usermod -u "${USER_UID}" envoybuild &> /dev/null
 chown envoybuild:envoybuild /home/envoybuild
 if [[ -e /home/envoybuild/.cache ]]; then
     chown envoybuild:envoybuild /home/envoybuild/.cache
