@@ -19,7 +19,6 @@ append_variant () {
     local repo=$1
     local variant=$2
     local arch=$3
-    local flags
 
     tag="${repo}:${variant}-${TAG_SHA}-${arch}"
     if ! exists "$tag"; then

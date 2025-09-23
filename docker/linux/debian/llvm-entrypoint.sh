@@ -9,9 +9,8 @@ if [[ -e /home/envoybuild/.cache ]]; then
     chown envoybuild:envoybuild /home/envoybuild/.cache
 fi
 if [[ -f /entrypoint-extra.sh ]]; then
+    # shellcheck disable=SC1091
     . /entrypoint-extra.sh
 fi
+
 exec gosu envoybuild "$@"
-if [[ -f /cleanup.sh ]]; then
-    . /cleanup.sh
-fi
