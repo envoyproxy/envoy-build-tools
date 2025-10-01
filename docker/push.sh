@@ -5,11 +5,10 @@
 set -e
 
 IMAGE_PREFIX="${IMAGE_PREFIX:-envoyproxy/envoy-build-}"
-GCR_IMAGE_PREFIX=gcr.io/envoy-ci/
 # Enable docker experimental
 export DOCKER_CLI_EXPERIMENTAL=enabled
 CONTAINER_SHA="${CONTAINER_SHA:-$(git log -1 --pretty=format:"%H" .)}"
-CONTAINER_TAG="${CONTAINER_SHA}"
+export CONTAINER_TAG="${CONTAINER_SHA}"
 IMAGE_TAGS=()
 OCI_OUTPUT_DIR="oci-output"
 
@@ -83,8 +82,10 @@ export BASE_IMAGE_NAME
 
 # Use distro-specific build script if available
 if [[ "${OS_DISTRO}" == "debian" && -f "./debian_build.sh" ]]; then
+    # shellcheck source=docker/linux/debian_build.sh
     source "./debian_build.sh"
 else
+    # shellcheck source=docker/linux/build.sh
     source "./build.sh"
 fi
 

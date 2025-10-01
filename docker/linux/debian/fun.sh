@@ -14,7 +14,6 @@ COMMON_PACKAGES=(
     ca-certificates
     libtinfo5
     patch)
-DEV_PACKAGES=()
 CI_PACKAGES=(git gosu sudo)
 DEBIAN_PACKAGES=(
     aspell
