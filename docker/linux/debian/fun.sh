@@ -142,6 +142,7 @@ mobile_install () {
     add_ubuntu_keys "${APT_KEYS_MOBILE[@]}"
     mobile_install_jdk
     mobile_install_android
+    apt-get install -y curl
 }
 
 install_devel () {
