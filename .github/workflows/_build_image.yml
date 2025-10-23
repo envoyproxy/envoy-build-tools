@@ -43,6 +43,16 @@ jobs:
       [${{ inputs.host-platform }}] Build and test Docker image
     runs-on: ${{ inputs.runs-on }}
     steps:
+    - run: |
+        df -h
+        sudo systemctl stop docker
+        sudo rm -rf /var/lib/docker
+        sudo mkdir /var/lib/docker
+        sudo mkdir /mnt/docker
+        sudo mount -o bind /mnt/docker /var/lib/docker
+        sudo systemctl start docker
+        df -h
+
     - name: 'Checkout repository'
       uses: actions/checkout@v5
     - run: |
