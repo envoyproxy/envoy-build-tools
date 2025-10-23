@@ -44,7 +44,7 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     steps:
     - name: 'Checkout repository'
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - run: |
         CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "./docker")
         echo "tag=${CONTAINER_TAG}" >> "$GITHUB_OUTPUT"
