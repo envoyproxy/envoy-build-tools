@@ -60,7 +60,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
 COPY debian/docker-entrypoint.sh /entrypoint.sh
 
 
-FROM ci AS llvm
+FROM devtools AS llvm
 ARG LLVM_VERSION=18.1.8 \
     LLVM_DISTRO=ubuntu-18.04
 RUN --mount=type=tmpfs,target=/var/cache/apt \
@@ -84,7 +84,7 @@ COPY \
 
 
 # mobile
-FROM devtools AS mobile
+FROM llvm AS mobile
 ARG ANDROID_CLI_TOOLS=https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip \
     APT_KEY_AZUL=0xB1998361219BD9C9 \
     ZULU_INSTALL_DEB=https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
