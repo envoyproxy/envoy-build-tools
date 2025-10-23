@@ -39,6 +39,10 @@ jobs:
       contents: read
       packages: write
     steps:
+    - run: |
+        sudo mkdir /mnt/workspace
+        sudo chown runner:runner /mnt/workspace
+        sudo mount -o bind /mnt/workspace ${{ github.workspace }}
     - name: 'Checkout repository'
       uses: actions/checkout@v5
     - name: Get docker SHA
