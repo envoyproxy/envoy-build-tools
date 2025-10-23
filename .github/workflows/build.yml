@@ -39,10 +39,12 @@ jobs:
       contents: read
       packages: write
     steps:
-    - run: |
-        sudo mkdir /mnt/workspace
-        sudo chown runner:runner /mnt/workspace
-        sudo mount -o bind /mnt/workspace ${{ github.workspace }}
+    - uses: envoyproxy/toolshed/gh-actions/bind-mounts@actions-v0.3.27
+      with:
+        mounts: |
+          - src: /mnt/workspace
+            target: ${{ github.workspace }}
+            permissions: "runner:runner"
     - name: 'Checkout repository'
       uses: actions/checkout@v5
     - name: Get docker SHA

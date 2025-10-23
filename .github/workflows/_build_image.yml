@@ -43,15 +43,14 @@ jobs:
       [${{ inputs.host-platform }}] Build and test Docker image
     runs-on: ${{ inputs.runs-on }}
     steps:
-    - run: |
-        df -h
-        sudo systemctl stop docker
-        sudo rm -rf /var/lib/docker
-        sudo mkdir /var/lib/docker
-        sudo mkdir /mnt/docker
-        sudo mount -o bind /mnt/docker /var/lib/docker
-        sudo systemctl start docker
-        df -h
+    - uses: envoyproxy/toolshed/gh-actions/bind-mounts@actions-v0.3.27
+      with:
+        mounts: |
+          - src: /mnt/docker
+            target: /var/lib/docker
+            rm: true
+            command-pre: sudo systemctl stop docker
+            command-post: sudo systemctl start docker
 
     - name: 'Checkout repository'
       uses: actions/checkout@v5
@@ -61,6 +60,7 @@ jobs:
       id: container
       shell: bash
       name: Container hash
+
     - run: |
         cd docker
         ./push.sh
