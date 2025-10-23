@@ -12,6 +12,7 @@ APT_KEYS_MOBILE=(
 COMMON_PACKAGES=(
     apt-transport-https
     ca-certificates
+    curl
     libtinfo5
     patch)
 CI_PACKAGES=(git gosu sudo)
@@ -20,7 +21,6 @@ DEBIAN_PACKAGES=(
     aspell-en
     byobu
     bzip2
-    curl
     devscripts
     docker-buildx-plugin
     docker-ce-cli
@@ -142,7 +142,6 @@ mobile_install () {
     add_ubuntu_keys "${APT_KEYS_MOBILE[@]}"
     mobile_install_jdk
     mobile_install_android
-    apt-get install -y curl
 }
 
 install_devel () {
