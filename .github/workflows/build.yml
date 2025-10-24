@@ -39,12 +39,12 @@ jobs:
       contents: read
       packages: write
     steps:
-    - uses: envoyproxy/toolshed/gh-actions/bind-mounts@actions-v0.3.27
+    - uses: envoyproxy/toolshed/gh-actions/bind-mounts@actions-v0.3.28
       with:
         mounts: |
           - src: /mnt/workspace
             target: ${{ github.workspace }}
-            permissions: "runner:runner"
+            chown: "runner:runner"
     - name: 'Checkout repository'
       uses: actions/checkout@v5
     - name: Get docker SHA
