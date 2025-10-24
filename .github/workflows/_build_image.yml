@@ -43,7 +43,7 @@ jobs:
       [${{ inputs.host-platform }}] Build and test Docker image
     runs-on: ${{ inputs.runs-on }}
     steps:
-    - uses: envoyproxy/toolshed/gh-actions/bind-mounts@actions-v0.3.27
+    - uses: envoyproxy/toolshed/gh-actions/bind-mounts@actions-v0.3.28
       with:
         mounts: |
           - src: /mnt/docker
