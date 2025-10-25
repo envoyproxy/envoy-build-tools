@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim@sha256:779034981fec838da124ff6ab9211499ba5d4e769dabdfd6c42c6ae2553b9a3b AS worker
+FROM debian:bullseye-slim@sha256:779034981fec838da124ff6ab9211499ba5d4e769dabdfd6c42c6ae2553b9a3b AS worker-base
 ARG DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-ec"]
 RUN --mount=type=tmpfs,target=/var/cache/apt \
@@ -9,17 +9,18 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     && install_base
 
 
-FROM worker AS bazelisk
+FROM worker-base AS bazelisk
 ARG BAZELISK_SHA256SUM=6539c12842ad76966f3d493e8f80d67caa84ec4a000e220d5459833c967c12bc \
     BAZELISK_SHA256SUM_ARM64=54f85ef4c23393f835252cc882e5fea596e8ef3c4c2056b059f8067cd19f0351 \
     BAZELISK_VERSION=1.26.0
 RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
     --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
     . ./debian/fun.sh \
-    && install_bazelisk
+    && install_bazelisk \
+    && stamp_build bazelisk "$CONTAINER_TAG"
 
 
-FROM worker AS ci
+FROM worker-base AS ci-base
 ARG USER_NAME \
     USER_ID \
     GROUP_ID
@@ -34,7 +35,7 @@ COPY debian/entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 
-FROM ci AS devtools
+FROM ci-base AS devtools-base
 ARG BAZELISK_SHA256SUM=6539c12842ad76966f3d493e8f80d67caa84ec4a000e220d5459833c967c12bc \
     BAZELISK_SHA256SUM_ARM64=54f85ef4c23393f835252cc882e5fea596e8ef3c4c2056b059f8067cd19f0351 \
     BAZELISK_VERSION=1.26.0 \
@@ -48,7 +49,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     && install_devel
 
 
-FROM ci AS docker
+FROM ci-base AS docker-base
 ARG APT_KEY_K8S=https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/Debian_12/Release.key \
     APT_KEY_DOCKER=https://download.docker.com/linux/debian/gpg
 RUN --mount=type=tmpfs,target=/var/cache/apt \
@@ -60,7 +61,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
 COPY debian/docker-entrypoint.sh /entrypoint.sh
 
 
-FROM devtools AS llvm
+FROM devtools-base AS llvm-base
 ARG LLVM_VERSION=18.1.8 \
     LLVM_DISTRO=ubuntu-18.04
 RUN --mount=type=tmpfs,target=/var/cache/apt \
@@ -72,7 +73,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
 COPY debian/llvm-entrypoint.sh /entrypoint.sh
 
 
-FROM devtools AS test
+FROM devtools-base AS test
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/debian/test.sh,target=/debian/test.sh \
@@ -84,7 +85,7 @@ COPY \
 
 
 # mobile
-FROM llvm AS mobile
+FROM llvm-base AS mobile-base
 ARG ANDROID_CLI_TOOLS=https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip \
     APT_KEY_AZUL=0xB1998361219BD9C9 \
     ZULU_INSTALL_DEB=https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
@@ -100,5 +101,48 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     . ./debian/fun.sh \
     && mobile_install
 
+
+# Stamp containers
+FROM worker-base AS worker
+ARG CONTAINER_TAG
+RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    . ./debian/fun.sh \
+    && stamp_build worker "$CONTAINER_TAG"
+
+FROM docker-base AS docker
+ARG CONTAINER_TAG
+RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    . ./debian/fun.sh \
+    && stamp_build docker "$CONTAINER_TAG"
+
+FROM devtools-base AS devtools
+ARG CONTAINER_TAG
+RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    . ./debian/fun.sh \
+    && stamp_build devtools "$CONTAINER_TAG"
+
+FROM llvm-base AS llvm
+ARG CONTAINER_TAG
+RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    . ./debian/fun.sh \
+    && stamp_build llvm "$CONTAINER_TAG"
+
+FROM mobile-base AS mobile
+ARG CONTAINER_TAG
+RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    . ./debian/fun.sh \
+    && stamp_build mobile "$CONTAINER_TAG"
+
+FROM ci-base AS ci
+ARG CONTAINER_TAG
+RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    . ./debian/fun.sh \
+    && stamp_build ci "$CONTAINER_TAG"
 
 FROM ci

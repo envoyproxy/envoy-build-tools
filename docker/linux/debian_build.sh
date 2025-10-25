@@ -68,6 +68,7 @@ build_and_push_variants () {
         fi
         ci_log_run docker buildx build . \
                    -f "${OS_DISTRO}/Dockerfile" \
+                   --build-arg "CONTAINER_TAG=${CONTAINER_TAG}" \
                    -t "${IMAGE_NAME}:${variant}-${CONTAINER_TAG}${ARCH_SUFFIX}" \
                    --target "${variant}" \
                    --platform "$platform" \
@@ -82,9 +83,12 @@ ci_log_run config_env
 if [[ "${SAVE_OCI}" == "true" ]]; then
     echo "Building OCI artifact to: ${OCI_OUTPUT_DIR}/${OS_DISTRO}-ci-${CONTAINER_TAG}${ARCH_SUFFIX}.tar"
     ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}${ARCH_SUFFIX}" --target ci --platform "${BUILD_TOOLS_PLATFORMS}" \
+        --build-arg "CONTAINER_TAG=${CONTAINER_TAG}" \
         --output "type=oci,dest=${OCI_OUTPUT_DIR}/${OS_DISTRO}-ci-${CONTAINER_TAG}${ARCH_SUFFIX}.tar"
 else
-    ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}${ARCH_SUFFIX}" --target ci --platform "${BUILD_TOOLS_PLATFORMS}"
+    ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}${ARCH_SUFFIX}" \
+        --build-arg "CONTAINER_TAG=${CONTAINER_TAG}" \
+        --target ci --platform "${BUILD_TOOLS_PLATFORMS}"
 fi
 
 if [[ -z "${NO_BUILD_VARIANTS}" ]]; then
@@ -96,14 +100,20 @@ if [[ "${SAVE_OCI}" != "true" ]] && [[ -n "${IMAGE_TAGS}" ]]; then
     for IMAGE_TAG in "${IMAGE_TAGS[@]}"; do
         if [[ "$IMAGE_TAG" == *"|"* ]]; then
             IFS="|" read -ra parts <<< "$IMAGE_TAG"
-            ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${parts[0]}${ARCH_SUFFIX}" --target "${parts[1]}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
+            ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${parts[0]}${ARCH_SUFFIX}" \
+                --build-arg "CONTAINER_TAG=${CONTAINER_TAG}" \
+                --target "${parts[1]}" --platform "${BUILD_TOOLS_PLATFORMS}" --push
         else
             # Default target for Debian is 'ci' (includes bazel for builds)
-            ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_TAG}${ARCH_SUFFIX}" --target ci --platform "${BUILD_TOOLS_PLATFORMS}" --push
+            ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_TAG}${ARCH_SUFFIX}" \
+                --build-arg "CONTAINER_TAG=${CONTAINER_TAG}" \
+                --target ci --platform "${BUILD_TOOLS_PLATFORMS}" --push
         fi
     done
 fi
 
 if [[ "$LOAD_IMAGE" == "true" && "$BUILD_TOOLS_PLATFORMS" == *"linux/amd64"*  ]]; then
-    ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}${ARCH_SUFFIX}" --target ci --platform "linux/amd64" --load
+    ci_log_run docker buildx build . -f "${OS_DISTRO}/Dockerfile" -t "${IMAGE_NAME}:${CONTAINER_TAG}${ARCH_SUFFIX}" \
+        --build-arg "CONTAINER_TAG=${CONTAINER_TAG}" \
+        --target ci --platform "linux/amd64" --load
 fi

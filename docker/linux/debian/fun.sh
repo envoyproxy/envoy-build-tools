@@ -228,3 +228,9 @@ create_user () {
         -s /bin/bash \
         "$USER_NAME"
 }
+
+stamp_build () {
+    local container_name="$1" container_tag="$2"
+    echo "Stamping ${container_name}-${container_tag} > .build-id"
+    echo "${container_name}-${container_tag}" > /.build-id
+}
