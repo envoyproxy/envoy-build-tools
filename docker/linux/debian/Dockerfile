@@ -16,8 +16,7 @@ ARG BAZELISK_SHA256SUM=6539c12842ad76966f3d493e8f80d67caa84ec4a000e220d5459833c9
 RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
     --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
     . ./debian/fun.sh \
-    && install_bazelisk \
-    && stamp_build bazelisk "$CONTAINER_TAG"
+    && install_bazelisk
 
 
 FROM worker-base AS ci-base
