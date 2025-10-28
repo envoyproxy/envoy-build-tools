@@ -13,6 +13,7 @@ COMMON_PACKAGES=(
     apt-transport-https
     ca-certificates
     curl
+    git
     libtinfo5
     patch)
 CI_PACKAGES=(git gosu sudo)
@@ -27,7 +28,6 @@ DEBIAN_PACKAGES=(
     doxygen
     expect
     gdb
-    git
     graphviz
     jq
     libcap2-bin
