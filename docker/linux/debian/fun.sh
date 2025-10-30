@@ -62,7 +62,8 @@ DOCKER_PACKAGES=(
 GROUP_ID="${GROUP_ID:-${USER_ID:-1000}}"
 USER_ID="${USER_ID:-1000}"
 USER_NAME="${USER_NAME:-envoybuild}"
-WORKER_PACKAGES=(autoconf automake libtool m4)
+# wireshark is required for api tests (text2pcap)
+WORKER_PACKAGES=(autoconf automake libtool m4 wireshark-common)
 
 # This is used for mobile installs - we need to add the key properly
 add_ubuntu_keys () {
