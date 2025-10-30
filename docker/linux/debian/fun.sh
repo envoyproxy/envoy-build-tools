@@ -104,6 +104,11 @@ install_base () {
     echo "Installing common packages..."
     apt_install "${COMMON_PACKAGES[@]}"
 
+    # Workaround for https://github.com/llvm/llvm-project/issues/113696
+    if [[ "$DEB_ARCH" == "arm64" ]]; then
+        WORKER_PACKAGES+=(libxml2)
+    fi
+
     apt_install "${WORKER_PACKAGES[@]}"
 
     # Note: No development tools installed in base layer
