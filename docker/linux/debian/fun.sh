@@ -21,7 +21,6 @@ DEBIAN_PACKAGES=(
     docker-ce-cli
     doxygen
     expect
-    g++-13
     gdb
     git
     gnupg2
@@ -159,7 +158,10 @@ install_devel () {
 
     apt_install "${DEV_PACKAGES[@]}"
     apt-get -qq dist-upgrade -y
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 1
+    install_gcc
+
+    # not sure if this is necessary
+    export NO_INSTALL_BUILDTOOLS=1
     install_build
 
     echo "Development tools installation completed - compilers provided by toolchains"
@@ -169,6 +171,12 @@ install () {
     apt-get -qq update -y
     apt-get -qq install -y --no-install-recommends "${CI_PACKAGES[@]}"
     create_user
+}
+
+install_gcc () {
+    apt-get -qq update -y
+    apt-get -qq install -y g++-13
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 1
 }
 
 install_bazelisk () {

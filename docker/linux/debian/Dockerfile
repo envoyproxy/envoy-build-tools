@@ -34,6 +34,18 @@ COPY debian/entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 
+# This can be removed if/when we implement hermetic gcc toolchains
+FROM worker-base AS gcc-base
+RUN --mount=type=tmpfs,target=/var/cache/apt \
+    --mount=type=tmpfs,target=/var/lib/apt/lists \
+    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    . ./debian/fun.sh \
+    && install_gcc
+COPY debian/entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
+
 FROM ci-base AS docker-base
 ARG APT_KEY_K8S=https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/Debian_Testing/Release.key \
     APT_KEY_DOCKER=https://download.docker.com/linux/debian/gpg
@@ -107,6 +119,13 @@ RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
     --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
     . ./debian/fun.sh \
     && stamp_build worker "$CONTAINER_TAG"
+
+FROM gcc-base AS gcc
+ARG CONTAINER_TAG
+RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    . ./debian/fun.sh \
+    && stamp_build gcc "$CONTAINER_TAG"
 
 FROM docker-base AS docker
 ARG CONTAINER_TAG

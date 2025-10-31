@@ -3,7 +3,7 @@
 set -o pipefail
 
 # Debian-specific build configuration
-DEBIAN_DOCKER_VARIANTS=("worker" "ci" "devtools" "docker" "llvm" "mobile" "test")
+DEBIAN_DOCKER_VARIANTS=("worker" "ci" "gcc" "devtools" "docker" "llvm" "mobile" "test")
 IMAGE_TAGS=${IMAGE_TAGS:-}
 OS_DISTRO="debian"
 
@@ -57,8 +57,8 @@ build_and_push_variants () {
             push_arg+=(--push)
         fi
 
-        # Platform logic: worker, ci, devtools, docker and test get multi-arch, others get amd64 only
-        if [[ "$variant" == "test" || "$variant" == "ci" || "$variant" == "docker" || "$variant" == "worker" || "$variant" == "devtools" ]]; then
+        # Platform logic: worker, ci, gcc, devtools, docker and test get multi-arch, others get amd64 only
+        if [[ "$variant" == "test" || "$variant" == "ci" || "$variant" == "gcc" || "$variant" == "docker" || "$variant" == "worker" || "$variant" == "devtools" ]]; then
             platform="${BUILD_TOOLS_PLATFORMS}"
         elif [[ "$BUILD_TOOLS_PLATFORMS" == *"linux/amd64"* ]]; then
             # devtools and mobile are amd64 only (matching original behavior for full/mobile)

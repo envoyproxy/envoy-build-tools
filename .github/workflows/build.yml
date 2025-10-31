@@ -94,6 +94,22 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-worker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+          # gcc
+          - name: envoy-build
+            tag: gcc-${{ steps.docker-sha.outputs.sha }}
+            registry: docker.io/envoyproxy
+            architectures:
+            - amd64
+            - arm64
+            artifact-pattern: oci-debian-{arch}/debian-gcc-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+          # gcc (gcr)
+          - name: envoy-build
+            tag: gcc-${{ steps.docker-sha.outputs.sha }}
+            registry: gcr.io/envoy-ci
+            architectures:
+            - amd64
+            - arm64
+            artifact-pattern: oci-debian-{arch}/debian-gcc-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
           # docker
           - name: envoy-build
             tag: docker-${{ steps.docker-sha.outputs.sha }}
