@@ -32,7 +32,9 @@ install_build_tools () {
 
 install_build () {
     setup_tcpdump
-    install_build_tools
+    if [[ -z "${NO_INSTALL_BUILDTOOLS}" ]]; then
+        install_build_tools
+    fi
     git config --global --add safe.directory /source
     mv ~/.gitconfig /etc/gitconfig
 }
