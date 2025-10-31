@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim@sha256:779034981fec838da124ff6ab9211499ba5d4e769dabdfd6c42c6ae2553b9a3b AS worker-base
+FROM debian:trixie-slim@sha256:66b37a5078a77098bfc80175fb5eb881a3196809242fd295b25502854e12cbec AS worker-base
 ARG DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-ec"]
 RUN --mount=type=tmpfs,target=/var/cache/apt \
@@ -34,22 +34,8 @@ COPY debian/entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 
-FROM ci-base AS devtools-base
-ARG BAZELISK_SHA256SUM=6539c12842ad76966f3d493e8f80d67caa84ec4a000e220d5459833c967c12bc \
-    BAZELISK_SHA256SUM_ARM64=54f85ef4c23393f835252cc882e5fea596e8ef3c4c2056b059f8067cd19f0351 \
-    BAZELISK_VERSION=1.26.0 \
-    APT_KEY_K8S=https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/Debian_12/Release.key \
-    APT_KEY_DOCKER=https://download.docker.com/linux/debian/gpg
-RUN --mount=type=tmpfs,target=/var/cache/apt \
-    --mount=type=tmpfs,target=/var/lib/apt/lists \
-    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
-    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
-    . ./debian/fun.sh \
-    && install_devel
-
-
 FROM ci-base AS docker-base
-ARG APT_KEY_K8S=https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/Debian_12/Release.key \
+ARG APT_KEY_K8S=https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/Debian_Testing/Release.key \
     APT_KEY_DOCKER=https://download.docker.com/linux/debian/gpg
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
@@ -58,6 +44,20 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     . ./debian/fun.sh \
     && install_docker
 COPY debian/docker-entrypoint.sh /entrypoint.sh
+
+
+FROM docker-base AS devtools-base
+ARG BAZELISK_SHA256SUM=6539c12842ad76966f3d493e8f80d67caa84ec4a000e220d5459833c967c12bc \
+    BAZELISK_SHA256SUM_ARM64=54f85ef4c23393f835252cc882e5fea596e8ef3c4c2056b059f8067cd19f0351 \
+    BAZELISK_VERSION=1.26.0 \
+    APT_KEY_K8S=https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/Debian_Testing/Release.key \
+    APT_KEY_DOCKER=https://download.docker.com/linux/debian/gpg
+RUN --mount=type=tmpfs,target=/var/cache/apt \
+    --mount=type=tmpfs,target=/var/lib/apt/lists \
+    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    . ./debian/fun.sh \
+    && install_devel
 
 
 FROM devtools-base AS llvm-base
@@ -86,7 +86,6 @@ COPY \
 # mobile
 FROM llvm-base AS mobile-base
 ARG ANDROID_CLI_TOOLS=https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip \
-    APT_KEY_AZUL=0xB1998361219BD9C9 \
     ZULU_INSTALL_DEB=https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
 ENV ANDROID_HOME=/.android/sdk \
     ANDROID_NDK_HOME=/.android/sdk/ndk/26.3.11579264 \
