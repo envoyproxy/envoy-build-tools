@@ -5,15 +5,10 @@ set -o pipefail
 # shellcheck source=docker/linux/common_fun.sh
 . ./common_fun.sh
 
-
-# Mobile and repo variables
-APT_KEYS_MOBILE=(
-    "$APT_KEY_AZUL")
 COMMON_PACKAGES=(
     apt-transport-https
     ca-certificates
     curl
-    libtinfo5
     patch)
 CI_PACKAGES=(git gosu sudo)
 DEBIAN_PACKAGES=(
@@ -26,8 +21,11 @@ DEBIAN_PACKAGES=(
     docker-ce-cli
     doxygen
     expect
+    g++-13
     gdb
     git
+    gnupg2
+    gpg-agent
     graphviz
     jq
     libcap2-bin
@@ -45,7 +43,8 @@ DEBIAN_PACKAGES=(
     tshark
     unzip
     xz-utils
-    zip)
+    zip
+    yq)
 DOCKER_PACKAGES=(
     containerd.io
     docker-buildx-plugin
@@ -53,42 +52,36 @@ DOCKER_PACKAGES=(
     docker-ce-cli
     docker-compose-plugin
     expect
-    fuse-overlayfs
     gettext
     jq
     netcat-openbsd
     skopeo
-    whois)
+    whois
+    yq)
 GROUP_ID="${GROUP_ID:-${USER_ID:-1000}}"
 USER_ID="${USER_ID:-1000}"
 USER_NAME="${USER_NAME:-envoybuild}"
 WORKER_PACKAGES=(autoconf automake libtool m4)
 
-# This is used for mobile installs - we need to add the key properly
-add_ubuntu_keys () {
-    apt-get update -y
-    for key in "${@}"; do
-        apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "$key"
-    done
-}
+add_apt_key() {
+    local key_url="$1"
+    local key_id="$2"
+    local key_path="/usr/share/keyrings/${key_id}.gpg"
 
-add_apt_key () {
-    apt-get update -y
-    wget -q -O - "$1" | apt-key add -
-}
-
-add_apt_k8s_key () {
-    apt-get update -y
-    wget -q -O - "$1" | gpg --dearmor > /etc/apt/trusted.gpg.d/devel_kubic_libcontainers_stable.gpg
+    echo "Add apt key(${key_id}): ${key_url}" >&2
+    wget -qO - "$key_url" | gpg --dearmor | sudo tee "$key_path" > /dev/null
+    echo -n "$key_path"
 }
 
 add_apt_repos () {
     local repo
+
     apt-get update -y
     apt-get -qq install -y ca-certificates
     for repo in "${@}"; do
         echo "deb ${repo}" >> "/etc/apt/sources.list"
     done
+    cat /etc/apt/sources.list
     apt-get update -y
 }
 
@@ -103,6 +96,11 @@ install_base () {
     # Install base packages first
     echo "Installing common packages..."
     apt_install "${COMMON_PACKAGES[@]}"
+
+    # Workaround https://github.com/llvm/llvm-project/issues/75490
+    curl -LO "http://deb.debian.org/debian/pool/main/n/ncurses/libtinfo5_6.4-4_${DEB_ARCH}.deb"
+    dpkg -i "libtinfo5_6.4-4_${DEB_ARCH}.deb"
+    rm "libtinfo5_6.4-4_${DEB_ARCH}.deb"
 
     # Workaround for https://github.com/llvm/llvm-project/issues/113696
     if [[ "$DEB_ARCH" == "arm64" ]]; then
@@ -144,7 +142,9 @@ mobile_install_jdk () {
 }
 
 mobile_install () {
-    add_ubuntu_keys "${APT_KEYS_MOBILE[@]}"
+    azul_keypath="$(add_apt_key https://repos.azul.com/azul-repo.key azul)"
+    echo "deb [signed-by=${azul_keypath}] https://repos.azul.com/zulu/deb stable main" \
+        | sudo tee /etc/apt/sources.list.d/zulu.list
     mobile_install_jdk
     mobile_install_android
 }
@@ -152,26 +152,14 @@ mobile_install () {
 install_devel () {
     # Install development tools (no system compilers - toolchains will provide these)
     echo "Installing development tools..."
-
     apt-get -qq update -y
-    apt-get -qq install -y --no-install-recommends locales lsb-release
-    if ! locale -a | grep -q en_US.utf8; then
-        localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
-    fi
-    LSB_RELEASE="$(lsb_release -cs)"
-    APT_REPOS=(
-        "[arch=${DEB_ARCH}] https://download.docker.com/linux/debian ${LSB_RELEASE} stable"
-        "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_11/ /")
-
-    apt-get -qq install -y --no-install-recommends wget gnupg2 gpg-agent software-properties-common
-    add_apt_key "${APT_KEY_DOCKER}"
-    add_apt_k8s_key "${APT_KEY_K8S}"
-    add_apt_repos "${APT_REPOS[@]}"
-    apt-get -qq update
     apt-get -qq install -y --no-install-recommends "${DEBIAN_PACKAGES[@]}"
     apt-get -qq update
     apt-get -qq upgrade -y
 
+    apt_install "${DEV_PACKAGES[@]}"
+    apt-get -qq dist-upgrade -y
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 1
     install_build
 
     echo "Development tools installation completed - compilers provided by toolchains"
@@ -191,22 +179,19 @@ install_bazelisk () {
 
 install_docker () {
     apt-get -qq update -y
-    apt-get -qq install -y --no-install-recommends locales lsb-release
+    apt-get -qq install -y --no-install-recommends gpg locales lsb-release wget
     if ! locale -a | grep -q en_US.utf8; then
         localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
     fi
-    LSB_RELEASE="$(lsb_release -cs)"
-    APT_REPOS=(
-        "http://archive.debian.org/debian bullseye-backports main"
-        "[arch=${DEB_ARCH}] https://download.docker.com/linux/debian ${LSB_RELEASE} stable"
-        "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_11/ /")
-    apt-get -qq install -y --no-install-recommends wget gnupg2 gpg-agent software-properties-common
-    add_apt_key "${APT_KEY_DOCKER}"
-    add_apt_k8s_key "${APT_KEY_K8S}"
-    add_apt_repos "${APT_REPOS[@]}"
+    lsb_release="$(lsb_release -cs)"
+    docker_key=$(add_apt_key "${APT_KEY_DOCKER}" docker)
+    k8s_key=$(add_apt_key "${APT_KEY_K8S}" k8s)
+    apt_repos=(
+        "[arch=${DEB_ARCH} signed-by=${docker_key}] https://download.docker.com/linux/debian ${lsb_release} stable"
+        "[signed-by=${k8s_key}] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_Testing/ /")
+    add_apt_repos "${apt_repos[@]}"
     apt-get -qq update
     apt-get -qq install -y --no-install-recommends "${DOCKER_PACKAGES[@]}"
-    apt-get -qq install -y --no-install-recommends -t bullseye-backports curl yq
     apt-get -qq update
     apt-get -qq upgrade -y
 }
