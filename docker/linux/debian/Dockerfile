@@ -57,11 +57,6 @@ COPY debian/docker-entrypoint.sh /entrypoint.sh
 
 
 FROM docker-base AS devtools-base
-ARG BAZELISK_SHA256SUM=6539c12842ad76966f3d493e8f80d67caa84ec4a000e220d5459833c967c12bc \
-    BAZELISK_SHA256SUM_ARM64=54f85ef4c23393f835252cc882e5fea596e8ef3c4c2056b059f8067cd19f0351 \
-    BAZELISK_VERSION=1.26.0 \
-    APT_KEY_K8S=https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/Debian_Testing/Release.key \
-    APT_KEY_DOCKER=https://download.docker.com/linux/debian/gpg
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
@@ -108,6 +103,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
     . ./debian/fun.sh \
     && mobile_install
+ENTRYPOINT []
 
 
 # Stamp containers
