@@ -42,8 +42,6 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
     . ./debian/fun.sh \
     && install_gcc
-COPY debian/entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
 
 
 FROM ci-base AS docker-base
