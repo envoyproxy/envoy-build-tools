@@ -175,7 +175,7 @@ install () {
 
 install_gcc () {
     apt-get -qq update -y
-    apt-get -qq install -y g++-13
+    apt-get -qq install -y g++-13 binutils-gold
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 1
 }
 
