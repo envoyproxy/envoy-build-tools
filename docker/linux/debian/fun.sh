@@ -146,6 +146,7 @@ mobile_install () {
         | sudo tee /etc/apt/sources.list.d/zulu.list
     mobile_install_jdk
     mobile_install_android
+    install_gcc
 }
 
 install_devel () {
@@ -176,6 +177,7 @@ install () {
 install_gcc () {
     apt-get -qq update -y
     apt-get -qq install -y g++-13 binutils-gold
+    apt-get -qq remove -f gcc-14 libgcc-14-dev
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 1
 }
 
