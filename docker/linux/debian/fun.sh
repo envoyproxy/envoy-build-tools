@@ -60,7 +60,7 @@ DOCKER_PACKAGES=(
 GROUP_ID="${GROUP_ID:-${USER_ID:-1000}}"
 USER_ID="${USER_ID:-1000}"
 USER_NAME="${USER_NAME:-envoybuild}"
-WORKER_PACKAGES=(autoconf automake libtool m4)
+WORKER_PACKAGES=(autoconf automake m4)
 
 add_apt_key() {
     local key_url="$1"
