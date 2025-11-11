@@ -62,6 +62,8 @@ UBUNTU_PACKAGES=(
     libffi-dev
     libncurses-dev
     libssl-dev
+    libtool
+    make
     rpm
     rsync
     skopeo
@@ -160,6 +162,9 @@ install () {
     apt-get -qq update
     apt-get -qq upgrade -y
     ensure_stdlibcc
+    LLVM_HOST_TARGET="$(/opt/llvm/bin/llvm-config --host-target)"
+    echo "/opt/llvm/lib/${LLVM_HOST_TARGET}" > /etc/ld.so.conf.d/llvm.conf
+    ldconfig
 }
 
 install_ci () {
@@ -167,4 +172,8 @@ install_ci () {
     apt-get -qq update -y
     apt-get -qq install -y --no-install-recommends "${CI_PACKAGES[@]}"
     install_build
+}
+
+install_llvm () {
+    install_llvm_bins
 }
