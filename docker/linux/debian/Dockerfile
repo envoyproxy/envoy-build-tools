@@ -1,3 +1,12 @@
+# Create equivs packages to prevent installation of GCC when installing libtool
+FROM debian:trixie-slim@sha256:66b37a5078a77098bfc80175fb5eb881a3196809242fd295b25502854e12cbec AS fake
+SHELL ["/bin/bash", "-ec"]
+RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
+    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    . ./debian/fun.sh \
+    && build_fake_compiler
+
+
 FROM debian:trixie-slim@sha256:66b37a5078a77098bfc80175fb5eb881a3196809242fd295b25502854e12cbec AS worker-base
 ARG DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-ec"]
@@ -5,6 +14,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
     --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
+    --mount=type=bind,from=fake,source=/tmp/fake-compiler,target=/tmp/fake-compiler \
     . ./debian/fun.sh \
     && install_base
 
