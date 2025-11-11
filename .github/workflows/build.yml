@@ -45,6 +45,9 @@ jobs:
           - src: /mnt/workspace
             target: ${{ github.workspace }}
             chown: "runner:runner"
+          - src: /mnt/oci
+            target: /tmp/oci
+            chown: "runner:runner"
     - name: 'Checkout repository'
       uses: actions/checkout@v5
     - name: Get docker SHA
