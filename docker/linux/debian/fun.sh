@@ -90,8 +90,23 @@ apt_install () {
     apt-get -qq install -y --no-install-recommends --no-install-suggests "${@}"
 }
 
+build_fake_compiler () {
+    apt-get -qq update -y
+    apt-get -qq install -y equivs
+    equivs-control dummy-build-deps
+    sed -i 's/Package: .*/Package: dummy-build-deps/' dummy-build-deps
+    sed -i 's/# Version: .*/Version: 1.0/' dummy-build-deps
+    sed -i 's/# Provides: .*/Provides: gcc, g++, cpp/' dummy-build-deps
+    equivs-build dummy-build-deps
+    mkdir -p /tmp/fake-compiler
+    mv dummy-build-deps_*.deb /tmp/fake-compiler
+}
+
 install_base () {
     echo "Starting install_base for Debian slim image (${DEB_ARCH})..."
+
+    # Install fake gcc/g++ to satisfy libtool
+    dpkg -i /tmp/fake-compiler/dummy-build-deps_*.deb
 
     # Install base packages first
     echo "Installing common packages..."
