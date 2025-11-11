@@ -164,6 +164,7 @@ install_devel () {
 
     # not sure if this is necessary
     export NO_INSTALL_BUILDTOOLS=1
+    export NO_INSTALL_CLANGTOOLS=1
     install_build
 
     echo "Development tools installation completed - compilers provided by toolchains"
