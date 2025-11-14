@@ -30,7 +30,6 @@ DEBIAN_PACKAGES=(
     libcap2-bin
     libffi-dev
     libncurses-dev
-    libnuma-dev
     libssl-dev
     rpm
     rsync
