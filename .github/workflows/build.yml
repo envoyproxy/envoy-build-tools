@@ -53,26 +53,40 @@ jobs:
         paths: ${{ steps.changed-files.outputs.stdout }}
         config: ${{ steps.config.outputs.value }}
 
-  build_image:
+  build_image_debian:
     needs: detect-changes
     if: >-
       (github.repository == 'envoyproxy/envoy-build-tools' || vars.ENVOY_CI_RUN == 'true')
-      && (github.event_name == 'push'
-      || (matrix.target == 'debian' && needs.detect-changes.outputs.debian == 'true')
-      || (matrix.target == 'ubuntu' && needs.detect-changes.outputs.ubuntu == 'true'))
+      && (github.event_name == 'push' || needs.detect-changes.outputs.debian == 'true')
     strategy:
       fail-fast: false
       matrix:
-        target:
-        - ubuntu
-        - debian
         arch:
         - amd64
         - arm64
-    name: Build (${{ matrix.target }}-${{ matrix.arch }})
+    name: Build (debian-${{ matrix.arch }})
     uses: ./.github/workflows/_build_image.yml
     with:
-      distro: ${{ matrix.target }}
+      distro: debian
+      host-platform: ${{ matrix.arch }}
+      runs-on: ${{ matrix.arch == 'amd64' && 'ubuntu-22.04' || 'ubuntu-22.04-arm' }}
+      target-platforms: ${{ matrix.arch == 'amd64' && 'linux/amd64' || 'linux/arm64' }}
+
+  build_image_ubuntu:
+    needs: detect-changes
+    if: >-
+      (github.repository == 'envoyproxy/envoy-build-tools' || vars.ENVOY_CI_RUN == 'true')
+      && (github.event_name == 'push' || needs.detect-changes.outputs.ubuntu == 'true')
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+        - amd64
+        - arm64
+    name: Build (ubuntu-${{ matrix.arch }})
+    uses: ./.github/workflows/_build_image.yml
+    with:
+      distro: ubuntu
       host-platform: ${{ matrix.arch }}
       runs-on: ${{ matrix.arch == 'amd64' && 'ubuntu-22.04' || 'ubuntu-22.04-arm' }}
       target-platforms: ${{ matrix.arch == 'amd64' && 'linux/amd64' || 'linux/arm64' }}
@@ -82,8 +96,12 @@ jobs:
     runs-on: ubuntu-latest
     needs:
     - detect-changes
-    - build_image
-    if: always() && needs.build_image.result != 'cancelled' && needs.build_image.result != 'failure'
+    - build_image_debian
+    - build_image_ubuntu
+    if: >-
+      always()
+      && (needs.build_image_debian.result == 'success' || needs.build_image_debian.result == 'skipped')
+      && (needs.build_image_ubuntu.result == 'success' || needs.build_image_ubuntu.result == 'skipped')
     permissions:
       contents: read
       packages: write
