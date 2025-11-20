@@ -14,8 +14,8 @@ jobs:
       github.repository == 'envoyproxy/envoy-build-tools'
       || vars.ENVOY_CI_RUN == 'true'
     outputs:
-      debian: ${{ fromJSON(steps.torun.outputs.runs).debian }}
-      ubuntu: ${{ fromJSON(steps.torun.outputs.runs).ubuntu }}
+      debian: ${{ steps.set-outputs.outputs.debian }}
+      ubuntu: ${{ steps.set-outputs.outputs.ubuntu }}
     steps:
     - uses: actions/checkout@v5
     - uses: envoyproxy/toolshed/gh-actions/bson@actions-v0.3.30
@@ -52,6 +52,11 @@ jobs:
         event: ${{ github.event_name }}
         paths: ${{ steps.changed-files.outputs.stdout }}
         config: ${{ steps.config.outputs.value }}
+    - id: set-outputs
+      shell: bash
+      run: |
+        echo "debian=$(echo '${{ steps.torun.outputs.runs }}' | jq -r '.debian')" >> $GITHUB_OUTPUT
+        echo "ubuntu=$(echo '${{ steps.torun.outputs.runs }}' | jq -r '.ubuntu')" >> $GITHUB_OUTPUT
 
   build_image_debian:
     needs: detect-changes
