@@ -7,14 +7,15 @@
 debian:
   ci:
     paths:
-    - docker/linux/debian/**
+    - docker/linux/debian/*
     - docker/linux/debian_build.sh
     - docker/push.sh
     - docker/linux/build.sh
     - docker/linux/common_fun.sh
     - docker/linux/group_manifests.sh
-    - .github/workflows/**
+    - .github/**/*
   manifests:
+  # devtools
   - name: envoy-build
     tag: devtools-{sha}
     registry: docker.io/envoyproxy
@@ -22,6 +23,7 @@ debian:
     - amd64
     - arm64
     artifact-pattern: oci-debian-{arch}/debian-devtools-{sha}-{arch}.tar
+  # ci
   - name: envoy-build
     tag: ci-{sha}
     registry: docker.io/envoyproxy
@@ -29,6 +31,7 @@ debian:
     - amd64
     - arm64
     artifact-pattern: oci-debian-{arch}/debian-ci-{sha}-{arch}.tar
+  # worker
   - name: envoy-build
     tag: worker-{sha}
     registry: docker.io/envoyproxy
@@ -36,6 +39,7 @@ debian:
     - amd64
     - arm64
     artifact-pattern: oci-debian-{arch}/debian-worker-{sha}-{arch}.tar
+  # worker (gcr)
   - name: envoy-build
     tag: worker-{sha}
     registry: gcr.io/envoy-ci
@@ -43,6 +47,7 @@ debian:
     - amd64
     - arm64
     artifact-pattern: oci-debian-{arch}/debian-worker-{sha}-{arch}.tar
+  # gcc
   - name: envoy-build
     tag: gcc-{sha}
     registry: docker.io/envoyproxy
@@ -50,6 +55,7 @@ debian:
     - amd64
     - arm64
     artifact-pattern: oci-debian-{arch}/debian-gcc-{sha}-{arch}.tar
+  # gcc (gcr)
   - name: envoy-build
     tag: gcc-{sha}
     registry: gcr.io/envoy-ci
@@ -57,6 +63,7 @@ debian:
     - amd64
     - arm64
     artifact-pattern: oci-debian-{arch}/debian-gcc-{sha}-{arch}.tar
+  # docker
   - name: envoy-build
     tag: docker-{sha}
     registry: docker.io/envoyproxy
@@ -64,6 +71,7 @@ debian:
     - amd64
     - arm64
     artifact-pattern: oci-debian-{arch}/debian-docker-{sha}-{arch}.tar
+  # test
   - name: envoy-build
     tag: test-{sha}
     registry: docker.io/envoyproxy
@@ -71,12 +79,14 @@ debian:
     - amd64
     - arm64
     artifact-pattern: oci-debian-{arch}/debian-test-{sha}-{arch}.tar
+  # llvm
   - name: envoy-build
     tag: llvm-{sha}
     registry: docker.io/envoyproxy
     architectures:
     - amd64
     artifact-pattern: oci-debian-{arch}/debian-llvm-{sha}-{arch}.tar
+  # mobile
   - name: envoy-build
     tag: mobile-{sha}
     registry: docker.io/envoyproxy
@@ -87,13 +97,14 @@ debian:
 ubuntu:
   ci:
     paths:
-    - docker/linux/ubuntu/**
+    - docker/linux/ubuntu/*
     - docker/push.sh
     - docker/linux/build.sh
     - docker/linux/common_fun.sh
     - docker/linux/group_manifests.sh
-    - .github/workflows/**
+    - .github/**/*
   manifests:
+  # ci
   - name: envoy-build-ubuntu
     tag: ci-{sha}
     registry: docker.io/envoyproxy
@@ -101,20 +112,23 @@ ubuntu:
     - arm64
     - amd64
     artifact-pattern: oci-ubuntu-{arch}/ubuntu-ci-{sha}-{arch}.tar
+  # mobile
   - name: envoy-build-ubuntu
     tag: mobile-{sha}
     registry: docker.io/envoyproxy
     architectures:
     - amd64
     artifact-pattern: oci-ubuntu-{arch}/ubuntu-mobile-{sha}-{arch}.tar
+  # test
   - name: envoy-build-ubuntu
     tag: test-{sha}
     registry: docker.io/envoyproxy
     architectures:
     - amd64
     artifact-pattern: oci-ubuntu-{arch}/ubuntu-test-{sha}-{arch}.tar
+  # full
   - name: envoy-build-ubuntu
-    tag: full-f8d1fd9bdac3a7843d1e69816456648989d238be
+    tag: full-{sha}
     registry: docker.io/envoyproxy
     architectures:
     - amd64
@@ -122,6 +136,7 @@ ubuntu:
     artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-{sha}-{arch}.tar
     additional-tags:
     - "{sha}"
+  # full (gcr)
   - name: envoy-build
     tag: "{sha}"
     registry: gcr.io/envoy-ci

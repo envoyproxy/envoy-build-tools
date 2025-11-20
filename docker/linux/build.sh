@@ -2,7 +2,6 @@
 
 set -o pipefail
 
-# Ubuntu-specific build configuration
 UBUNTU_DOCKER_VARIANTS=("ci" "mobile" "test")
 IMAGE_TAGS=${IMAGE_TAGS:-}
 
@@ -10,7 +9,6 @@ IMAGE_TAGS=${IMAGE_TAGS:-}
 [[ -z "${OS_DISTRO}" ]] && OS_DISTRO="ubuntu"
 [[ -z "${IMAGE_NAME}" ]] && IMAGE_NAME="envoyproxy/envoy-build-${OS_DISTRO}"
 
-# Ubuntu uses multi-arch builds by default
 if [[ -z "${BUILD_TOOLS_PLATFORMS}" ]]; then
     if [[ "${OS_DISTRO}" == "ubuntu" ]]; then
         export BUILD_TOOLS_PLATFORMS=linux/arm64,linux/amd64
@@ -46,7 +44,6 @@ config_env() {
     docker buildx create --use --name envoy-build-tools-builder --platform "${BUILD_TOOLS_PLATFORMS}"
 }
 
-# Build Ubuntu variants with specific platform logic
 # TODO(phlax): add (json) build images config
 build_and_push_variants () {
     if [[ "${OS_DISTRO}" != "ubuntu" ]]; then
@@ -83,7 +80,6 @@ build_and_push_variants () {
 
 ci_log_run config_env
 
-# Default target for Ubuntu is 'full' (complete build environment)
 # Build the full/main image first
 if [[ "${SAVE_OCI}" == "true" ]]; then
     echo "Building OCI artifact to: ${OCI_OUTPUT_DIR}/${OS_DISTRO}-full-${CONTAINER_TAG}${ARCH_SUFFIX}.tar"
