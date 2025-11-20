@@ -38,7 +38,7 @@ jobs:
         input: .github/config.yml
         input-format: yaml-path
         filter: |
-          .
+          {debian: .debian.ci, ubuntu: .ubuntu.ci}
     - uses: envoyproxy/toolshed/gh-actions/torun@actions-v0.3.30
       id: torun
       with:
@@ -137,122 +137,31 @@ jobs:
       id: config-debian
       uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.26
       with:
-        input-format: yaml
+        input: .github/config.yml
+        input-format: yaml-path
         filter: >-
-          {manifests: .}
-        input: |
-          - name: envoy-build
-            tag: devtools-${{ steps.docker-sha.outputs.sha }}
-            registry: docker.io/envoyproxy
-            architectures:
-            - amd64
-            - arm64
-            artifact-pattern: oci-debian-{arch}/debian-devtools-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          - name: envoy-build
-            tag: ci-${{ steps.docker-sha.outputs.sha }}
-            registry: docker.io/envoyproxy
-            architectures:
-            - amd64
-            - arm64
-            artifact-pattern: oci-debian-{arch}/debian-ci-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          - name: envoy-build
-            tag: worker-${{ steps.docker-sha.outputs.sha }}
-            registry: docker.io/envoyproxy
-            architectures:
-            - amd64
-            - arm64
-            artifact-pattern: oci-debian-{arch}/debian-worker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          - name: envoy-build
-            tag: worker-${{ steps.docker-sha.outputs.sha }}
-            registry: gcr.io/envoy-ci
-            architectures:
-            - amd64
-            - arm64
-            artifact-pattern: oci-debian-{arch}/debian-worker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          - name: envoy-build
-            tag: gcc-${{ steps.docker-sha.outputs.sha }}
-            registry: docker.io/envoyproxy
-            architectures:
-            - amd64
-            - arm64
-            artifact-pattern: oci-debian-{arch}/debian-gcc-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          - name: envoy-build
-            tag: gcc-${{ steps.docker-sha.outputs.sha }}
-            registry: gcr.io/envoy-ci
-            architectures:
-            - amd64
-            - arm64
-            artifact-pattern: oci-debian-{arch}/debian-gcc-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          - name: envoy-build
-            tag: docker-${{ steps.docker-sha.outputs.sha }}
-            registry: docker.io/envoyproxy
-            architectures:
-            - amd64
-            - arm64
-            artifact-pattern: oci-debian-{arch}/debian-docker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          - name: envoy-build
-            tag: test-${{ steps.docker-sha.outputs.sha }}
-            registry: docker.io/envoyproxy
-            architectures:
-            - amd64
-            - arm64
-            artifact-pattern: oci-debian-{arch}/debian-test-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          - name: envoy-build
-            tag: llvm-${{ steps.docker-sha.outputs.sha }}
-            registry: docker.io/envoyproxy
-            architectures:
-            - amd64
-            artifact-pattern: oci-debian-{arch}/debian-llvm-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          - name: envoy-build
-            tag: mobile-${{ steps.docker-sha.outputs.sha }}
-            registry: docker.io/envoyproxy
-            architectures:
-            - amd64
-            artifact-pattern: oci-debian-{arch}/debian-mobile-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+          .debian.manifests
+          | map(. + {
+              tag: (.tag | gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")),
+              "artifact-pattern": (.["artifact-pattern"] | gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")),
+              "additional-tags": (if .["additional-tags"] then .["additional-tags"] | map(gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")) else null end)
+            })
+          | {manifests: .}
     - name: Generate manifest configuration (Ubuntu)
       if: steps.built-distros.outputs.include-ubuntu == 'true'
       id: config-ubuntu
       uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.26
       with:
-        input-format: yaml
+        input: .github/config.yml
+        input-format: yaml-path
         filter: >-
-          {manifests: .}
-        input: |
-          - name: envoy-build-ubuntu
-            tag: ci-${{ steps.docker-sha.outputs.sha }}
-            registry: docker.io/envoyproxy
-            architectures:
-            - arm64
-            - amd64
-            artifact-pattern: oci-ubuntu-{arch}/ubuntu-ci-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          - name: envoy-build-ubuntu
-            tag: mobile-${{ steps.docker-sha.outputs.sha }}
-            registry: docker.io/envoyproxy
-            architectures:
-            - amd64
-            artifact-pattern: oci-ubuntu-{arch}/ubuntu-mobile-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          - name: envoy-build-ubuntu
-            tag: test-${{ steps.docker-sha.outputs.sha }}
-            registry: docker.io/envoyproxy
-            architectures:
-            - amd64
-            artifact-pattern: oci-ubuntu-{arch}/ubuntu-test-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          - name: envoy-build-ubuntu
-            tag: full-f8d1fd9bdac3a7843d1e69816456648989d238be
-            registry: docker.io/envoyproxy
-            architectures:
-            - amd64
-            - arm64
-            artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-            additional-tags:
-            - ${{ steps.docker-sha.outputs.sha }}
-          - name: envoy-build
-            tag: ${{ steps.docker-sha.outputs.sha }}
-            registry: gcr.io/envoy-ci
-            architectures:
-            - amd64
-            - arm64
-            artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+          .ubuntu.manifests
+          | map(. + {
+              tag: (.tag | gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")),
+              "artifact-pattern": (.["artifact-pattern"] | gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")),
+              "additional-tags": (if .["additional-tags"] then .["additional-tags"] | map(gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")) else null end)
+            })
+          | {manifests: .}
     - name: Merge manifest configurations
       id: config
       if: >-
