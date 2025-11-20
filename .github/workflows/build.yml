@@ -11,10 +11,8 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     if: >-
-      ${{
       github.repository == 'envoyproxy/envoy-build-tools'
       || vars.ENVOY_CI_RUN == 'true'
-      }}
     outputs:
       debian: ${{ fromJSON(steps.torun.outputs.runs).debian }}
       ubuntu: ${{ fromJSON(steps.torun.outputs.runs).ubuntu }}
@@ -41,50 +39,36 @@ jobs:
     - run: eval '${{ steps.changed.outputs.value }}' | jq -R . | jq -sc .
       id: changed-files
       shell: bash
+    - uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.30
+      id: config
+      with:
+        input-path: .github/config.yml
+        input-format: yaml
+        filter: |
+          .
     - uses: envoyproxy/toolshed/gh-actions/torun@actions-v0.3.30
       id: torun
       with:
         event: ${{ github.event_name }}
         paths: ${{ steps.changed-files.outputs.stdout }}
-        config: |
-          {
-            "debian": {
-              "paths": [
-                "docker/linux/debian/**",
-                "docker/linux/debian_build.sh",
-                "docker/push.sh",
-                "docker/linux/build.sh",
-                "docker/linux/common_fun.sh",
-                "docker/linux/group_manifests.sh",
-                ".github/workflows/**"
-              ]
-            },
-            "ubuntu": {
-              "paths": [
-                "docker/linux/ubuntu/**",
-                "docker/push.sh",
-                "docker/linux/build.sh",
-                "docker/linux/common_fun.sh",
-                "docker/linux/group_manifests.sh",
-                ".github/workflows/**"
-              ]
-            }
-          }
+        config: ${{ steps.config.outputs.value }}
 
   build_image:
     needs: detect-changes
     if: >-
-      ${{
       (github.repository == 'envoyproxy/envoy-build-tools' || vars.ENVOY_CI_RUN == 'true')
       && (github.event_name == 'push'
       || (matrix.target == 'debian' && needs.detect-changes.outputs.debian == 'true')
       || (matrix.target == 'ubuntu' && needs.detect-changes.outputs.ubuntu == 'true'))
-      }}
     strategy:
       fail-fast: false
       matrix:
-        target: [ubuntu, debian]
-        arch: [amd64, arm64]
+        target:
+        - ubuntu
+        - debian
+        arch:
+        - amd64
+        - arm64
     name: Build (${{ matrix.target }}-${{ matrix.arch }})
     uses: ./.github/workflows/_build_image.yml
     with:
@@ -97,7 +81,9 @@ jobs:
   push-manifests:
     name: Create manifests (${{ github.event_name == 'pull_request' && 'dry run' || 'push' }})
     runs-on: ubuntu-latest
-    needs: [detect-changes, build_image]
+    needs:
+    - detect-changes
+    - build_image
     if: always() && needs.build_image.result != 'cancelled' && needs.build_image.result != 'failure'
     permissions:
       contents: read
@@ -105,13 +91,13 @@ jobs:
     steps:
     - uses: envoyproxy/toolshed/gh-actions/bind-mounts@actions-v0.3.28
       with:
-        mounts: |
-          - src: /mnt/workspace
-            target: ${{ github.workspace }}
-            chown: "runner:runner"
-          - src: /mnt/oci
-            target: /tmp/oci
-            chown: "runner:runner"
+        mounts:
+        - src: /mnt/workspace
+          target: ${{ github.workspace }}
+          chown: "runner:runner"
+        - src: /mnt/oci
+          target: /tmp/oci
+          chown: "runner:runner"
     - name: 'Checkout repository'
       uses: actions/checkout@v5
     - name: Get docker SHA
@@ -125,11 +111,11 @@ jobs:
       shell: bash
       run: |
         if [ "${{ github.event_name }}" = "push" ]; then
-          echo "include-debian=true" >> $GITHUB_OUTPUT
-          echo "include-ubuntu=true" >> $GITHUB_OUTPUT
+            echo "include-debian=true" >> $GITHUB_OUTPUT
+            echo "include-ubuntu=true" >> $GITHUB_OUTPUT
         else
-          echo "include-debian=${{ needs.detect-changes.outputs.debian }}" >> $GITHUB_OUTPUT
-          echo "include-ubuntu=${{ needs.detect-changes.outputs.ubuntu }}" >> $GITHUB_OUTPUT
+            echo "include-debian=${{ needs.detect-changes.outputs.debian }}" >> $GITHUB_OUTPUT
+            echo "include-ubuntu=${{ needs.detect-changes.outputs.ubuntu }}" >> $GITHUB_OUTPUT
         fi
     - name: Generate manifest configuration (Debian)
       if: steps.built-distros.outputs.include-debian == 'true'
@@ -259,13 +245,13 @@ jobs:
         DEBIAN_CONFIG='${{ steps.config-debian.outputs.value }}'
         UBUNTU_CONFIG='${{ steps.config-ubuntu.outputs.value }}'
         if [ "${{ steps.built-distros.outputs.include-debian }}" = "true" ] && [ "${{ steps.built-distros.outputs.include-ubuntu }}" = "true" ]; then
-          MERGED=$(echo "$DEBIAN_CONFIG" "$UBUNTU_CONFIG" | jq -s '{"manifests": (.[0].manifests + .[1].manifests)}')
+            MERGED=$(echo "$DEBIAN_CONFIG" "$UBUNTU_CONFIG" | jq -s '{"manifests": (.[0].manifests + .[1].manifests)}')
         elif [ "${{ steps.built-distros.outputs.include-debian }}" = "true" ]; then
-          MERGED="$DEBIAN_CONFIG"
+            MERGED="$DEBIAN_CONFIG"
         elif [ "${{ steps.built-distros.outputs.include-ubuntu }}" = "true" ]; then
-          MERGED="$UBUNTU_CONFIG"
+            MERGED="$UBUNTU_CONFIG"
         else
-          MERGED='{"manifests": []}'
+            MERGED='{"manifests": []}'
         fi
         echo "value<<EOF" >> $GITHUB_OUTPUT
         echo "$MERGED" >> $GITHUB_OUTPUT
