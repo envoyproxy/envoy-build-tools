@@ -38,7 +38,7 @@ jobs:
         input: .github/config.yml
         input-format: yaml-path
         filter: |
-          .builds
+          {debian: .debian.ci, ubuntu: .ubuntu.ci}
     - uses: envoyproxy/toolshed/gh-actions/torun@actions-v0.3.30
       id: torun
       with:
@@ -140,7 +140,7 @@ jobs:
         input: .github/config.yml
         input-format: yaml-path
         filter: >-
-          .manifests.debian
+          .debian.manifests
           | map(. + {
               tag: (.tag | gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")),
               "artifact-pattern": (.["artifact-pattern"] | gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")),
@@ -155,7 +155,7 @@ jobs:
         input: .github/config.yml
         input-format: yaml-path
         filter: >-
-          .manifests.ubuntu
+          .ubuntu.manifests
           | map(. + {
               tag: (.tag | gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")),
               "artifact-pattern": (.["artifact-pattern"] | gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")),

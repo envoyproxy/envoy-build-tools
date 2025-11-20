@@ -1,8 +1,11 @@
 # Configuration for envoy-build-tools CI/CD
+# Each distro (debian/ubuntu) contains:
+# - ci.paths: Path-based build detection
+# - manifests: OCI manifest specifications
+# Note: {sha} placeholder will be replaced with the actual docker SHA at runtime
 
-# Path-based build detection - determines which distros to build based on changed files
-builds:
-  debian:
+debian:
+  ci:
     paths:
     - docker/linux/debian/**
     - docker/linux/debian_build.sh
@@ -11,19 +14,7 @@ builds:
     - docker/linux/common_fun.sh
     - docker/linux/group_manifests.sh
     - .github/workflows/**
-  ubuntu:
-    paths:
-    - docker/linux/ubuntu/**
-    - docker/push.sh
-    - docker/linux/build.sh
-    - docker/linux/common_fun.sh
-    - docker/linux/group_manifests.sh
-    - .github/workflows/**
-
-# Manifest configuration templates - defines OCI manifest specifications
-# Note: {sha} placeholder will be replaced with the actual docker SHA at runtime
-manifests:
-  debian:
+  manifests:
   - name: envoy-build
     tag: devtools-{sha}
     registry: docker.io/envoyproxy
@@ -92,7 +83,17 @@ manifests:
     architectures:
     - amd64
     artifact-pattern: oci-debian-{arch}/debian-mobile-{sha}-{arch}.tar
-  ubuntu:
+
+ubuntu:
+  ci:
+    paths:
+    - docker/linux/ubuntu/**
+    - docker/push.sh
+    - docker/linux/build.sh
+    - docker/linux/common_fun.sh
+    - docker/linux/group_manifests.sh
+    - .github/workflows/**
+  manifests:
   - name: envoy-build-ubuntu
     tag: ci-{sha}
     registry: docker.io/envoyproxy
