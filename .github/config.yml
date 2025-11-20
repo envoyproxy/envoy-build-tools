@@ -1,17 +1,130 @@
-debian:
-  paths:
-  - docker/linux/debian/**
-  - docker/linux/debian_build.sh
-  - docker/push.sh
-  - docker/linux/build.sh
-  - docker/linux/common_fun.sh
-  - docker/linux/group_manifests.sh
-  - .github/workflows/**
-ubuntu:
-  paths:
-  - docker/linux/ubuntu/**
-  - docker/push.sh
-  - docker/linux/build.sh
-  - docker/linux/common_fun.sh
-  - docker/linux/group_manifests.sh
-  - .github/workflows/**
+# Configuration for envoy-build-tools CI/CD
+
+# Path-based build detection - determines which distros to build based on changed files
+builds:
+  debian:
+    paths:
+    - docker/linux/debian/**
+    - docker/linux/debian_build.sh
+    - docker/push.sh
+    - docker/linux/build.sh
+    - docker/linux/common_fun.sh
+    - docker/linux/group_manifests.sh
+    - .github/workflows/**
+  ubuntu:
+    paths:
+    - docker/linux/ubuntu/**
+    - docker/push.sh
+    - docker/linux/build.sh
+    - docker/linux/common_fun.sh
+    - docker/linux/group_manifests.sh
+    - .github/workflows/**
+
+# Manifest configuration templates - defines OCI manifest specifications
+# Note: {sha} placeholder will be replaced with the actual docker SHA at runtime
+manifests:
+  debian:
+  - name: envoy-build
+    tag: devtools-{sha}
+    registry: docker.io/envoyproxy
+    architectures:
+    - amd64
+    - arm64
+    artifact-pattern: oci-debian-{arch}/debian-devtools-{sha}-{arch}.tar
+  - name: envoy-build
+    tag: ci-{sha}
+    registry: docker.io/envoyproxy
+    architectures:
+    - amd64
+    - arm64
+    artifact-pattern: oci-debian-{arch}/debian-ci-{sha}-{arch}.tar
+  - name: envoy-build
+    tag: worker-{sha}
+    registry: docker.io/envoyproxy
+    architectures:
+    - amd64
+    - arm64
+    artifact-pattern: oci-debian-{arch}/debian-worker-{sha}-{arch}.tar
+  - name: envoy-build
+    tag: worker-{sha}
+    registry: gcr.io/envoy-ci
+    architectures:
+    - amd64
+    - arm64
+    artifact-pattern: oci-debian-{arch}/debian-worker-{sha}-{arch}.tar
+  - name: envoy-build
+    tag: gcc-{sha}
+    registry: docker.io/envoyproxy
+    architectures:
+    - amd64
+    - arm64
+    artifact-pattern: oci-debian-{arch}/debian-gcc-{sha}-{arch}.tar
+  - name: envoy-build
+    tag: gcc-{sha}
+    registry: gcr.io/envoy-ci
+    architectures:
+    - amd64
+    - arm64
+    artifact-pattern: oci-debian-{arch}/debian-gcc-{sha}-{arch}.tar
+  - name: envoy-build
+    tag: docker-{sha}
+    registry: docker.io/envoyproxy
+    architectures:
+    - amd64
+    - arm64
+    artifact-pattern: oci-debian-{arch}/debian-docker-{sha}-{arch}.tar
+  - name: envoy-build
+    tag: test-{sha}
+    registry: docker.io/envoyproxy
+    architectures:
+    - amd64
+    - arm64
+    artifact-pattern: oci-debian-{arch}/debian-test-{sha}-{arch}.tar
+  - name: envoy-build
+    tag: llvm-{sha}
+    registry: docker.io/envoyproxy
+    architectures:
+    - amd64
+    artifact-pattern: oci-debian-{arch}/debian-llvm-{sha}-{arch}.tar
+  - name: envoy-build
+    tag: mobile-{sha}
+    registry: docker.io/envoyproxy
+    architectures:
+    - amd64
+    artifact-pattern: oci-debian-{arch}/debian-mobile-{sha}-{arch}.tar
+  ubuntu:
+  - name: envoy-build-ubuntu
+    tag: ci-{sha}
+    registry: docker.io/envoyproxy
+    architectures:
+    - arm64
+    - amd64
+    artifact-pattern: oci-ubuntu-{arch}/ubuntu-ci-{sha}-{arch}.tar
+  - name: envoy-build-ubuntu
+    tag: mobile-{sha}
+    registry: docker.io/envoyproxy
+    architectures:
+    - amd64
+    artifact-pattern: oci-ubuntu-{arch}/ubuntu-mobile-{sha}-{arch}.tar
+  - name: envoy-build-ubuntu
+    tag: test-{sha}
+    registry: docker.io/envoyproxy
+    architectures:
+    - amd64
+    artifact-pattern: oci-ubuntu-{arch}/ubuntu-test-{sha}-{arch}.tar
+  - name: envoy-build-ubuntu
+    tag: full-f8d1fd9bdac3a7843d1e69816456648989d238be
+    registry: docker.io/envoyproxy
+    architectures:
+    - amd64
+    - arm64
+    artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-{sha}-{arch}.tar
+    additional-tags:
+    - "{sha}"
+  - name: envoy-build
+    tag: "{sha}"
+    registry: gcr.io/envoy-ci
+    architectures:
+    - amd64
+    - arm64
+    artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-{sha}-{arch}.tar
