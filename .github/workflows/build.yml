@@ -29,7 +29,6 @@ jobs:
         filter: |
           .base_ref as $base_ref
           | "git diff --name-only \($base_ref) HEAD"
-          | @sh
     - uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.30
       id: changed-files
       with:
