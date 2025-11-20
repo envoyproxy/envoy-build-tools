@@ -18,27 +18,17 @@ jobs:
       ubuntu: ${{ steps.set-outputs.outputs.ubuntu }}
     steps:
     - uses: actions/checkout@v5
-    - uses: envoyproxy/toolshed/gh-actions/bson@actions-v0.3.30
-      id: changed
       with:
-        input: |
-          diff: ${{ github.event_name == 'pull_request' && 'HEAD^1' || 'HEAD^1' }}
-          remote: origin
-          ref: ${{ github.ref_name }}
-          working_directory: .
-        input-format: yaml
-        output-path: OUTPUT
-        filter: |
-          .diff as $diff
-          | .remote as $remote
-          | .ref as $ref
-          | .working_directory as $working_directory
-          | "git -C \($working_directory) fetch \($remote) \($ref) && git -C \($working_directory) diff --name-only \($diff) \($remote)/\($ref)" as $command
-          | $command
-          | @sh
-    - run: eval '${{ steps.changed.outputs.value }}' | jq -R . | jq -sc .
-      id: changed-files
+        fetch-depth: 0
+    - id: changed-files
       shell: bash
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED=$(git diff --name-only HEAD^1 HEAD | jq -R . | jq -sc .)
+        else
+            CHANGED=$(git diff --name-only HEAD^1 HEAD | jq -R . | jq -sc .)
+        fi
+        echo "stdout=$CHANGED" >> $GITHUB_OUTPUT
     - uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.30
       id: config
       with:
