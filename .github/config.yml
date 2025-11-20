@@ -1,0 +1,17 @@
+debian:
+  paths:
+  - docker/linux/debian/**
+  - docker/linux/debian_build.sh
+  - docker/push.sh
+  - docker/linux/build.sh
+  - docker/linux/common_fun.sh
+  - docker/linux/group_manifests.sh
+  - .github/workflows/**
+ubuntu:
+  paths:
+  - docker/linux/ubuntu/**
+  - docker/push.sh
+  - docker/linux/build.sh
+  - docker/linux/common_fun.sh
+  - docker/linux/group_manifests.sh
+  - .github/workflows/**

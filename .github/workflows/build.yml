@@ -1,32 +1,90 @@
 name: Envoy/build-tools
-
 permissions:
   contents: read
-
 on:
   push:
     branches:
     - main
   pull_request:
 
-
 jobs:
-  build_image:
+  detect-changes:
+    runs-on: ubuntu-latest
     if: >-
-      ${{
-          github.repository == 'envoyproxy/envoy-build-tools'
-          || vars.ENVOY_CI_RUN == 'true'
-      }}
+      github.repository == 'envoyproxy/envoy-build-tools'
+      || vars.ENVOY_CI_RUN == 'true'
+    outputs:
+      debian: ${{ steps.set-outputs.outputs.debian }}
+      ubuntu: ${{ steps.set-outputs.outputs.ubuntu }}
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+    - uses: envoyproxy/toolshed/gh-actions/bson@actions-v0.3.30
+      id: changed
+      with:
+        input: |
+          base_ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || 'HEAD^1' }}
+        input-format: yaml
+        filter: |
+          .base_ref as $base_ref
+          | "OUTPUT=$(git diff --name-only \($base_ref) HEAD)"
+          | bash::output
+        result-filter: |
+          . | split("\n") | map(select(length > 0))
+    - uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.30
+      id: config
+      with:
+        input: .github/config.yml
+        input-format: yaml-path
+        filter: |
+          .
+    - uses: envoyproxy/toolshed/gh-actions/torun@actions-v0.3.30
+      id: torun
+      with:
+        event: ${{ github.event_name }}
+        paths: ${{ steps.changed.outputs.output }}
+        config: ${{ steps.config.outputs.value }}
+    - id: set-outputs
+      shell: bash
+      run: |
+        echo "debian=$(echo '${{ steps.torun.outputs.runs }}' | jq -r '.debian')" >> $GITHUB_OUTPUT
+        echo "ubuntu=$(echo '${{ steps.torun.outputs.runs }}' | jq -r '.ubuntu')" >> $GITHUB_OUTPUT
+
+  build_image_debian:
+    needs: detect-changes
+    if: >-
+      (github.repository == 'envoyproxy/envoy-build-tools' || vars.ENVOY_CI_RUN == 'true')
+      && (github.event_name == 'push' || needs.detect-changes.outputs.debian == 'true')
     strategy:
       fail-fast: false
       matrix:
-        target: [ubuntu, debian]
-        arch: [amd64, arm64]
-    name: Build (${{ matrix.target }}-${{ matrix.arch }})
+        arch:
+        - amd64
+        - arm64
+    name: Build (debian-${{ matrix.arch }})
     uses: ./.github/workflows/_build_image.yml
     with:
-      distro: ${{ matrix.target }}
-      os_family: ${{ matrix.os_family != '' && matrix.os_family || 'linux' }}
+      distro: debian
+      host-platform: ${{ matrix.arch }}
+      runs-on: ${{ matrix.arch == 'amd64' && 'ubuntu-22.04' || 'ubuntu-22.04-arm' }}
+      target-platforms: ${{ matrix.arch == 'amd64' && 'linux/amd64' || 'linux/arm64' }}
+
+  build_image_ubuntu:
+    needs: detect-changes
+    if: >-
+      (github.repository == 'envoyproxy/envoy-build-tools' || vars.ENVOY_CI_RUN == 'true')
+      && (github.event_name == 'push' || needs.detect-changes.outputs.ubuntu == 'true')
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+        - amd64
+        - arm64
+    name: Build (ubuntu-${{ matrix.arch }})
+    uses: ./.github/workflows/_build_image.yml
+    with:
+      distro: ubuntu
       host-platform: ${{ matrix.arch }}
       runs-on: ${{ matrix.arch == 'amd64' && 'ubuntu-22.04' || 'ubuntu-22.04-arm' }}
       target-platforms: ${{ matrix.arch == 'amd64' && 'linux/amd64' || 'linux/arm64' }}
@@ -34,7 +92,14 @@ jobs:
   push-manifests:
     name: Create manifests (${{ github.event_name == 'pull_request' && 'dry run' || 'push' }})
     runs-on: ubuntu-latest
-    needs: [build_image]
+    needs:
+    - detect-changes
+    - build_image_debian
+    - build_image_ubuntu
+    if: >-
+      always()
+      && (contains(fromJSON('["success", "skipped"]'), needs.build_image_debian.result)
+          || contains(fromJSON('["success", "skipped"]'), needs.build_image_ubuntu.result))
     permissions:
       contents: read
       packages: write
@@ -56,16 +121,26 @@ jobs:
       run: |
         TAG_SHA=$(git log -1 --pretty=format:"%H" ./docker)
         echo "sha=${TAG_SHA}" >> $GITHUB_OUTPUT
-    - name: Generate manifest configuration
-      id: config
+    - name: Determine which distros were built
+      id: built-distros
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" = "push" ]; then
+            echo "include-debian=true" >> $GITHUB_OUTPUT
+            echo "include-ubuntu=true" >> $GITHUB_OUTPUT
+        else
+            echo "include-debian=${{ needs.build_image_debian.result == 'success' }}" >> $GITHUB_OUTPUT
+            echo "include-ubuntu=${{ needs.build_image_ubuntu.result == 'success' }}" >> $GITHUB_OUTPUT
+        fi
+    - name: Generate manifest configuration (Debian)
+      if: steps.built-distros.outputs.include-debian == 'true'
+      id: config-debian
       uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.26
       with:
         input-format: yaml
         filter: >-
           {manifests: .}
         input: |
-          ## debian
-          # devtools
           - name: envoy-build
             tag: devtools-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -73,7 +148,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-devtools-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # ci
           - name: envoy-build
             tag: ci-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -81,7 +155,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-ci-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # worker
           - name: envoy-build
             tag: worker-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -89,7 +162,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-worker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # worker (gcr)
           - name: envoy-build
             tag: worker-${{ steps.docker-sha.outputs.sha }}
             registry: gcr.io/envoy-ci
@@ -97,7 +169,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-worker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # gcc
           - name: envoy-build
             tag: gcc-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -105,7 +176,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-gcc-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # gcc (gcr)
           - name: envoy-build
             tag: gcc-${{ steps.docker-sha.outputs.sha }}
             registry: gcr.io/envoy-ci
@@ -113,7 +183,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-gcc-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # docker
           - name: envoy-build
             tag: docker-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -121,7 +190,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-docker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # test
           - name: envoy-build
             tag: test-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -129,23 +197,27 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-test-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # llvm
           - name: envoy-build
             tag: llvm-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
             architectures:
             - amd64
             artifact-pattern: oci-debian-{arch}/debian-llvm-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # mobile
           - name: envoy-build
             tag: mobile-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
             architectures:
             - amd64
             artifact-pattern: oci-debian-{arch}/debian-mobile-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-
-          ## ubuntu
-          # ci
+    - name: Generate manifest configuration (Ubuntu)
+      if: steps.built-distros.outputs.include-ubuntu == 'true'
+      id: config-ubuntu
+      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.26
+      with:
+        input-format: yaml
+        filter: >-
+          {manifests: .}
+        input: |
           - name: envoy-build-ubuntu
             tag: ci-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -153,21 +225,18 @@ jobs:
             - arm64
             - amd64
             artifact-pattern: oci-ubuntu-{arch}/ubuntu-ci-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # mobile
           - name: envoy-build-ubuntu
             tag: mobile-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
             architectures:
             - amd64
             artifact-pattern: oci-ubuntu-{arch}/ubuntu-mobile-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # test
           - name: envoy-build-ubuntu
             tag: test-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
             architectures:
             - amd64
             artifact-pattern: oci-ubuntu-{arch}/ubuntu-test-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # full
           - name: envoy-build-ubuntu
             tag: full-f8d1fd9bdac3a7843d1e69816456648989d238be
             registry: docker.io/envoyproxy
@@ -177,7 +246,6 @@ jobs:
             artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
             additional-tags:
             - ${{ steps.docker-sha.outputs.sha }}
-          # full (gcr)
           - name: envoy-build
             tag: ${{ steps.docker-sha.outputs.sha }}
             registry: gcr.io/envoy-ci
@@ -185,8 +253,32 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
+    - name: Merge manifest configurations
+      id: config
+      if: >-
+        steps.built-distros.outputs.include-debian == 'true'
+        || steps.built-distros.outputs.include-ubuntu == 'true'
+      shell: bash
+      run: |
+        DEBIAN_CONFIG='${{ steps.config-debian.outputs.value }}'
+        UBUNTU_CONFIG='${{ steps.config-ubuntu.outputs.value }}'
+        if [ "${{ steps.built-distros.outputs.include-debian }}" = "true" ] && [ "${{ steps.built-distros.outputs.include-ubuntu }}" = "true" ]; then
+            MERGED=$(echo "$DEBIAN_CONFIG" "$UBUNTU_CONFIG" | jq -s '{"manifests": (.[0].manifests + .[1].manifests)}')
+        elif [ "${{ steps.built-distros.outputs.include-debian }}" = "true" ]; then
+            MERGED="$DEBIAN_CONFIG"
+        elif [ "${{ steps.built-distros.outputs.include-ubuntu }}" = "true" ]; then
+            MERGED="$UBUNTU_CONFIG"
+        else
+            MERGED='{"manifests": []}'
+        fi
+        echo "value<<EOF" >> $GITHUB_OUTPUT
+        echo "$MERGED" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
     - name: Collect and push OCI artifacts
       uses: envoyproxy/toolshed/gh-actions/oci/collector@actions-v0.3.26
+      if: >-
+        steps.built-distros.outputs.include-debian == 'true'
+        || steps.built-distros.outputs.include-ubuntu == 'true'
       with:
         manifest-config: ${{ steps.config.outputs.value }}
         dry-run: ${{ github.event_name == 'pull_request' }}
