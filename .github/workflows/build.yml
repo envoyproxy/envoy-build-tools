@@ -73,7 +73,6 @@ jobs:
     uses: ./.github/workflows/_build_image.yml
     with:
       distro: ${{ matrix.target }}
-      os_family: ${{ matrix.os_family != '' && matrix.os_family || 'linux' }}
       host-platform: ${{ matrix.arch }}
       runs-on: ${{ matrix.arch == 'amd64' && 'ubuntu-22.04' || 'ubuntu-22.04-arm' }}
       target-platforms: ${{ matrix.arch == 'amd64' && 'linux/amd64' || 'linux/arm64' }}
