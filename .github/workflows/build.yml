@@ -28,26 +28,22 @@ jobs:
         input-format: yaml
         filter: |
           .base_ref as $base_ref
-          | "git diff --name-only \($base_ref) HEAD"
-    - uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.30
-      id: changed-files
-      with:
-        input: ${{ steps.changed.outputs.output }}
-        options: -R
-        filter: |
+          | "OUTPUT=$(git diff --name-only \($base_ref) HEAD)"
+          | bash::output
+        result-filter: |
           . | split("\n") | map(select(length > 0))
     - uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.30
       id: config
       with:
-        input-path: .github/config.yml
-        input-format: yaml
+        input: .github/config.yml
+        input-format: yaml-path
         filter: |
           .
     - uses: envoyproxy/toolshed/gh-actions/torun@actions-v0.3.30
       id: torun
       with:
         event: ${{ github.event_name }}
-        paths: ${{ steps.changed-files.outputs.value }}
+        paths: ${{ steps.changed.outputs.output }}
         config: ${{ steps.config.outputs.value }}
     - id: set-outputs
       shell: bash
@@ -102,8 +98,8 @@ jobs:
     - build_image_ubuntu
     if: >-
       always()
-      && (needs.build_image_debian.result == 'success' || needs.build_image_debian.result == 'skipped')
-      && (needs.build_image_ubuntu.result == 'success' || needs.build_image_ubuntu.result == 'skipped')
+      && (contains(fromJSON('["success", "skipped"]'), needs.build_image_debian.result)
+          || contains(fromJSON('["success", "skipped"]'), needs.build_image_ubuntu.result))
     permissions:
       contents: read
       packages: write
@@ -133,8 +129,8 @@ jobs:
             echo "include-debian=true" >> $GITHUB_OUTPUT
             echo "include-ubuntu=true" >> $GITHUB_OUTPUT
         else
-            echo "include-debian=${{ needs.detect-changes.outputs.debian }}" >> $GITHUB_OUTPUT
-            echo "include-ubuntu=${{ needs.detect-changes.outputs.ubuntu }}" >> $GITHUB_OUTPUT
+            echo "include-debian=${{ needs.build_image_debian.result == 'success' }}" >> $GITHUB_OUTPUT
+            echo "include-ubuntu=${{ needs.build_image_ubuntu.result == 'success' }}" >> $GITHUB_OUTPUT
         fi
     - name: Generate manifest configuration (Debian)
       if: steps.built-distros.outputs.include-debian == 'true'
@@ -259,6 +255,9 @@ jobs:
             artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
     - name: Merge manifest configurations
       id: config
+      if: >-
+        steps.built-distros.outputs.include-debian == 'true'
+        || steps.built-distros.outputs.include-ubuntu == 'true'
       shell: bash
       run: |
         DEBIAN_CONFIG='${{ steps.config-debian.outputs.value }}'
@@ -277,6 +276,9 @@ jobs:
         echo "EOF" >> $GITHUB_OUTPUT
     - name: Collect and push OCI artifacts
       uses: envoyproxy/toolshed/gh-actions/oci/collector@actions-v0.3.26
+      if: >-
+        steps.built-distros.outputs.include-debian == 'true'
+        || steps.built-distros.outputs.include-ubuntu == 'true'
       with:
         manifest-config: ${{ steps.config.outputs.value }}
         dry-run: ${{ github.event_name == 'pull_request' }}
