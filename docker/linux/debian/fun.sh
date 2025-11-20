@@ -69,7 +69,8 @@ WORKER_PACKAGES=(
     # build hermetically with just the worker
     # We can remove with bzlmod as there is a hermetic
     # zip module ... or if it doesnt work
-    unzip)
+    unzip
+    zip)
 
 add_apt_key() {
     local key_url="$1"
