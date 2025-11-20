@@ -20,15 +20,23 @@ jobs:
     - uses: actions/checkout@v5
       with:
         fetch-depth: 0
-    - id: changed-files
-      shell: bash
-      run: |
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-            CHANGED=$(git diff --name-only HEAD^1 HEAD | jq -R . | jq -sc .)
-        else
-            CHANGED=$(git diff --name-only HEAD^1 HEAD | jq -R . | jq -sc .)
-        fi
-        echo "stdout=$CHANGED" >> $GITHUB_OUTPUT
+    - uses: envoyproxy/toolshed/gh-actions/bson@actions-v0.3.30
+      id: changed
+      with:
+        input: |
+          base_ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || 'HEAD^1' }}
+        input-format: yaml
+        filter: |
+          .base_ref as $base_ref
+          | "git diff --name-only \($base_ref) HEAD"
+          | @sh
+    - uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.30
+      id: changed-files
+      with:
+        input: ${{ steps.changed.outputs.output }}
+        options: -R
+        filter: |
+          . | split("\n") | map(select(length > 0))
     - uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.30
       id: config
       with:
@@ -40,7 +48,7 @@ jobs:
       id: torun
       with:
         event: ${{ github.event_name }}
-        paths: ${{ steps.changed-files.outputs.stdout }}
+        paths: ${{ steps.changed-files.outputs.value }}
         config: ${{ steps.config.outputs.value }}
     - id: set-outputs
       shell: bash
