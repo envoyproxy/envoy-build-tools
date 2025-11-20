@@ -1,57 +1,84 @@
 name: Envoy/build-tools
-
 permissions:
   contents: read
-
 on:
   push:
     branches:
     - main
   pull_request:
 
-
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
     if: >-
       ${{
-          github.repository == 'envoyproxy/envoy-build-tools'
-          || vars.ENVOY_CI_RUN == 'true'
+      github.repository == 'envoyproxy/envoy-build-tools'
+      || vars.ENVOY_CI_RUN == 'true'
       }}
     outputs:
-      debian: ${{ steps.filter.outputs.debian }}
-      ubuntu: ${{ steps.filter.outputs.ubuntu }}
-      shared: ${{ steps.filter.outputs.shared }}
+      debian: ${{ fromJSON(steps.torun.outputs.runs).debian }}
+      ubuntu: ${{ fromJSON(steps.torun.outputs.runs).ubuntu }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            debian:
-              - 'docker/linux/debian/**'
-              - 'docker/linux/debian_build.sh'
-            ubuntu:
-              - 'docker/linux/ubuntu/**'
-            shared:
-              - 'docker/push.sh'
-              - 'docker/linux/build.sh'
-              - 'docker/linux/common_fun.sh'
-              - 'docker/linux/group_manifests.sh'
-              - '.github/workflows/**'
+    - uses: actions/checkout@v5
+    - uses: envoyproxy/toolshed/gh-actions/bson@actions-v0.3.30
+      id: changed
+      with:
+        input: |
+          diff: ${{ github.event_name == 'pull_request' && 'HEAD^1' || 'HEAD^1' }}
+          remote: origin
+          ref: ${{ github.ref_name }}
+          working_directory: .
+        input-format: yaml
+        filter: |
+          .diff as $diff
+          | .remote as $remote
+          | .ref as $ref
+          | .working_directory as $working_directory
+          | "git -C \($working_directory) fetch \($remote) \($ref) && git -C \($working_directory) diff --name-only \($diff) \($remote)/\($ref)" as $command
+          | $command
+          | @sh
+      output-path: OUTPUT
+    - run: eval '${{ steps.changed.outputs.value }}' | jq -R . | jq -sc .
+      id: changed-files
+      shell: bash
+    - uses: envoyproxy/toolshed/gh-actions/torun@actions-v0.3.30
+      id: torun
+      with:
+        event: ${{ github.event_name }}
+        paths: ${{ steps.changed-files.outputs.stdout }}
+        config: |
+          {
+            "debian": {
+              "paths": [
+                "docker/linux/debian/**",
+                "docker/linux/debian_build.sh",
+                "docker/push.sh",
+                "docker/linux/build.sh",
+                "docker/linux/common_fun.sh",
+                "docker/linux/group_manifests.sh",
+                ".github/workflows/**"
+              ]
+            },
+            "ubuntu": {
+              "paths": [
+                "docker/linux/ubuntu/**",
+                "docker/push.sh",
+                "docker/linux/build.sh",
+                "docker/linux/common_fun.sh",
+                "docker/linux/group_manifests.sh",
+                ".github/workflows/**"
+              ]
+            }
+          }
 
   build_image:
     needs: detect-changes
     if: >-
       ${{
-          (github.repository == 'envoyproxy/envoy-build-tools'
-          || vars.ENVOY_CI_RUN == 'true')
-          && (
-            github.event_name == 'push'
-            || needs.detect-changes.outputs.shared == 'true'
-            || (matrix.target == 'debian' && needs.detect-changes.outputs.debian == 'true')
-            || (matrix.target == 'ubuntu' && needs.detect-changes.outputs.ubuntu == 'true')
-          )
+      (github.repository == 'envoyproxy/envoy-build-tools' || vars.ENVOY_CI_RUN == 'true')
+      && (github.event_name == 'push'
+      || (matrix.target == 'debian' && needs.detect-changes.outputs.debian == 'true')
+      || (matrix.target == 'ubuntu' && needs.detect-changes.outputs.ubuntu == 'true'))
       }}
     strategy:
       fail-fast: false
@@ -97,31 +124,12 @@ jobs:
       id: built-distros
       shell: bash
       run: |
-        # On push to main, always include both
         if [ "${{ github.event_name }}" = "push" ]; then
           echo "include-debian=true" >> $GITHUB_OUTPUT
           echo "include-ubuntu=true" >> $GITHUB_OUTPUT
         else
-          # On PR, check what changed
-          INCLUDE_DEBIAN="false"
-          INCLUDE_UBUNTU="false"
-
-          # If shared files changed, include both
-          if [ "${{ needs.detect-changes.outputs.shared }}" = "true" ]; then
-            INCLUDE_DEBIAN="true"
-            INCLUDE_UBUNTU="true"
-          else
-            # Otherwise include based on specific changes
-            if [ "${{ needs.detect-changes.outputs.debian }}" = "true" ]; then
-              INCLUDE_DEBIAN="true"
-            fi
-            if [ "${{ needs.detect-changes.outputs.ubuntu }}" = "true" ]; then
-              INCLUDE_UBUNTU="true"
-            fi
-          fi
-
-          echo "include-debian=${INCLUDE_DEBIAN}" >> $GITHUB_OUTPUT
-          echo "include-ubuntu=${INCLUDE_UBUNTU}" >> $GITHUB_OUTPUT
+          echo "include-debian=${{ needs.detect-changes.outputs.debian }}" >> $GITHUB_OUTPUT
+          echo "include-ubuntu=${{ needs.detect-changes.outputs.ubuntu }}" >> $GITHUB_OUTPUT
         fi
     - name: Generate manifest configuration (Debian)
       if: steps.built-distros.outputs.include-debian == 'true'
@@ -132,8 +140,6 @@ jobs:
         filter: >-
           {manifests: .}
         input: |
-          ## debian
-          # devtools
           - name: envoy-build
             tag: devtools-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -141,7 +147,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-devtools-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # ci
           - name: envoy-build
             tag: ci-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -149,7 +154,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-ci-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # worker
           - name: envoy-build
             tag: worker-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -157,7 +161,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-worker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # worker (gcr)
           - name: envoy-build
             tag: worker-${{ steps.docker-sha.outputs.sha }}
             registry: gcr.io/envoy-ci
@@ -165,7 +168,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-worker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # gcc
           - name: envoy-build
             tag: gcc-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -173,7 +175,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-gcc-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # gcc (gcr)
           - name: envoy-build
             tag: gcc-${{ steps.docker-sha.outputs.sha }}
             registry: gcr.io/envoy-ci
@@ -181,7 +182,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-gcc-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # docker
           - name: envoy-build
             tag: docker-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -189,7 +189,6 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-docker-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # test
           - name: envoy-build
             tag: test-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -197,14 +196,12 @@ jobs:
             - amd64
             - arm64
             artifact-pattern: oci-debian-{arch}/debian-test-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # llvm
           - name: envoy-build
             tag: llvm-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
             architectures:
             - amd64
             artifact-pattern: oci-debian-{arch}/debian-llvm-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # mobile
           - name: envoy-build
             tag: mobile-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -220,8 +217,6 @@ jobs:
         filter: >-
           {manifests: .}
         input: |
-          ## ubuntu
-          # ci
           - name: envoy-build-ubuntu
             tag: ci-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
@@ -229,21 +224,18 @@ jobs:
             - arm64
             - amd64
             artifact-pattern: oci-ubuntu-{arch}/ubuntu-ci-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # mobile
           - name: envoy-build-ubuntu
             tag: mobile-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
             architectures:
             - amd64
             artifact-pattern: oci-ubuntu-{arch}/ubuntu-mobile-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # test
           - name: envoy-build-ubuntu
             tag: test-${{ steps.docker-sha.outputs.sha }}
             registry: docker.io/envoyproxy
             architectures:
             - amd64
             artifact-pattern: oci-ubuntu-{arch}/ubuntu-test-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
-          # full
           - name: envoy-build-ubuntu
             tag: full-f8d1fd9bdac3a7843d1e69816456648989d238be
             registry: docker.io/envoyproxy
@@ -253,7 +245,6 @@ jobs:
             artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-${{ steps.docker-sha.outputs.sha }}-{arch}.tar
             additional-tags:
             - ${{ steps.docker-sha.outputs.sha }}
-          # full (gcr)
           - name: envoy-build
             tag: ${{ steps.docker-sha.outputs.sha }}
             registry: gcr.io/envoy-ci
@@ -267,23 +258,15 @@ jobs:
       run: |
         DEBIAN_CONFIG='${{ steps.config-debian.outputs.value }}'
         UBUNTU_CONFIG='${{ steps.config-ubuntu.outputs.value }}'
-
-        # Combine the configs
         if [ "${{ steps.built-distros.outputs.include-debian }}" = "true" ] && [ "${{ steps.built-distros.outputs.include-ubuntu }}" = "true" ]; then
-          # Both configs present, merge them
           MERGED=$(echo "$DEBIAN_CONFIG" "$UBUNTU_CONFIG" | jq -s '{"manifests": (.[0].manifests + .[1].manifests)}')
         elif [ "${{ steps.built-distros.outputs.include-debian }}" = "true" ]; then
-          # Only Debian
           MERGED="$DEBIAN_CONFIG"
         elif [ "${{ steps.built-distros.outputs.include-ubuntu }}" = "true" ]; then
-          # Only Ubuntu
           MERGED="$UBUNTU_CONFIG"
         else
-          # Neither (shouldn't happen, but handle it)
           MERGED='{"manifests": []}'
         fi
-
-        # Output the merged config
         echo "value<<EOF" >> $GITHUB_OUTPUT
         echo "$MERGED" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
