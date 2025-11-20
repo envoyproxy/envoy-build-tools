@@ -99,7 +99,7 @@ COPY \
 
 
 # mobile
-FROM llvm-base AS mobile-base
+FROM devtools-base AS mobile-base
 ARG ANDROID_CLI_TOOLS=https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip \
     ZULU_INSTALL_DEB=https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
 ENV ANDROID_HOME=/.android/sdk \
