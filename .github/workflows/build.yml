@@ -104,7 +104,7 @@ jobs:
       contents: read
       packages: write
     steps:
-    - uses: envoyproxy/toolshed/gh-actions/bind-mounts@actions-v0.3.28
+    - uses: envoyproxy/toolshed/gh-actions/bind-mounts@actions-v0.3.30
       with:
         mounts: |
           - src: /mnt/workspace
@@ -135,7 +135,7 @@ jobs:
     - name: Generate manifest configuration (Debian)
       if: steps.built-distros.outputs.include-debian == 'true'
       id: config-debian
-      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.26
+      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.30
       with:
         input: .github/config.yml
         input-format: yaml-path
@@ -150,7 +150,7 @@ jobs:
     - name: Generate manifest configuration (Ubuntu)
       if: steps.built-distros.outputs.include-ubuntu == 'true'
       id: config-ubuntu
-      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.26
+      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.30
       with:
         input: .github/config.yml
         input-format: yaml-path
@@ -184,7 +184,7 @@ jobs:
         echo "$MERGED" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
     - name: Collect and push OCI artifacts
-      uses: envoyproxy/toolshed/gh-actions/oci/collector@actions-v0.3.26
+      uses: envoyproxy/toolshed/gh-actions/oci/collector@actions-v0.3.30
       if: >-
         steps.built-distros.outputs.include-debian == 'true'
         || steps.built-distros.outputs.include-ubuntu == 'true'
