@@ -27,6 +27,7 @@ jobs:
           ref: ${{ github.ref_name }}
           working_directory: .
         input-format: yaml
+        output-path: OUTPUT
         filter: |
           .diff as $diff
           | .remote as $remote
@@ -35,7 +36,6 @@ jobs:
           | "git -C \($working_directory) fetch \($remote) \($ref) && git -C \($working_directory) diff --name-only \($diff) \($remote)/\($ref)" as $command
           | $command
           | @sh
-      output-path: OUTPUT
     - run: eval '${{ steps.changed.outputs.value }}' | jq -R . | jq -sc .
       id: changed-files
       shell: bash
@@ -91,13 +91,13 @@ jobs:
     steps:
     - uses: envoyproxy/toolshed/gh-actions/bind-mounts@actions-v0.3.28
       with:
-        mounts:
-        - src: /mnt/workspace
-          target: ${{ github.workspace }}
-          chown: "runner:runner"
-        - src: /mnt/oci
-          target: /tmp/oci
-          chown: "runner:runner"
+        mounts: |
+          - src: /mnt/workspace
+            target: ${{ github.workspace }}
+            chown: "runner:runner"
+          - src: /mnt/oci
+            target: /tmp/oci
+            chown: "runner:runner"
     - name: 'Checkout repository'
       uses: actions/checkout@v5
     - name: Get docker SHA
