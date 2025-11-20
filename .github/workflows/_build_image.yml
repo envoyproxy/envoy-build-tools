@@ -76,7 +76,7 @@ jobs:
         SAVE_OCI: true
         LOAD_IMAGE: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
     - name: Upload OCI artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: oci-${{ inputs.distro }}-${{ inputs.host-platform }}
         path: ./docker/oci-output/*.tar
