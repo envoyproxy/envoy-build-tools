@@ -17,7 +17,7 @@ jobs:
       debian: ${{ steps.set-outputs.outputs.debian }}
       ubuntu: ${{ steps.set-outputs.outputs.ubuntu }}
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
     - uses: envoyproxy/toolshed/gh-actions/bson@actions-v0.3.30
@@ -114,7 +114,7 @@ jobs:
             target: /tmp/oci
             chown: "runner:runner"
     - name: 'Checkout repository'
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
     - name: Get docker SHA
       id: docker-sha
       shell: bash

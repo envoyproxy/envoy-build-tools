@@ -53,7 +53,7 @@ jobs:
             command-post: sudo systemctl start docker
 
     - name: 'Checkout repository'
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
     - run: |
         CONTAINER_TAG=$(git log -1 --pretty=format:"%H" "./docker")
         echo "tag=${CONTAINER_TAG}" >> "$GITHUB_OUTPUT"
