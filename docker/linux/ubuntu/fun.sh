@@ -49,6 +49,7 @@ CI_PACKAGES=(
     time
     sudo)
 UBUNTU_PACKAGES=(
+    autoconf-archive
     automake
     byobu
     bzip2
