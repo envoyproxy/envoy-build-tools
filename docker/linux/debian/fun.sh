@@ -62,6 +62,7 @@ USER_ID="${USER_ID:-1000}"
 USER_NAME="${USER_NAME:-envoybuild}"
 WORKER_PACKAGES=(
     autoconf
+    autoconf-archive
     automake
     libtool
     m4
