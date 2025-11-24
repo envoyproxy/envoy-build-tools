@@ -121,6 +121,9 @@ configure_dns_fast_fail () {
     # The options timeout:N and attempts:N control DNS resolution behavior:
     # - timeout: seconds to wait for a response before trying next server (default 5)
     # - attempts: number of times to try each nameserver (default 2)
+    #
+    # NOTE: timeout:1 attempts:1 is aggressive but necessary for tests that expect
+    # immediate failure for non-existent domains. This prevents CI timeouts.
     
     # Check if /etc/resolv.conf exists and is writable
     if [ -f /etc/resolv.conf ]; then
@@ -128,7 +131,7 @@ configure_dns_fast_fail () {
         if [ -L /etc/resolv.conf ]; then
             # Preserve the current content before removing the symlink
             local temp_resolv
-            temp_resolv=$(mktemp)
+            temp_resolv=$(mktemp -m 600)
             cat /etc/resolv.conf > "$temp_resolv" 2>/dev/null || true
             rm -f /etc/resolv.conf
             cat "$temp_resolv" > /etc/resolv.conf
@@ -139,9 +142,14 @@ configure_dns_fast_fail () {
         if ! grep -q "^options" /etc/resolv.conf 2>/dev/null; then
             # Insert options line at the beginning for faster DNS failure
             sed -i '1i options timeout:1 attempts:1' /etc/resolv.conf
-        elif ! grep -q "^options.*timeout" /etc/resolv.conf 2>/dev/null; then
-            # Options line exists but doesn't have timeout, update it
-            sed -i '/^options/ s/$/ timeout:1 attempts:1/' /etc/resolv.conf
+        else
+            # Options line exists, check if we need to add timeout or attempts
+            if ! grep -q "^options.*timeout" /etc/resolv.conf 2>/dev/null; then
+                sed -i '/^options/ s/$/ timeout:1/' /etc/resolv.conf
+            fi
+            if ! grep -q "^options.*attempts" /etc/resolv.conf 2>/dev/null; then
+                sed -i '/^options/ s/$/ attempts:1/' /etc/resolv.conf
+            fi
         fi
     fi
 }
