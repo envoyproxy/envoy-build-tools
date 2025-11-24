@@ -127,7 +127,8 @@ configure_dns_fast_fail () {
         # Remove the file if it's a symlink to allow us to create a real file
         if [ -L /etc/resolv.conf ]; then
             # Preserve the current content before removing the symlink
-            local temp_resolv=$(mktemp)
+            local temp_resolv
+            temp_resolv=$(mktemp)
             cat /etc/resolv.conf > "$temp_resolv" 2>/dev/null || true
             rm -f /etc/resolv.conf
             cat "$temp_resolv" > /etc/resolv.conf
