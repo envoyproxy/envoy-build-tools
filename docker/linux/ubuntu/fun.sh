@@ -112,50 +112,7 @@ ensure_stdlibcc () {
     apt list libstdc++6 | grep installed | grep "$LIBSTDCXX_EXPECTED_VERSION"
 }
 
-configure_dns_fast_fail () {
-    # Configure DNS to fail fast for non-existent domains
-    # This mitigates systemd-resolved timeout issues in recent Ubuntu updates
-    # where DNS queries for non-existent domains timeout instead of failing immediately
-    
-    # In Docker containers, we need to configure /etc/resolv.conf with fast-fail options
-    # The options timeout:N and attempts:N control DNS resolution behavior:
-    # - timeout: seconds to wait for a response before trying next server (default 5)
-    # - attempts: number of times to try each nameserver (default 2)
-    #
-    # NOTE: timeout:1 attempts:1 is aggressive but necessary for tests that expect
-    # immediate failure for non-existent domains. This prevents CI timeouts.
-    
-    # Check if /etc/resolv.conf exists and is writable
-    if [ -f /etc/resolv.conf ]; then
-        # Remove the file if it's a symlink to allow us to create a real file
-        if [ -L /etc/resolv.conf ]; then
-            # Preserve the current content before removing the symlink
-            local temp_resolv
-            temp_resolv=$(mktemp -m 600)
-            cat /etc/resolv.conf > "$temp_resolv" 2>/dev/null || true
-            rm -f /etc/resolv.conf
-            cat "$temp_resolv" > /etc/resolv.conf
-            rm -f "$temp_resolv"
-        fi
-        
-        # Add DNS timeout options if not already present
-        if ! grep -q "^options" /etc/resolv.conf 2>/dev/null; then
-            # Insert options line at the beginning for faster DNS failure
-            sed -i '1i options timeout:1 attempts:1' /etc/resolv.conf
-        else
-            # Options line exists, check if we need to add timeout or attempts
-            if ! grep -q "^options.*timeout" /etc/resolv.conf 2>/dev/null; then
-                sed -i '/^options/ s/$/ timeout:1/' /etc/resolv.conf
-            fi
-            if ! grep -q "^options.*attempts" /etc/resolv.conf 2>/dev/null; then
-                sed -i '/^options/ s/$/ attempts:1/' /etc/resolv.conf
-            fi
-        fi
-    fi
-}
-
 install_base () {
-    configure_dns_fast_fail
     apt_install "${COMMON_PACKAGES[@]}"
     add_ubuntu_keys "${APT_KEYS_ENV[@]}"
     add_apt_repos "${APT_REPOS_ENV[@]}"
@@ -193,14 +150,12 @@ mobile_install_jdk () {
 }
 
 mobile_install () {
-    configure_dns_fast_fail
     add_ubuntu_keys "${APT_KEYS_MOBILE[@]}"
     mobile_install_jdk
     mobile_install_android
 }
 
 install () {
-    configure_dns_fast_fail
     add_apt_key "${APT_KEY_DOCKER}"
     add_apt_k8s_key "${APT_KEY_K8S}"
     add_apt_repos "${APT_REPOS[@]}"
@@ -215,7 +170,6 @@ install () {
 }
 
 install_ci () {
-    configure_dns_fast_fail
     ensure_stdlibcc
     apt-get -qq update -y
     apt-get -qq install -y --no-install-recommends "${CI_PACKAGES[@]}"
@@ -223,6 +177,5 @@ install_ci () {
 }
 
 install_llvm () {
-    configure_dns_fast_fail
     install_llvm_bins
 }
