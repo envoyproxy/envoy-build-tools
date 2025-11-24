@@ -155,6 +155,7 @@ configure_dns_fast_fail () {
 }
 
 install_base () {
+    configure_dns_fast_fail
     apt_install "${COMMON_PACKAGES[@]}"
     add_ubuntu_keys "${APT_KEYS_ENV[@]}"
     add_apt_repos "${APT_REPOS_ENV[@]}"
@@ -163,7 +164,6 @@ install_base () {
     apt-get -qq dist-upgrade -y
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 1
     ensure_stdlibcc
-    configure_dns_fast_fail
 }
 
 mobile_install_android () {
@@ -193,12 +193,14 @@ mobile_install_jdk () {
 }
 
 mobile_install () {
+    configure_dns_fast_fail
     add_ubuntu_keys "${APT_KEYS_MOBILE[@]}"
     mobile_install_jdk
     mobile_install_android
 }
 
 install () {
+    configure_dns_fast_fail
     add_apt_key "${APT_KEY_DOCKER}"
     add_apt_k8s_key "${APT_KEY_K8S}"
     add_apt_repos "${APT_REPOS[@]}"
@@ -213,6 +215,7 @@ install () {
 }
 
 install_ci () {
+    configure_dns_fast_fail
     ensure_stdlibcc
     apt-get -qq update -y
     apt-get -qq install -y --no-install-recommends "${CI_PACKAGES[@]}"
@@ -220,5 +223,6 @@ install_ci () {
 }
 
 install_llvm () {
+    configure_dns_fast_fail
     install_llvm_bins
 }
