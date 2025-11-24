@@ -112,6 +112,36 @@ ensure_stdlibcc () {
     apt list libstdc++6 | grep installed | grep "$LIBSTDCXX_EXPECTED_VERSION"
 }
 
+configure_dns_fast_fail () {
+    # Configure DNS to fail fast for non-existent domains
+    # This mitigates systemd-resolved timeout issues in recent Ubuntu updates
+    # where DNS queries for non-existent domains timeout instead of failing immediately
+    
+    # In Docker containers, we need to configure /etc/resolv.conf with fast-fail options
+    # The options timeout:N and attempts:N control DNS resolution behavior:
+    # - timeout: seconds to wait for a response before trying next server (default 5)
+    # - attempts: number of times to try each nameserver (default 2)
+    
+    # Check if /etc/resolv.conf exists and is writable
+    if [ -f /etc/resolv.conf ]; then
+        # Remove the file if it's a symlink to allow us to create a real file
+        if [ -L /etc/resolv.conf ]; then
+            # Preserve the current content before removing the symlink
+            local temp_resolv=$(mktemp)
+            cat /etc/resolv.conf > "$temp_resolv" 2>/dev/null || true
+            rm -f /etc/resolv.conf
+            cat "$temp_resolv" > /etc/resolv.conf
+            rm -f "$temp_resolv"
+        fi
+        
+        # Add DNS timeout options if not already present
+        if ! grep -q "^options.*timeout" /etc/resolv.conf 2>/dev/null; then
+            # Insert options line at the beginning for faster DNS failure
+            sed -i '1i options timeout:1 attempts:1' /etc/resolv.conf
+        fi
+    fi
+}
+
 install_base () {
     apt_install "${COMMON_PACKAGES[@]}"
     add_ubuntu_keys "${APT_KEYS_ENV[@]}"
@@ -121,6 +151,7 @@ install_base () {
     apt-get -qq dist-upgrade -y
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 1
     ensure_stdlibcc
+    configure_dns_fast_fail
 }
 
 mobile_install_android () {
