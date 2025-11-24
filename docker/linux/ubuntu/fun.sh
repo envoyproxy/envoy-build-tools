@@ -136,9 +136,12 @@ configure_dns_fast_fail () {
         fi
         
         # Add DNS timeout options if not already present
-        if ! grep -q "^options.*timeout" /etc/resolv.conf 2>/dev/null; then
+        if ! grep -q "^options" /etc/resolv.conf 2>/dev/null; then
             # Insert options line at the beginning for faster DNS failure
             sed -i '1i options timeout:1 attempts:1' /etc/resolv.conf
+        elif ! grep -q "^options.*timeout" /etc/resolv.conf 2>/dev/null; then
+            # Options line exists but doesn't have timeout, update it
+            sed -i '/^options/ s/$/ timeout:1 attempts:1/' /etc/resolv.conf
         fi
     fi
 }
