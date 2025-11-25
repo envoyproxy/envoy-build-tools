@@ -75,18 +75,6 @@ RUN --mount=type=tmpfs,target=/var/cache/apt \
     && install_devel
 
 
-FROM devtools-base AS llvm-base
-ARG LLVM_VERSION=18.1.8 \
-    LLVM_DISTRO=ubuntu-18.04
-RUN --mount=type=tmpfs,target=/var/cache/apt \
-    --mount=type=tmpfs,target=/var/lib/apt/lists \
-    --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
-    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
-    . ./debian/fun.sh \
-    && install_llvm
-COPY debian/llvm-entrypoint.sh /entrypoint.sh
-
-
 FROM devtools-base AS test
 RUN --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
@@ -144,13 +132,6 @@ RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
     --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
     . ./debian/fun.sh \
     && stamp_build devtools "$CONTAINER_TAG"
-
-FROM llvm-base AS llvm
-ARG CONTAINER_TAG
-RUN --mount=type=bind,source=/common_fun.sh,target=/common_fun.sh \
-    --mount=type=bind,source=/debian/fun.sh,target=/debian/fun.sh \
-    . ./debian/fun.sh \
-    && stamp_build llvm "$CONTAINER_TAG"
 
 FROM mobile-base AS mobile
 ARG CONTAINER_TAG

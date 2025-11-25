@@ -3,7 +3,7 @@
 set -o pipefail
 
 # Debian-specific build configuration
-DEBIAN_DOCKER_VARIANTS=("worker" "ci" "gcc" "devtools" "docker" "llvm" "mobile" "test")
+DEBIAN_DOCKER_VARIANTS=("worker" "ci" "gcc" "devtools" "docker" "mobile" "test")
 IMAGE_TAGS=${IMAGE_TAGS:-}
 OS_DISTRO="debian"
 

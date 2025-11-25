@@ -79,13 +79,6 @@ debian:
     - amd64
     - arm64
     artifact-pattern: oci-debian-{arch}/debian-test-{sha}-{arch}.tar
-  # llvm
-  - name: envoy-build
-    tag: llvm-{sha}
-    registry: docker.io/envoyproxy
-    architectures:
-    - amd64
-    artifact-pattern: oci-debian-{arch}/debian-llvm-{sha}-{arch}.tar
   # mobile
   - name: envoy-build
     tag: mobile-{sha}
