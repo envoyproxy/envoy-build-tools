@@ -30,7 +30,6 @@ COMMON_PACKAGES=(
     ca-certificates
     gnupg2
     gpg-agent
-    libnuma-dev
     libtinfo5
     unzip
     wget
