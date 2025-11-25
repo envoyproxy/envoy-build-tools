@@ -233,19 +233,6 @@ install_docker () {
     apt-get -qq upgrade -y
 }
 
-install_llvm () {
-    apt-get update -qq
-    apt-get install --no-install-recommends -y -qq curl xz-utils
-    mkdir /tmp/llvm
-    mkdir /opt/llvm
-    cd /tmp/llvm
-    curl -sL --output llvm.tar.xz "https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/clang+llvm-${LLVM_VERSION}-x86_64-linux-gnu-${LLVM_DISTRO}.tar.xz"
-    tar Jxf llvm.tar.xz --strip-components=1 -C /opt/llvm
-    LLVM_HOST_TARGET="$(/opt/llvm/bin/llvm-config --host-target)"
-    echo "/opt/llvm/lib/${LLVM_HOST_TARGET}" > /etc/ld.so.conf.d/llvm.conf
-    rm -rf /tmp/llvm
-}
-
 create_user () {
     groupadd -g "$GROUP_ID" "$USER_NAME"
     useradd \
