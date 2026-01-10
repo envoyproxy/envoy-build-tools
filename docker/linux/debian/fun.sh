@@ -27,7 +27,6 @@ DEBIAN_PACKAGES=(
     gpg-agent
     graphviz
     jq
-    libatomic1
     libcap2-bin
     libffi-dev
     libncurses-dev
@@ -65,6 +64,7 @@ WORKER_PACKAGES=(
     autoconf
     autoconf-archive
     automake
+    libatomic1
     libtool
     m4
     # This is for mobile/android which seems to be able to
