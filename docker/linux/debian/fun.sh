@@ -27,6 +27,7 @@ DEBIAN_PACKAGES=(
     gpg-agent
     graphviz
     jq
+    libatomic1
     libcap2-bin
     libffi-dev
     libncurses-dev
