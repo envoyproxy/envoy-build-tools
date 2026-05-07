@@ -107,14 +107,18 @@ apt_install () {
     apt-get -qq install -y --no-install-recommends --no-install-suggests "${@}"
 }
 
-pin_libstdcxx_13 () {
+pin_libstdcxx () {
     local candidate_version libstdcxx_major libstdcxx_pin
     candidate_version="$(apt-cache policy libstdc++6 | awk '/Candidate:/ {print $2}')"
     libstdcxx_pin="13.*"
     if ! apt-cache madison libstdc++6 | awk '{print $3}' | grep -q '^13\.'; then
         libstdcxx_major="${candidate_version%%[-.]*}"
-        [[ "$libstdcxx_major" =~ ^[0-9]+$ ]]
+        if ! [[ "$libstdcxx_major" =~ ^[0-9]+$ ]]; then
+            echo "Unable to parse libstdc++6 major version from candidate: ${candidate_version}" >&2
+            return 1
+        fi
         libstdcxx_pin="${libstdcxx_major}*"
+        # Keep ensure_stdlibcc aligned with the pinned runtime when 13.* is unavailable.
         LIBSTDCXX_EXPECTED_VERSION="${libstdcxx_major}-"
     fi
     cat > /etc/apt/preferences.d/99-libstdcxx-13 <<EOF
@@ -140,7 +144,7 @@ install_base () {
     add_ubuntu_keys "${APT_KEYS_ENV[@]}"
     add_apt_repos "${APT_REPOS_ENV[@]}"
     apt-get -qq update
-    pin_libstdcxx_13
+    pin_libstdcxx
     apt_install "${DEV_PACKAGES[@]}"
     apt-get -qq dist-upgrade -y
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 1
