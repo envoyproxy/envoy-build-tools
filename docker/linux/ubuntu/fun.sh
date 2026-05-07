@@ -108,8 +108,9 @@ apt_install () {
 }
 
 pin_libstdcxx () {
-    local candidate_version libstdcxx_major libstdcxx_pin
+    local candidate_version libstdcxx_expected libstdcxx_major libstdcxx_pin
     candidate_version="$(apt-cache policy libstdc++6 | awk '/Candidate:/ {print $2}')"
+    libstdcxx_expected="${LIBSTDCXX_EXPECTED_VERSION}"
     libstdcxx_pin="13.*"
     if ! apt-cache madison libstdc++6 | awk '{print $3}' | grep -q '^13\.'; then
         libstdcxx_major="${candidate_version%%[-.]*}"
@@ -119,8 +120,13 @@ pin_libstdcxx () {
         fi
         libstdcxx_pin="${libstdcxx_major}*"
         # Keep ensure_stdlibcc aligned with the pinned runtime when 13.* is unavailable.
-        LIBSTDCXX_EXPECTED_VERSION="${libstdcxx_major}-"
+        if [[ "$candidate_version" == *.* ]]; then
+            libstdcxx_expected="${libstdcxx_major}."
+        else
+            libstdcxx_expected="${libstdcxx_major}-"
+        fi
     fi
+    LIBSTDCXX_EXPECTED_VERSION="${libstdcxx_expected}"
     cat > /etc/apt/preferences.d/99-libstdcxx-13 <<EOF
 Package: libstdc++6 libgcc-s1
 Pin: version ${libstdcxx_pin}
