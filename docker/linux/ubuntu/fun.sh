@@ -107,7 +107,29 @@ apt_install () {
     apt-get -qq install -y --no-install-recommends --no-install-suggests "${@}"
 }
 
+pin_libstdcxx_13 () {
+    local candidate_version libstdcxx_pin
+    candidate_version="$(apt-cache policy libstdc++6 | awk '/Candidate:/ {print $2}')"
+    libstdcxx_pin="13.*"
+    if ! apt-cache madison libstdc++6 | awk '{print $3}' | grep -q '^13\.'; then
+        libstdcxx_pin="${candidate_version%%[-.]*}*"
+        LIBSTDCXX_EXPECTED_VERSION="${candidate_version%%[-.]*}-"
+    fi
+    cat > /etc/apt/preferences.d/99-libstdcxx-13 <<EOF
+Package: libstdc++6 libgcc-s1
+Pin: version ${libstdcxx_pin}
+Pin-Priority: 1001
+
+Package: gcc-13-base
+Pin: version 13.*
+Pin-Priority: 1001
+EOF
+}
+
 ensure_stdlibcc () {
+    echo "Expected libstdc++6 version: ${LIBSTDCXX_EXPECTED_VERSION}"
+    echo "Installed libstdc++6:"
+    apt list --installed libstdc++6
     apt list libstdc++6 | grep installed | grep "$LIBSTDCXX_EXPECTED_VERSION"
 }
 
@@ -116,6 +138,7 @@ install_base () {
     add_ubuntu_keys "${APT_KEYS_ENV[@]}"
     add_apt_repos "${APT_REPOS_ENV[@]}"
     apt-get -qq update
+    pin_libstdcxx_13
     apt_install "${DEV_PACKAGES[@]}"
     apt-get -qq dist-upgrade -y
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 1
