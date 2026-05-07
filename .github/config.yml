@@ -1,91 +1,8 @@
-# Configuration for envoy-build-tools CI/CD
-# Each distro (debian/ubuntu) contains:
+# Configuration for envoy-build-tools CI/CD (Ubuntu images only; Debian publishing has moved to envoyproxy/toolshed).
+# Ubuntu contains:
 # - ci.paths: Path-based build detection
 # - manifests: OCI manifest specifications
 # Note: {sha} placeholder will be replaced with the actual docker SHA at runtime
-
-debian:
-  ci:
-    paths:
-    - docker/linux/debian/*
-    - docker/linux/debian_build.sh
-    - docker/push.sh
-    - docker/linux/build.sh
-    - docker/linux/common_fun.sh
-    - docker/linux/group_manifests.sh
-    - .github/**/*
-  manifests:
-  # devtools
-  - name: envoy-build
-    tag: devtools-{sha}
-    registry: docker.io/envoyproxy
-    architectures:
-    - amd64
-    - arm64
-    artifact-pattern: oci-debian-{arch}/debian-devtools-{sha}-{arch}.tar
-  # ci
-  - name: envoy-build
-    tag: ci-{sha}
-    registry: docker.io/envoyproxy
-    architectures:
-    - amd64
-    - arm64
-    artifact-pattern: oci-debian-{arch}/debian-ci-{sha}-{arch}.tar
-  # worker
-  - name: envoy-build
-    tag: worker-{sha}
-    registry: docker.io/envoyproxy
-    architectures:
-    - amd64
-    - arm64
-    artifact-pattern: oci-debian-{arch}/debian-worker-{sha}-{arch}.tar
-  # worker (gcr)
-  - name: envoy-build
-    tag: worker-{sha}
-    registry: gcr.io/envoy-ci
-    architectures:
-    - amd64
-    - arm64
-    artifact-pattern: oci-debian-{arch}/debian-worker-{sha}-{arch}.tar
-  # gcc
-  - name: envoy-build
-    tag: gcc-{sha}
-    registry: docker.io/envoyproxy
-    architectures:
-    - amd64
-    - arm64
-    artifact-pattern: oci-debian-{arch}/debian-gcc-{sha}-{arch}.tar
-  # gcc (gcr)
-  - name: envoy-build
-    tag: gcc-{sha}
-    registry: gcr.io/envoy-ci
-    architectures:
-    - amd64
-    - arm64
-    artifact-pattern: oci-debian-{arch}/debian-gcc-{sha}-{arch}.tar
-  # docker
-  - name: envoy-build
-    tag: docker-{sha}
-    registry: docker.io/envoyproxy
-    architectures:
-    - amd64
-    - arm64
-    artifact-pattern: oci-debian-{arch}/debian-docker-{sha}-{arch}.tar
-  # test
-  - name: envoy-build
-    tag: test-{sha}
-    registry: docker.io/envoyproxy
-    architectures:
-    - amd64
-    - arm64
-    artifact-pattern: oci-debian-{arch}/debian-test-{sha}-{arch}.tar
-  # mobile
-  - name: envoy-build
-    tag: mobile-{sha}
-    registry: docker.io/envoyproxy
-    architectures:
-    - amd64
-    artifact-pattern: oci-debian-{arch}/debian-mobile-{sha}-{arch}.tar
 
 ubuntu:
   ci:
@@ -129,11 +46,3 @@ ubuntu:
     artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-{sha}-{arch}.tar
     additional-tags:
     - "{sha}"
-  # full (gcr)
-  - name: envoy-build
-    tag: "{sha}"
-    registry: gcr.io/envoy-ci
-    architectures:
-    - amd64
-    - arm64
-    artifact-pattern: oci-ubuntu-{arch}/ubuntu-full-{sha}-{arch}.tar

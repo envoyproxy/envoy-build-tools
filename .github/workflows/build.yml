@@ -14,7 +14,6 @@ jobs:
       github.repository == 'envoyproxy/envoy-build-tools'
       || vars.ENVOY_CI_RUN == 'true'
     outputs:
-      debian: ${{ steps.set-outputs.outputs.debian }}
       ubuntu: ${{ steps.set-outputs.outputs.ubuntu }}
     steps:
     - uses: actions/checkout@v5
@@ -38,7 +37,7 @@ jobs:
         input: .github/config.yml
         input-format: yaml-path
         filter: |
-          {debian: .debian.ci, ubuntu: .ubuntu.ci}
+          {ubuntu: .ubuntu.ci}
     - uses: envoyproxy/toolshed/gh-actions/torun@actions-v0.3.30
       id: torun
       with:
@@ -48,27 +47,7 @@ jobs:
     - id: set-outputs
       shell: bash
       run: |
-        echo "debian=$(echo '${{ steps.torun.outputs.runs }}' | jq -r '.debian')" >> $GITHUB_OUTPUT
         echo "ubuntu=$(echo '${{ steps.torun.outputs.runs }}' | jq -r '.ubuntu')" >> $GITHUB_OUTPUT
-
-  build_image_debian:
-    needs: detect-changes
-    if: >-
-      (github.repository == 'envoyproxy/envoy-build-tools' || vars.ENVOY_CI_RUN == 'true')
-      && (github.event_name == 'push' || needs.detect-changes.outputs.debian == 'true')
-    strategy:
-      fail-fast: false
-      matrix:
-        arch:
-        - amd64
-        - arm64
-    name: Build (debian-${{ matrix.arch }})
-    uses: ./.github/workflows/_build_image.yml
-    with:
-      distro: debian
-      host-platform: ${{ matrix.arch }}
-      runs-on: ${{ matrix.arch == 'amd64' && 'ubuntu-22.04' || 'ubuntu-22.04-arm' }}
-      target-platforms: ${{ matrix.arch == 'amd64' && 'linux/amd64' || 'linux/arm64' }}
 
   build_image_ubuntu:
     needs: detect-changes
@@ -94,12 +73,10 @@ jobs:
     runs-on: ubuntu-latest
     needs:
     - detect-changes
-    - build_image_debian
     - build_image_ubuntu
     if: >-
       always()
-      && (contains(fromJSON('["success", "skipped"]'), needs.build_image_debian.result)
-          || contains(fromJSON('["success", "skipped"]'), needs.build_image_ubuntu.result))
+      && contains(fromJSON('["success", "skipped"]'), needs.build_image_ubuntu.result)
     permissions:
       contents: read
       packages: write
@@ -121,34 +98,8 @@ jobs:
       run: |
         TAG_SHA=$(git log -1 --pretty=format:"%H" ./docker)
         echo "sha=${TAG_SHA}" >> $GITHUB_OUTPUT
-    - name: Determine which distros were built
-      id: built-distros
-      shell: bash
-      run: |
-        if [ "${{ github.event_name }}" = "push" ]; then
-            echo "include-debian=true" >> $GITHUB_OUTPUT
-            echo "include-ubuntu=true" >> $GITHUB_OUTPUT
-        else
-            echo "include-debian=${{ needs.build_image_debian.result == 'success' }}" >> $GITHUB_OUTPUT
-            echo "include-ubuntu=${{ needs.build_image_ubuntu.result == 'success' }}" >> $GITHUB_OUTPUT
-        fi
-    - name: Generate manifest configuration (Debian)
-      if: steps.built-distros.outputs.include-debian == 'true'
-      id: config-debian
-      uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.26
-      with:
-        input: .github/config.yml
-        input-format: yaml-path
-        filter: >-
-          .debian.manifests
-          | map(. + {
-              tag: (.tag | gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")),
-              "artifact-pattern": (.["artifact-pattern"] | gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")),
-              "additional-tags": (if .["additional-tags"] then .["additional-tags"] | map(gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")) else null end)
-            })
-          | {manifests: .}
     - name: Generate manifest configuration (Ubuntu)
-      if: steps.built-distros.outputs.include-ubuntu == 'true'
+      if: needs.build_image_ubuntu.result == 'success'
       id: config-ubuntu
       uses: envoyproxy/toolshed/gh-actions/jq@actions-v0.3.26
       with:
@@ -162,34 +113,11 @@ jobs:
               "additional-tags": (if .["additional-tags"] then .["additional-tags"] | map(gsub("{sha}"; "${{ steps.docker-sha.outputs.sha }}")) else null end)
             })
           | {manifests: .}
-    - name: Merge manifest configurations
-      id: config
-      if: >-
-        steps.built-distros.outputs.include-debian == 'true'
-        || steps.built-distros.outputs.include-ubuntu == 'true'
-      shell: bash
-      run: |
-        DEBIAN_CONFIG='${{ steps.config-debian.outputs.value }}'
-        UBUNTU_CONFIG='${{ steps.config-ubuntu.outputs.value }}'
-        if [ "${{ steps.built-distros.outputs.include-debian }}" = "true" ] && [ "${{ steps.built-distros.outputs.include-ubuntu }}" = "true" ]; then
-            MERGED=$(echo "$DEBIAN_CONFIG" "$UBUNTU_CONFIG" | jq -s '{"manifests": (.[0].manifests + .[1].manifests)}')
-        elif [ "${{ steps.built-distros.outputs.include-debian }}" = "true" ]; then
-            MERGED="$DEBIAN_CONFIG"
-        elif [ "${{ steps.built-distros.outputs.include-ubuntu }}" = "true" ]; then
-            MERGED="$UBUNTU_CONFIG"
-        else
-            MERGED='{"manifests": []}'
-        fi
-        echo "value<<EOF" >> $GITHUB_OUTPUT
-        echo "$MERGED" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
     - name: Collect and push OCI artifacts
       uses: envoyproxy/toolshed/gh-actions/oci/collector@actions-v0.3.26
-      if: >-
-        steps.built-distros.outputs.include-debian == 'true'
-        || steps.built-distros.outputs.include-ubuntu == 'true'
+      if: needs.build_image_ubuntu.result == 'success'
       with:
-        manifest-config: ${{ steps.config.outputs.value }}
+        manifest-config: ${{ steps.config-ubuntu.outputs.value }}
         dry-run: ${{ github.event_name == 'pull_request' }}
         dockerhub-username: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.DOCKERHUB_USERNAME || '' }}
         dockerhub-password: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.DOCKERHUB_PASSWORD || '' }}
