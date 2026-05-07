@@ -108,7 +108,10 @@ apt_install () {
 }
 
 ensure_stdlibcc () {
-    apt list libstdc++6 | grep installed | grep "$LIBSTDCXX_EXPECTED_VERSION"
+    echo "Expected libstdc++6 version: ${LIBSTDCXX_EXPECTED_VERSION}"
+    echo "Installed libstdc++6:"
+    apt list --installed libstdc++6 2>/dev/null || true
+    apt list --installed libstdc++6 2>/dev/null | grep "$LIBSTDCXX_EXPECTED_VERSION"
 }
 
 install_base () {
