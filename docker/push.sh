@@ -30,12 +30,7 @@ ci_log_run_end () {
 }
 
 pull_image () {
-    if [[ "$OS_DISTRO" == "debian" ]]; then
-        # temp hack to get containers building
-        container_name="envoy-build"
-    else
-        container_name="${IMAGE_PREFIX}${OS_DISTRO}"
-    fi
+    container_name="${IMAGE_PREFIX}${OS_DISTRO}"
     ci_log_run echo "Building ${container_name}:${CONTAINER_SHA}"
     container_url="https://index.docker.io/v1/repositories/${container_name}/tags/${CONTAINER_SHA}"
     if curl -sSLf "$container_url" &> /dev/null; then
@@ -54,11 +49,7 @@ fi
 # For OCI artifact saving, we always need to determine the image tags
 # but we won't push them - we'll save them to local files
 if [[ "${SAVE_OCI}" == "true" ]] || [[ "${SOURCE_BRANCH}" == "refs/heads/main" ]]; then
-    if [[ "$OS_DISTRO" == "debian" ]]; then
-        BASE_IMAGE_NAME="envoyproxy/envoy-build"
-    else
-        BASE_IMAGE_NAME="${IMAGE_PREFIX}${OS_DISTRO}"
-    fi
+    BASE_IMAGE_NAME="${IMAGE_PREFIX}${OS_DISTRO}"
 
 fi
 
@@ -80,14 +71,8 @@ export SAVE_OCI
 export OCI_OUTPUT_DIR
 export BASE_IMAGE_NAME
 
-# Use distro-specific build script if available
-if [[ "${OS_DISTRO}" == "debian" && -f "./debian_build.sh" ]]; then
-    # shellcheck source=docker/linux/debian_build.sh
-    source "./debian_build.sh"
-else
-    # shellcheck source=docker/linux/build.sh
-    source "./build.sh"
-fi
+# shellcheck source=docker/linux/build.sh
+source "./build.sh"
 
 ci_log_run docker images
 

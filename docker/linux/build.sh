@@ -10,11 +10,7 @@ IMAGE_TAGS=${IMAGE_TAGS:-}
 [[ -z "${IMAGE_NAME}" ]] && IMAGE_NAME="envoyproxy/envoy-build-${OS_DISTRO}"
 
 if [[ -z "${BUILD_TOOLS_PLATFORMS}" ]]; then
-    if [[ "${OS_DISTRO}" == "ubuntu" ]]; then
-        export BUILD_TOOLS_PLATFORMS=linux/arm64,linux/amd64
-    else
-        export BUILD_TOOLS_PLATFORMS=linux/amd64
-    fi
+    export BUILD_TOOLS_PLATFORMS=linux/arm64,linux/amd64
 fi
 
 HOST_ARCH="$(uname -m)"
@@ -46,9 +42,6 @@ config_env() {
 
 # TODO(phlax): add (json) build images config
 build_and_push_variants () {
-    if [[ "${OS_DISTRO}" != "ubuntu" ]]; then
-        return
-    fi
     local variant="" platform push_arg
     for variant in "${UBUNTU_DOCKER_VARIANTS[@]}"; do
         push_arg=()

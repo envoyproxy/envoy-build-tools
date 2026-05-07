@@ -2,13 +2,13 @@
 
 set -eo pipefail
 
-IMAGE_REPOS=("envoyproxy/envoy-build" "envoyproxy/envoy-build-ubuntu")
+IMAGE_REPOS=("envoyproxy/envoy-build-ubuntu")
 
 if [[ -z "$TAG_SHA" ]]; then
     TAG_SHA="$(git log -1 --pretty=format:"%H" .)"
 fi
 
-VARIANTS=(ci worker gcc devtools docker llvm mobile test)
+VARIANTS=(ci mobile test)
 ARCHES=(amd64 arm64)
 
 exists () {
