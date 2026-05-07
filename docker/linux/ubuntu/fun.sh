@@ -108,12 +108,14 @@ apt_install () {
 }
 
 pin_libstdcxx_13 () {
-    local candidate_version libstdcxx_pin
+    local candidate_version libstdcxx_major libstdcxx_pin
     candidate_version="$(apt-cache policy libstdc++6 | awk '/Candidate:/ {print $2}')"
     libstdcxx_pin="13.*"
     if ! apt-cache madison libstdc++6 | awk '{print $3}' | grep -q '^13\.'; then
-        libstdcxx_pin="${candidate_version%%[-.]*}*"
-        LIBSTDCXX_EXPECTED_VERSION="${candidate_version%%[-.]*}-"
+        libstdcxx_major="${candidate_version%%[-.]*}"
+        [[ "$libstdcxx_major" =~ ^[0-9]+$ ]]
+        libstdcxx_pin="${libstdcxx_major}*"
+        LIBSTDCXX_EXPECTED_VERSION="${libstdcxx_major}-"
     fi
     cat > /etc/apt/preferences.d/99-libstdcxx-13 <<EOF
 Package: libstdc++6 libgcc-s1
@@ -130,7 +132,7 @@ ensure_stdlibcc () {
     echo "Expected libstdc++6 version: ${LIBSTDCXX_EXPECTED_VERSION}"
     echo "Installed libstdc++6:"
     apt list --installed libstdc++6
-    apt list libstdc++6 | grep installed | grep "$LIBSTDCXX_EXPECTED_VERSION"
+    apt list libstdc++6 | grep installed | grep -F "$LIBSTDCXX_EXPECTED_VERSION"
 }
 
 install_base () {
