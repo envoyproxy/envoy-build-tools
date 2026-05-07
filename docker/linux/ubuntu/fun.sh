@@ -107,8 +107,51 @@ apt_install () {
     apt-get -qq install -y --no-install-recommends --no-install-suggests "${@}"
 }
 
+pin_libstdcxx () {
+    local candidate_version libstdcxx_expected libstdcxx_major libstdcxx_pin
+    candidate_version="$(apt-cache policy libstdc++6 | awk '/Candidate:/ {print $2}')"
+    libstdcxx_expected="${LIBSTDCXX_EXPECTED_VERSION}"
+    libstdcxx_pin="13.*"
+    if ! apt-cache madison libstdc++6 | awk '{print $3}' | grep -q '^13\.'; then
+        libstdcxx_major="${candidate_version%%[^0-9]*}"
+        if ! [[ "$libstdcxx_major" =~ ^[0-9]+$ ]]; then
+            echo "Unable to parse libstdc++6 major version from candidate: ${candidate_version}" >&2
+            return 1
+        fi
+        if [[ "$candidate_version" == *.* ]]; then
+            libstdcxx_pin="${libstdcxx_major}.*"
+            libstdcxx_expected="${libstdcxx_major}."
+        elif [[ "$candidate_version" == *-* ]]; then
+            libstdcxx_pin="${libstdcxx_major}-*"
+            libstdcxx_expected="${libstdcxx_major}-"
+        else
+            libstdcxx_pin="${libstdcxx_major}*"
+            libstdcxx_expected="${libstdcxx_major}"
+        fi
+        # Keep ensure_stdlibcc aligned with the pinned runtime when 13.* is unavailable.
+    fi
+    LIBSTDCXX_EXPECTED_VERSION="${libstdcxx_expected}"
+    cat > /etc/apt/preferences.d/99-libstdcxx-13 <<EOF
+Package: libstdc++6
+Pin: version ${libstdcxx_pin}
+Pin-Priority: 1001
+
+Package: libgcc-s1
+Pin: version ${libstdcxx_pin}
+Pin-Priority: 1001
+
+Package: gcc-13-base
+# gcc-13-base remains pinned to the gcc-13 package line.
+Pin: version 13.*
+Pin-Priority: 1001
+EOF
+}
+
 ensure_stdlibcc () {
-    apt list libstdc++6 | grep installed | grep "$LIBSTDCXX_EXPECTED_VERSION"
+    echo "Expected libstdc++6 version: ${LIBSTDCXX_EXPECTED_VERSION}"
+    echo "Installed libstdc++6:"
+    apt list --installed libstdc++6
+    apt list libstdc++6 | grep installed | grep -F "$LIBSTDCXX_EXPECTED_VERSION"
 }
 
 install_base () {
@@ -116,6 +159,7 @@ install_base () {
     add_ubuntu_keys "${APT_KEYS_ENV[@]}"
     add_apt_repos "${APT_REPOS_ENV[@]}"
     apt-get -qq update
+    pin_libstdcxx
     apt_install "${DEV_PACKAGES[@]}"
     apt-get -qq dist-upgrade -y
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 1
