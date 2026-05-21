@@ -134,7 +134,7 @@ mobile_install_android () {
     (yes || :) | $sdkmanager --licenses
     $sdkmanager --install "ndk;${ANDROID_NDK_VERSION}" | (grep -v = || :)
     $sdkmanager --install "platforms;android-30" | grep -v = || true
-    $sdkmanager --install "build-tools;30.0.2" | grep -v = || true
+    $sdkmanager --install "build-tools;35.0.0" | grep -v = || true
 }
 
 mobile_install_jdk () {
