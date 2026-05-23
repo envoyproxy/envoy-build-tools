@@ -1,0 +1,46 @@
+ARG BUILD_FROM=debian:buster-slim
+FROM $BUILD_FROM
+ENV DEBIAN_FRONTEND=noninteractive \
+        ENVOY_SRCDIR=/source/envoy
+RUN apt-get update -y \
+        && apt-get install -y --no-install-recommends \
+                build-essential \
+                cmake \
+                curl \
+                git \
+                gosu \
+                ninja-build \
+                python-pip \
+                python3-pip \
+                rsync \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+        && pip3 install -U virtualenv \
+        && useradd \
+             -m \
+             -d /home/envoydev \
+             -k /etc/skel \
+             -s /bin/bash \
+             envoydev \
+        && mkdir -p  /source /docs \
+        && chown envoydev:envoydev /source /docs
+COPY ./docs-entrypoint.sh ./build-docs.sh /usr/local/bin/
+
+COPY ./build_container_docs.sh /
+RUN ./build_container_docs.sh \
+        && rm /build_container_docs.sh
+
+# warm the bazel and pip caches
+USER envoydev
+RUN cd /source/ \
+        && git clone https://github.com/envoyproxy/envoy \
+        && cd envoy \
+        && pip3 install -U pip setuptools \
+        && pip3 install -r docs/requirements.txt \
+        && ./docs/build.sh \
+        && cd \
+        && rm -rf /source/envoy
+USER root
+
+ENTRYPOINT ["docs-entrypoint.sh"]
+CMD ["build-docs.sh"]
